@@ -7,6 +7,7 @@ from jnpr.junos import Device
 from jnpr.junos.exception import *
 from jnpr.junos.utils.start_shell import StartShell
 from lxml import etree
+import time
 
 logger = logging.getLogger()
 handler = logging.StreamHandler()
