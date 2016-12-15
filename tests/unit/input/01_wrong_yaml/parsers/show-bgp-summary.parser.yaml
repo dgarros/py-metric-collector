@@ -1,0 +1,4 @@
+parser:
+  command: show bgp summary
+  type: xml
+  matche

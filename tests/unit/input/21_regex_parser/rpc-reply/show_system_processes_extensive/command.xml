@@ -1,0 +1,140 @@
+last pid:  2270;  load averages:  0.00,  0.01,  0.02  up 0+00:34:57    16:20:04
+133 processes: 5 running, 108 sleeping, 1 zombie, 19 waiting
+
+Mem: 304M Active, 48M Inact, 56M Wired, 332M Cache, 69M Buf, 233M Free
+Swap: 1024M Total, 1024M Free
+
+
+  PID USERNAME PRI NICE   SIZE    RES STATE    TIME   WCPU COMMAND
+   10 root     171   52     0K    12K RUN     31:03 91.85% idle
+   12 root     -20 -139     0K    12K WAIT     0:49  0.88% swi7: clock sio
+ 1451 root      96    0   112M 38208K RUN      0:29  0.59% authd
+   14 root     -20 -139     0K    12K WAIT     0:11  0.05% swi7: +
+   30 root     -16    0     0K    12K client   0:10  0.00% ifstate notify
+ 1438 root      96    0 55532K 21876K select   0:10  0.00% pfed
+ 1447 root      96    0 98872K 16340K select   0:08  0.00% jdhcpd
+  173 root      -8    0     0K    12K mdwait   0:08  0.00% md1
+ 1430 root      96    0 32212K  9236K select   0:06  0.00% mib2d
+  233 root      -8    0     0K    12K mdwait   0:06  0.00% md4
+ 1456 root     106    0 10120K  2796K ucond    0:05  0.00% jddosd
+ 1456 root      96    0 10120K  2796K select   0:05  0.00% jddosd
+ 1456 root      20    0 10120K  2796K sigwai   0:05  0.00% jddosd
+ 1459 root      96    0 33476K 18692K select   0:05  0.00% l2ald
+    4 root      -8    0     0K    12K -        0:03  0.00% g_down
+ 1443 root      96    0 16944K  6800K select   0:03  0.00% cosd
+ 1478 root      96    0 40880K 13284K select   0:02  0.00% dcd
+ 1454 root      96    0 12476K  3100K select   0:02  0.00% shm-rtsdbd
+ 1464 root      96    0  7848K  1732K select   0:02  0.00% ssd
+  280 root      -8    0     0K    12K mdwait   0:02  0.00% md6
+    3 root      -8    0     0K    12K -        0:01  0.00% g_up
+ 1457 root      96    0 20804K 10144K select   0:01  0.00% snmpd
+   57 root      -8    0     0K    12K mdwait   0:01  0.00% md0
+ 1340 root      96    0  5736K  3188K select   0:01  0.00% irsd
+ 1433 root       4    0 70372K 16648K kqread   0:01  0.00% rpd
+ 1424 root      96    0  8832K  2988K select   0:01  0.00% alarmd
+ 1462 root      96    0  9912K  4332K select   0:01  0.00% pkid
+   15 root     -16    0     0K    12K -        0:01  0.00% yarrow
+ 1422 root       4    0 36932K 11020K kqread   0:01  0.00% l2cpd
+    2 root      -8    0     0K    12K -        0:01  0.00% g_event
+ 1455 root      96    0 50296K 31604K select   0:01  0.00% smid
+ 1475 root       4    0 29100K  6304K kqread   0:01  0.00% caed
+ 1470 root      96    0  9380K  3948K select   0:01  0.00% license-check
+   33 root     171   52     0K    12K pgzero   0:01  0.00% pagezero
+ 1343 root       4  -20 27364K  6080K kqread   0:01  0.00% vccpd
+ 1335 root      96    0 79416K 11668K select   0:00  0.00% chassisd
+   21 root     -64 -183     0K    12K WAIT     0:00  0.00% irq14: ata0
+ 1342 root      96    0  9912K  4220K select   0:00  0.00% sdk-vmmd
+ 1342 root       8    0  9912K  4220K wait     0:00  0.00% sdk-vmmd
+ 1450 root      96    0  5728K  2972K select   0:00  0.00% lfmd
+ 1423 root      96    0  8824K  5672K select   0:00  0.00% ppmd
+ 1469 root       4    0 33232K  7568K kqread   0:00  0.00% mcsnoopd
+  193 root      -8    0     0K    12K mdwait   0:00  0.00% md2
+    1 root       8    0  1528K   788K wait     0:00  0.00% init
+ 1473 nobody    96    0  7028K  2812K select   0:00  0.00% lighttpd
+   35 root      20    0     0K    12K syncer   0:00  0.00% syncer
+ 1445 root      96    0  9860K  4600K select   0:00  0.00% bfdd
+ 1336 root      96    0 34668K 19388K select   0:00  0.00% mgd
+ 1474 root       4    0 24384K  3780K kqread   0:00  0.00% overlayd
+ 1461 root       4    0 19060K  4196K kqread   0:00  0.00% sflowd
+ 1449 root      96    0 51404K 10292K select   0:00  0.00% dfcd
+ 1364 root       8    0  2272K  1312K wait     0:00  0.00% sh
+   55 root     -16    0     0K    12K -        0:00  0.00% schedcpu
+ 1467 root      96    0  5040K  2376K RUN      0:00  0.00% res-cleanupd
+ 1439 root      96    0 10848K  5056K select   0:00  0.00% rmopd
+ 1479 root     102    0 34720K 20168K select   0:00  0.00% mgd
+  939 root      96    0  5736K  3136K select   0:00  0.00% eventd
+   45 root     -16    0     0K    12K psleep   0:00  0.00% vmkmemdaemon
+   50 root     -16    0     0K    12K .        0:00  0.00% ddostasks
+ 1428 root      96    0  8900K  3288K select   0:00  0.00% craftd
+ 1444 root      96    0 26716K 14580K select   0:00  0.00% dfwd
+   49 root     -16    0     0K    12K select   0:00  0.00% devrt_kthread
+ 1587 vagrant   96    0 29644K 23044K select   0:00  0.00% cli
+ 1458 root      96    0  5144K  2460K select   0:00  0.00% iccpd
+   37 root      -4    0     0K    12K vlruwt   0:00  0.00% vnlru
+   36 root      20    0     0K    12K vnlrum   0:00  0.00% vnlru_mem
+   34 root     -16    0     0K    12K psleep   0:00  0.00% bufdaemon
+   38 root     -16    0     0K    12K sdflus   0:00  0.00% softdepflush
+   40 root     -16    0     0K    12K psleep   0:00  0.00% vmuncachedaemon
+ 1341 root      96    0  5748K  2936K select   0:00  0.00% sdk-mgmtd
+   56 root     -16    0     0K    12K no_rs    0:00  0.00% rtimeshare_thr
+ 1584 root      96    0  7092K  3400K select   0:00  0.00% sshd
+   11 root     -40 -159     0K    12K WAIT     0:00  0.00% swi2: netisr 0
+ 1448 root      96    0  6636K  3080K select   0:00  0.00% rdd
+ 1452 root      96    0  5588K  2668K select   0:00  0.00% mplsoamd
+  260 root      -8    0     0K    12K mdwait   0:00  0.00% md5
+ 1035 root     -68 -187     0K    12K WAIT     0:00  0.00% irq11: em2 em3
+ 1034 root     -68 -187     0K    12K WAIT     0:00  0.00% irq9: em1 em4
+ 1453 root     106    0  7224K  3396K select   0:00  0.00% sendd
+  380 root      -8    0     0K    12K mdwait   0:00  0.00% md9
+  300 root      -8    0     0K    12K mdwait   0:00  0.00% md7
+   31 root     -16    0     0K    12K psleep   0:00  0.00% pagedaemon
+ 1588 root      96    0 34772K 20348K RUN      0:00  0.00% mgd
+  334 root      -8    0     0K    12K mdwait   0:00  0.00% md8
+ 1347 root       8    0  1952K  1104K nanslp   0:00  0.00% getty
+ 1258 root       8    0  1880K  1116K nanslp   0:00  0.00% cron
+ 1337 root      97    0  3680K  1548K select   0:00  0.00% inetd
+   23 root     -16    0     0K    12K -        0:00  0.00% em0 taskq
+   24 root     -68 -187     0K    12K WAIT     0:00  0.00% irq10: virtio_pci0
+ 1332 root      96    0  1816K   808K select   0:00  0.00% watchdog
+ 1344 root       8    0  2272K  1328K wait     0:00  0.00% sh
+ 1346 root       5    0  1956K  1096K ttyin    0:00  0.00% getty
+ 1333 root     121    0  2052K  1168K select   0:00  0.00% tnetd
+ 1460 root     104    0  2052K  1176K select   0:00  0.00% tnp.sntpd
+ 2252 root       4    0  3452K  1308K connec   0:00  0.00% rsh
+  213 root      -8    0     0K    12K mdwait   0:00  0.00% md3
+ 1472 root       8    0  1784K   880K wait     0:00  0.00% web-api
+    0 root     -16    0     0K     0K WAIT     0:00  0.00% swapper
+ 1345 root       5    0  1956K  1096K ttyin    0:00  0.00% getty
+   26 root     -48 -167     0K    12K WAIT     0:00  0.00% swi0: sio
+ 2251 root       8    0  2264K  1300K wait     0:00  0.00% sh
+ 2269 root       8    0  1748K   680K nanslp   0:00  0.00% sleep
+    9 root       8    0     0K    12K -        0:00  0.00% kqueue taskq
+   43 root     -16    0     0K    12K select   0:00  0.00% if_pfe_listen
+   44 root     -16    0     0K    12K select   0:00  0.00% if_pic_listen0
+    6 root       8    0     0K    12K -        0:00  0.00% acpi_task_0
+    5 root       8    0     0K    12K -        0:00  0.00% mastership taskq
+   46 root       4    0     0K    12K purge_   0:00  0.00% kern_pir_proc
+ 1050 root       8    0     0K    12K crypto   0:00  0.00% crypto
+   39 root      96    0     0K    12K sleep    0:00  0.00% netdaemon
+   47 root      20    0     0K    12K condsl   0:00  0.00% delayedexecd
+ 1051 root       8    0     0K    12K crypto   0:00  0.00% crypto returns
+   51 root       8    0     0K    12K -        0:00  0.00% nfsiod 0
+   41 root       4    0     0K    12K dump_r   0:00  0.00% kern_dump_proc
+   32 root      20    0     0K    12K psleep   0:00  0.00% vmdaemon
+    7 root       8    0     0K    12K -        0:00  0.00% acpi_task_1
+   52 root       8    0     0K    12K -        0:00  0.00% nfsiod 1
+    8 root       8    0     0K    12K -        0:00  0.00% acpi_task_2
+   53 root       8    0     0K    12K -        0:00  0.00% nfsiod 2
+   20 root       8    0     0K    12K -        0:00  0.00% thread taskq
+   54 root       8    0     0K    12K -        0:00  0.00% nfsiod 3
+   16 root     -12 -131     0K    12K WAIT     0:00  0.00% swi9: Giant taskq
+   17 root     -12 -131     0K    12K WAIT     0:00  0.00% swi9: task queue
+   19 root     -16 -135     0K    12K WAIT     0:00  0.00% swi8: +
+   13 root     -24 -143     0K    12K WAIT     0:00  0.00% swi6: vm
+   18 root     -28 -147     0K    12K WAIT     0:00  0.00% swi5: cambio
+   29 root     -32 -151     0K    12K WAIT     0:00  0.00% swi4: ipmismatch+
+   27 root     -36 -155     0K    12K WAIT     0:00  0.00% swi3: ipopt ip6opt
+   28 root     -44 -163     0K    12K WAIT     0:00  0.00% swi1: ipfwd
+   25 root     -60 -179     0K    12K WAIT     0:00  0.00% irq1: atkbd0
+   22 root     -64 -183     0K    12K WAIT     0:00  0.00% irq15: ata1
+ 2270 root      96    0 22620K  1512K RUN      0:00  0.00% top

@@ -1,0 +1,4 @@
+noparser:
+    command: show bgp summary
+    type: xml
+    

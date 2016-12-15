@@ -1,0 +1,14 @@
+parser:
+    regex-command: show\s+version\s+\|\s+display\s+xml
+    type: xml
+    matches:
+    -
+        type: single-value
+        method: xpath
+        xpath: //product-model
+        variable-name:  $host.product_model
+    -
+        type: single-value
+        method: xpath
+        xpath: //package-information[name='junos']/comment
+        variable-name:  $host.version
