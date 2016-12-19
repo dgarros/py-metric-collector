@@ -51,16 +51,23 @@ def get_target_hosts():
     return my_target_hosts.keys()
 
 def get_target_commands(my_host):
-    my_host_tags = hosts[my_host]
-    my_target_commands = {}
-    for group_command in sorted(general_commands.keys()):
-        for my_host_tag in my_host_tags.strip().split():
-            for command_tag in general_commands[group_command]["tags"].split():
-                if re.search(my_host_tag, command_tag, re.IGNORECASE):
-                    if "commands" in general_commands[group_command].keys():
-                        for cmd in general_commands[group_command]["commands"].strip().split("\n"):
-                            my_target_commands[cmd] = 1
-    return my_target_commands.keys()
+  my_host_tags = hosts[my_host]
+  my_target_commands = {}
+  for group_command in sorted(general_commands.keys()):
+    for my_host_tag in my_host_tags.strip().split():
+      for command_tag in general_commands[group_command]["tags"].split():
+        if re.search(my_host_tag, command_tag, re.IGNORECASE):
+          if "commands" in general_commands[group_command].keys():
+            cmd_list = []
+            if isinstance(general_commands[group_command]["commands"], str):
+              cmd_list = general_commands[group_command]["commands"].strip().split("\n")
+            else:
+              cmd_list = general_commands[group_command]["commands"]
+
+            for cmd in cmd_list:
+              my_target_commands[cmd] = 1
+
+  return my_target_commands.keys()
 
 def get_credentials(my_host):
     my_host_tags = hosts[my_host]
