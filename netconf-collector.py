@@ -306,7 +306,7 @@ general_commands = commands[0]
 ###########################################################
 #  LOAD all parsers                                      ##
 ###########################################################
-parsers_manager = parser_manager.ParserManager( parser_dir = '/data/parsers' )
+parsers_manager = parser_manager.ParserManager( parser_dir = dynamic_args['parserdir'] )
 
 if __name__ == "__main__":
 
