@@ -108,7 +108,7 @@ class ParserManager:
       if parser['type'] != 'xml':
           continue
 
-      if parser['command'] == input:
+      if parser.has_key('command') and parser['command'] == input:
         return parser
 
     ## Check for parser Regex
@@ -117,7 +117,7 @@ class ParserManager:
       if parser['type'] != 'regex':
           continue
 
-      if parser['regex-command'] == input:
+      if parser.has_key('regex-command') and parser['regex-command'] == input:
         return parser
 
     ## if nothing has been found
@@ -133,11 +133,11 @@ class ParserManager:
 
     ## Count numbers of parsers of each type
     if parser['type'] == 'xml':
-      self.nbr_xml_parsers =+ 1
+      self.nbr_xml_parsers += 1
     elif parser['type'] == 'regex':
-      self.nbr_regex_parsers =+ 1
+      self.nbr_regex_parsers += 1
     elif parser['type'] == 'pyez':
-      self.nbr_pyez_parsers =+ 1
+      self.nbr_pyez_parsers += 1
 
     self.parsers[name] = parser
 
