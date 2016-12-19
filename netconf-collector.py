@@ -196,6 +196,7 @@ full_parser.add_argument("--retry", default=5, help="Max retry")
 full_parser.add_argument("--usehostname", default=True, help="Use hostname from device instead of IP")
 full_parser.add_argument("--dbschema", default=2, help="Format of the output data")
 
+full_parser.add_argument("--host", default=None, help="Host DNS or IP")
 full_parser.add_argument("--hosts", default="hosts.yaml", help="Hosts file in yaml")
 full_parser.add_argument("--commands", default="commands.yaml", help="Commands file in Yaml")
 full_parser.add_argument("--credentials", default="credentials.yaml", help="Credentials file in Yaml")
@@ -244,7 +245,7 @@ if not(dynamic_args['start']):
 # Setting up logging directories and files
 timestamp = time.strftime("%Y-%m-%d", time.localtime(time.time()))
 log_dir = BASE_DIR + "/" + dynamic_args['logdir']
-logger = logging.getLogger("_open-nti_")
+logger = logging.getLogger("main")
 
 if not os.path.exists(log_dir):
     os.makedirs(log_dir, 0755)
@@ -275,15 +276,20 @@ except Exception, e:
     sys.exit(0)
 
 ###########################################################
-#  LOAD all hosts with their tags in a dic               ##
+#  LOAD all hosts with their tags in a dict              ##
+#  if 'host' is provided, use that instead of the file   ##
 ###########################################################
-hosts_yaml_file = BASE_DIR + "/"+ dynamic_args['hosts']
 hosts = {}
-logger.info('Importing host file: %s ',hosts_yaml_file)
-try:
+if dynamic_args['host']:
+  hosts[dynamic_args['host']] = ' '.join(tag_list)
+else:
+  hosts_yaml_file = BASE_DIR + "/"+ dynamic_args['hosts']
+  hosts = {}
+  logger.info('Importing host file: %s ',hosts_yaml_file)
+  try:
     with open(hosts_yaml_file) as f:
-        hosts = yaml.load(f)
-except Exception, e:
+      hosts = yaml.load(f)
+  except Exception, e:
     logger.error('Error importing host file: %s', hosts_yaml_file)
     sys.exit(0)
 
