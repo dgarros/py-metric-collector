@@ -9,13 +9,7 @@ from jnpr.junos.utils.start_shell import StartShell
 from lxml import etree
 import time
 
-logger = logging.getLogger()
-handler = logging.StreamHandler()
-formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-# logger.setLevel(logging.DEBUG)
-logger.propagate = False
+logger = logging.getLogger('netconf_collector')
 
 pp = pprint.PrettyPrinter(indent=4)
 

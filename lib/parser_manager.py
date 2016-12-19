@@ -6,15 +6,7 @@ from lxml import etree
 import copy
 import re
 
-# logger = logging.getLogger( 'parser' )
-
-logger = logging.getLogger()
-handler = logging.StreamHandler()
-formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-# logger.setLevel(logging.DEBUG)
-logger.propagate = False
+logger = logging.getLogger('parser_manager' )
 
 pp = pprint.PrettyPrinter(indent=4)
 
