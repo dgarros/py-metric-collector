@@ -55,6 +55,35 @@ class Test_Validate_Main_Block(unittest.TestCase):
     self.assertTrue( pm.nbr_regex_parsers == 1 )
     self.assertTrue( name == "show-system-processes-extensive.parser.yaml" )
 
+  def test_find_parser(self):
+    test_dir = here+'/input/05_find_parsers/parsers'
+
+    pm = parser_manager.ParserManager( parser_dir=test_dir )
+
+    by_name = pm.get_parser_name_for(input='type-regex-regex-command.parser.yaml')
+    # by_name_2 = pm.get_parser_name_for(input='type-regex-regex-command.parser')
+
+    regex_by_command = pm.get_parser_name_for(input='show system processes extensive')
+
+    xml_by_regex = pm.get_parser_name_for(input='show ospf summary')
+    xml_by_regex_2 = pm.get_parser_name_for(input='show ospf summary | display xml')
+
+    xml_by_command = pm.get_parser_name_for(input='show bgp summary')
+    xml_by_command_2 = pm.get_parser_name_for(input='show bgp summary | display xml')
+
+    assert( pm.get_nbr_parsers() == 3 )
+
+    assert( by_name == 'type-regex-regex-command.parser.yaml' )
+
+    # assert( by_name_2 == 'type-regex-regex-command.parser.yaml' )
+    assert( regex_by_command == 'type-regex-regex-command.parser.yaml' )
+
+    assert( xml_by_regex == 'type-xml-regex-command.parser.yaml' )
+    assert( xml_by_regex_2 == 'type-xml-regex-command.parser.yaml' )
+
+    assert( xml_by_command == 'type-xml-command.parser.yaml' )
+    assert( xml_by_command_2 == 'type-xml-command.parser.yaml' )
+
   def test_parse_valid_xml(self):
     test_dir = here+'/input/20_xml_parser'
 

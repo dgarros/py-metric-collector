@@ -1,0 +1,14 @@
+parser:
+    regex-command: show\s+ospf\s+summary\s+\|\s+display\s+xml
+    type: xml
+    matches:
+    -
+        type: single-value
+        method: xpath
+        xpath: //not-working/group-count
+        variable-name: group-count
+    -
+        type: single-value
+        method: xpath
+        xpath: //not-working/peer-count
+        variable-name: peer-count

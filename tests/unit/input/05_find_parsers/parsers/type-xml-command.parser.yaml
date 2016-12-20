@@ -1,0 +1,14 @@
+parser:
+    command: show bgp summary
+    type: xml
+    matches:
+    -
+        type: single-value
+        method: xpath
+        xpath: //bgp-information/group-count
+        variable-name: group-count
+    -
+        type: single-value
+        method: xpath
+        xpath: //bgp-information/peer-count
+        variable-name: peer-count

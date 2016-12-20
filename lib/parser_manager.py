@@ -90,35 +90,51 @@ class ParserManager:
     # 2- xml
     # 3- regex
     """
+
     ## Check with parser name
     for name, parser in self.parsers.iteritems():
       if name == input:
         return parser
 
-    ## Check for parser Pyez
-    for name, parser in self.parsers.iteritems():
-      if parser['type'] != 'pyez':
+    ### if parser not find with name, we need to search with command
+
+    command = ''
+    command_xml = ''
+
+    # Check if the command include "| display xml"
+    # if not create a version with display xml
+    display_xml_regex = r"(\s*\|\s*display\s*xml\s*)$"
+
+    has_display_xml = re.search(display_xml_regex, input,re.MULTILINE)
+
+    if has_display_xml:
+      command = re.sub(display_xml_regex, "", input)
+      command_xml = input
+    else:
+      command = input
+      command_xml = input + " | display xml"
+
+    ## Check for parsers pyez, xml and regex
+    for type in ['pyez', 'xml', 'regex']:
+
+      for name, parser in self.parsers.iteritems():
+        if parser['type'] != type:
           continue
 
-      if parser['command'] == input:
-        return parser
+        # Check if command in file is regex or not
+        command_is_regex = False
 
-    ## Check for parser XML
-    for name, parser in self.parsers.iteritems():
-      if parser['type'] != 'xml':
-          continue
+        ## Check if command is a regex or not
+        if re.search(r"\\s[\+\*]", parser['command'],re.MULTILINE):
+          command_is_regex = True
+          command_re = re.compile(parser['command'])
 
-      if parser.has_key('command') and parser['command'] == input:
-        return parser
-
-    ## Check for parser Regex
-    ## TODO check that probably not gonna work
-    for name, parser in self.parsers.iteritems():
-      if parser['type'] != 'regex':
-          continue
-
-      if parser.has_key('regex-command') and parser['regex-command'] == input:
-        return parser
+        if command_is_regex:
+          if command_re.match(command) or command_re.match(command_xml):
+            return parser
+        else:
+          if parser['command'] == command or parser['command'] == command_xml:
+            return parser
 
     ## if nothing has been found
     return None
@@ -206,7 +222,6 @@ class ParserManager:
           if xml_data.xpath(match["xpath"]):
             value_tmp = xml_data.xpath(match["xpath"])[0].text.strip()
             key_tmp = self.cleanup_xpath(match['xpath'])
-
 
             data_structure['fields'][key_tmp] = value_tmp
 
