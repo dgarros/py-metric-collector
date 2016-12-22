@@ -319,6 +319,9 @@ class ParserManager:
 
           if text_matches.lastindex == len(match["variables"]):
             logger.debug('We have (%s) matches with this regex %s', text_matches.lastindex,regex)
+
+            tmp_data_structure = copy.deepcopy(data_structure)
+
             for i in range(0,text_matches.lastindex):
               j=i+1
               variable_name = self.eval_variable_name(match["variables"][i]["variable-name"])
@@ -326,19 +329,25 @@ class ParserManager:
               # Begin function  (pero pendiente de ver si variable-type existe y su valor)
               if "variable-type" in match["variables"][i]:
                 value_tmp = self.eval_variable_value(value_tmp, type=match["variables"][i]["variable-type"])
-
                 key_tmp = self.cleanup_variable(match["variables"][i]['variable-name'])
-                data_structure['fields'][key_tmp] = value_tmp
+
+                ## Check if this is a Tags or not
+                if 'tag' in match["variables"][i] and match["variables"][i]['tag']:
+                  tmp_data_structure['tags'][key_tmp] = value_tmp
+                else:
+                  tmp_data_structure['fields'][key_tmp] = value_tmp
 
               else:
                 logger.error('More matches found on regex than variables especified on parser: %s', regex_command)
+
+            datas_to_return.append(tmp_data_structure)
         else:
           logger.debug('No matches found for regex: %s', regex)
       else:
        logger.error('An unkown match-type found in parser with regex: %s', regex_command)
 
-    pp.pprint([data_structure])
-    return  [data_structure]
+    # pp.pprint([data_structure])
+    return datas_to_return
 
   def eval_variable_name(self, variable,**kwargs):
     keys={}
