@@ -5,140 +5,180 @@ parser:
     -
         type: single-value
         method: regex
-        regex: \s*[0-9]+\s+\w+\s+\S+\s+\S+\s+\S+\s+(\d+[K|M|G]?)\s+(\d+[K|M|G]?)\s+\S+\s*[\d+]?\s+\S+\s+(\S+)%\s+rpd$
+        regex: (\d+[K|M|G]?)\s+(\d+[K|M|G]?)\s+\S+\s*[\d+]?\s+\S+\s+(\S+)%\s+(rpd)$
         variables:
         -
-            variable-name:  $host.re.memory.rpd-SIZE
+            variable-name:  size
             variable-type:  integer
         -
-            variable-name:  $host.re.memory.rpd-RES
+            variable-name:  res
             variable-type:  integer
         -
-            variable-name:  $host.re.memory.rpd-CPU
+            variable-name:  cpu
             variable-type:  integer
+        -
+            variable-name:  deamon
+            variable-type:  string
+            tag: true
     -
         type: single-value
         method: regex
-        regex: \s*[0-9]+\s+\w+\s+\S+\s+\S+\s+\S+\s+(\d+[K|M|G]?)\s+(\d+[K|M|G]?)\s+\S+\s*[\d+]?\s+\S+\s+(\S+)%\s+dcd$
+        regex: (\d+[K|M|G]?)\s+(\d+[K|M|G]?)\s+\S+\s*[\d+]?\s+\S+\s+(\S+)%\s+(dcd)$
         variables:
         -
-            variable-name:  $host.re.memory.dcd-SIZE
+            variable-name:  size
             variable-type:  integer
         -
-            variable-name:  $host.re.memory.dcd-RES
+            variable-name:  res
             variable-type:  integer
         -
-            variable-name:  $host.re.memory.dcd-CPU
+            variable-name:  cpu
             variable-type:  integer
+        -
+            variable-name:  deamon
+            variable-type:  string
+            tag: true
     -
         type: single-value
         method: regex
-        regex: \s*[0-9]+\s+\w+\s+\S+\s+\S+\s+\S+\s+(\d+[K|M|G]?)\s+(\d+[K|M|G]?)\s+\S+\s*[\d+]?\s+\S+\s+(\S+)%\s+snmpd$
+        regex: (\d+[K|M|G]?)\s+(\d+[K|M|G]?)\s+\S+\s*[\d+]?\s+\S+\s+(\S+)%\s+(snmpd)$
         variables:
         -
-            variable-name:  $host.re.memory.snmpd-SIZE
+            variable-name:  size
             variable-type:  integer
         -
-            variable-name:  $host.re.memory.snmpd-RES
+            variable-name:  res
             variable-type:  integer
         -
-            variable-name:  $host.re.memory.snmpd-CPU
+            variable-name:  cpu
             variable-type:  integer
+        -
+            variable-name:  deamon
+            variable-type:  string
+            tag: true
     -
         type: single-value
         method: regex
-        regex: \\s*[0-9]+\s+\w+\s+\S+\s+\S+\s+\S+\s+(\d+[K|M|G]?)\s+(\d+[K|M|G]?)\s+\S+\s*[\d+]?\s+\S+\s+(\S+)%\s+mib2d$
+        regex: (\d+[K|M|G]?)\s+(\d+[K|M|G]?)\s+\S+\s*[\d+]?\s+\S+\s+(\S+)%\s+(mib2d)$
         variables:
         -
-            variable-name:  $host.re.memory.mib2d-SIZE
+            variable-name:  size
             variable-type:  integer
         -
-            variable-name:  $host.re.memory.mib2d-RES
+            variable-name:  res
             variable-type:  integer
         -
-            variable-name:  $host.re.memory.mib2d-CPU
+            variable-name:  cpu
             variable-type:  integer
+        -
+            variable-name:  deamon
+            variable-type:  string
+            tag: true
     -
         type: single-value
         method: regex
-        regex: \s*[0-9]+\s+\w+\s+\S+\s+\S+\s+\S+\s+(\d+[K|M|G]?)\s+(\d+[K|M|G]?)\s+\S+\s*[\d+]?\s+\S+\s+(\S+)%\s+dfwd$
+        regex: (\d+[K|M|G]?)\s+(\d+[K|M|G]?)\s+\S+\s*[\d+]?\s+\S+\s+(\S+)%\s+(dfwd)$
         variables:
         -
-            variable-name:  $host.re.memory.dfwd-SIZE
+            variable-name:  size
             variable-type:  integer
         -
-            variable-name:  $host.re.memory.dfwd-RES
+            variable-name:  res
             variable-type:  integer
         -
-            variable-name:  $host.re.memory.dfwd-CPU
+            variable-name:  cpu
             variable-type:  integer
+        -
+            variable-name:  deamon
+            variable-type:  string
+            tag: true
     -
         type: single-value
         method: regex
-        regex: \s*[0-9]+\s+\w+\s+\S+\s+\S+\s+\S+\s+(\d+[K|M|G]?)\s+(\d+[K|M|G]?)\s+\S+\s*[\d+]?\s+\S+\s+(\S+)%\s+cosd$
+        regex: (\d+[K|M|G]?)\s+(\d+[K|M|G]?)\s+\S+\s*[\d+]?\s+\S+\s+(\S+)%\s+(cosd)$
         variables:
         -
-            variable-name:  $host.re.memory.cosd-SIZE
+            variable-name:  size
             variable-type:  integer
         -
-            variable-name:  $host.re.memory.cosd-RES
+            variable-name:  res
             variable-type:  integer
         -
-            variable-name:  $host.re.memory.cosd-CPU
+            variable-name:  cpu
             variable-type:  integer
+        -
+            variable-name:  deamon
+            variable-type:  string
+            tag: true
     -
         type: single-value
         method: regex
-        regex: \s*[0-9]+\s+\w+\s+\S+\s+\S+\s+\S+\s+(\d+[K|M|G]?)\s+(\d+[K|M|G]?)\s+\S+\s*[\d+]?\s+\S+\s+(\S+)%\s+sampled$
+        regex: (\d+[K|M|G]?)\s+(\d+[K|M|G]?)\s+\S+\s*[\d+]?\s+\S+\s+(\S+)%\s+(sampled)$
         variables:
         -
-            variable-name:  $host.re.memory.sampled-SIZE
+            variable-name:  size
             variable-type:  integer
         -
-            variable-name:  $host.re.memory.sampled-RES
+            variable-name:  res
             variable-type:  integer
         -
-            variable-name:  $host.re.memory.sampled-CPU
+            variable-name:  cpu
             variable-type:  integer
+        -
+            variable-name:  deamon
+            variable-type:  string
+            tag: true
     -
         type: single-value
         method: regex
-        regex: \s*[0-9]+\s+\w+\s+\S+\s+\S+\s+\S+\s+(\d+[K|M|G]?)\s+(\d+[K|M|G]?)\s+\S+\s*[\d+]?\s+\S+\s+(\S+)%\s+smid$
+        regex: (\d+[K|M|G]?)\s+(\d+[K|M|G]?)\s+\S+\s*[\d+]?\s+\S+\s+(\S+)%\s+(smid)$
         variables:
         -
-            variable-name:  $host.re.memory.smid-SIZE
+            variable-name:  size
             variable-type:  integer
         -
-            variable-name:  $host.re.memory.smid-RES
+            variable-name:  res
             variable-type:  integer
         -
-            variable-name:  $host.re.memory.smid-CPU
+            variable-name:  cpu
             variable-type:  integer
+        -
+            variable-name:  deamon
+            variable-type:  string
+            tag: true
     -
         type: single-value
         method: regex
-        regex: \s*[0-9]+\s+\w+\s+\S+\s+\S+\s+\S+\s+(\d+[K|M|G]?)\s+(\d+[K|M|G]?)\s+\S+\s*[\d+]?\s+\S+\s+(\S+)%\s+smihelperd$
+        regex: (\d+[K|M|G]?)\s+(\d+[K|M|G]?)\s+\S+\s*[\d+]?\s+\S+\s+(\S+)%\s+(smihelperd)$
         variables:
         -
-            variable-name:  $host.re.memory.smihelperd-SIZE
+            variable-name:  size
             variable-type:  integer
         -
-            variable-name:  $host.re.memory.smihelperd-RES
+            variable-name:  res
             variable-type:  integer
         -
-            variable-name:  $host.re.memory.smihelperd-CPU
+            variable-name:  cpu
             variable-type:  integer
+        -
+            variable-name:  deamon
+            variable-type:  string
+            tag: true
     -
         type: single-value
         method: regex
-        regex: \s*[0-9]+\s+\w+\s+\S+\s+\S+\s+\S+\s+(\d+[K|M|G]?)\s+(\d+[K|M|G]?)\s+\S+\s*[\d+]?\s+\S+\s+(\S+)%\s+idle$
+        regex: (\d+[K|M|G]?)\s+(\d+[K|M|G]?)\s+\S+\s*[\d+]?\s+\S+\s+(\S+)%\s+(idle)$
         variables:
         -
-            variable-name:  $host.re.memory.idle-SIZE
+            variable-name:  size
             variable-type:  integer
         -
-            variable-name:  $host.re.memory.idle-RES
+            variable-name:  res
             variable-type:  integer
         -
-            variable-name:  $host.re.memory.idle-CPU
+            variable-name:  cpu
             variable-type:  integer
+        -
+            variable-name:  deamon
+            variable-type:  string
+            tag: true
