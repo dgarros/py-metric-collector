@@ -1,5 +1,5 @@
 parser:
-    regex-command: show\s+version\s+\|\s+display\s+xml
+    command: show version
     type: xml
     matches:
     -

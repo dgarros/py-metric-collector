@@ -1,5 +1,5 @@
 parser:
-    regex-command: show\s+chassis\s+routing-engine\s+\|\s+display\s+xml
+    command: show chassis routing-engine
     type: xml
     matches:
     -
