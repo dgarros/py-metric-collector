@@ -272,8 +272,14 @@ if dynamic_args['console']:
 ###########################################################
 #  LOAD all credentials in a dict
 ###########################################################
-credentials_yaml_file = BASE_DIR + "/"+ dynamic_args['credentials']
 credentials = {}
+credentials_yaml_file = ''
+
+if os.path.isfile(dynamic_args['credentials']):
+  credentials_yaml_file = dynamic_args['credentials']
+else:
+  credentials_yaml_file = BASE_DIR + "/"+ dynamic_args['credentials']
+
 logger.info('Importing credentials file: %s ',credentials_yaml_file)
 try:
     with open(credentials_yaml_file) as f:
@@ -290,8 +296,14 @@ hosts = {}
 if dynamic_args['host']:
   hosts[dynamic_args['host']] = ' '.join(tag_list)
 else:
-  hosts_yaml_file = BASE_DIR + "/"+ dynamic_args['hosts']
+  hosts_yaml_file = ''
   hosts = {}
+
+  if os.path.isfile(dynamic_args['hosts']):
+    hosts_yaml_file = dynamic_args['hosts']
+  else:
+    hosts_yaml_file = BASE_DIR + "/"+ dynamic_args['hosts']
+
   logger.info('Importing host file: %s ',hosts_yaml_file)
   try:
     with open(hosts_yaml_file) as f:
@@ -303,8 +315,14 @@ else:
 ###########################################################
 #  LOAD all commands with their tags in a dict           ##
 ###########################################################
-commands_yaml_file = BASE_DIR + "/"+ dynamic_args['commands']
+commands_yaml_file = ''
 commands = []
+
+if os.path.isfile(dynamic_args['commands']):
+  commands_yaml_file = dynamic_args['commands']
+else:
+  commands_yaml_file = BASE_DIR + "/"+ dynamic_args['commands']
+
 logger.info('Importing commands file: %s ',commands_yaml_file)
 with open(commands_yaml_file) as f:
     try:
