@@ -67,7 +67,6 @@ def get_target_commands(my_host):
             for cmd in cmd_list:
               my_target_commands[cmd] = 1
 
-  print my_target_commands
   return my_target_commands.keys()
 
 def get_credentials(my_host):
