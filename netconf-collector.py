@@ -334,7 +334,6 @@ with open(commands_yaml_file) as f:
         sys.exit(0)
 
 general_commands = commands[0]
-print general_commands
 ###########################################################
 #  LOAD all parsers                                      ##
 ###########################################################
