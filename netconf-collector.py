@@ -57,16 +57,17 @@ def get_target_commands(my_host):
     for my_host_tag in my_host_tags.strip().split():
       for command_tag in general_commands[group_command]["tags"].split():
         if re.search(my_host_tag, command_tag, re.IGNORECASE):
-          if "commands" in general_commands[group_command].keys():
+          if "netconf" in general_commands[group_command].keys():
             cmd_list = []
-            if isinstance(general_commands[group_command]["commands"], str):
-              cmd_list = general_commands[group_command]["commands"].strip().split("\n")
+            if isinstance(general_commands[group_command]["netconf"], str):
+              cmd_list = general_commands[group_command]["netconf"].strip().split("\n")
             else:
-              cmd_list = general_commands[group_command]["commands"]
+              cmd_list = general_commands[group_command]["netconf"]
 
             for cmd in cmd_list:
               my_target_commands[cmd] = 1
 
+  print my_target_commands
   return my_target_commands.keys()
 
 def get_credentials(my_host):
@@ -333,7 +334,7 @@ with open(commands_yaml_file) as f:
         sys.exit(0)
 
 general_commands = commands[0]
-
+print general_commands
 ###########################################################
 #  LOAD all parsers                                      ##
 ###########################################################
@@ -378,7 +379,6 @@ if __name__ == "__main__":
       jdev = netconf_collector.NetconfCollector(host=host, credential=credential, parsers=parsers_manager)
       jdev.connect()
       jdev.collect_facts()
-
       for command in target_commands:
         values = jdev.collect(command=command)
         print_format_influxdb(values)
