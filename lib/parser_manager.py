@@ -189,14 +189,14 @@ class ParserManager:
   def parse( self, input=None, data=None):
 
     parser = self.__find_parser__(input=input)
-
-    if parser['type'] == 'xml':
-      return self.__parse_xml__(parser=parser, data=data)
-    elif parser['type'] == 'regex':
-      return self.__parse_regex__(parser=parser, data=data)
-    else:
-      return None
-
+    
+    try:
+      if parser['type'] == 'xml':
+        return self.__parse_xml__(parser=parser, data=data)
+      elif parser['type'] == 'regex':
+        return self.__parse_regex__(parser=parser, data=data)
+    except TypeError as t_err:
+      return None    
   def __parse_xml__(self, parser=None, data=None):
 
     datas_to_return = []
@@ -350,6 +350,7 @@ class ParserManager:
     return datas_to_return
 
   def eval_variable_name(self, variable,**kwargs):
+    
     keys={}
     db_schema = 3
 
