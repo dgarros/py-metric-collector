@@ -1,4 +1,3 @@
-
 import logging
 import pprint
 # from pyez_mock import mocked_device, rpc_reply_dict
@@ -125,7 +124,6 @@ class NetconfCollector():
       logger.info('[%s]: Host will be referenced as : %s', self.hostname, self.hostname)
 
     self.facts['device']=self.hostname
-
     return True
 
   def execute_command(self,command=None):
@@ -145,15 +143,20 @@ class NetconfCollector():
 
     raw_data = self.execute_command(command=command)
     datapoints = self.parsers.parse(input=command, data=raw_data)
+    
+    if datapoints is not None:
 
     ## For now, generate_measurement from command
-    measurement = command.replace(' ','_')
-    measurement = measurement.replace('show_','')
+      measurement = command.replace(' ','_')
+      measurement = measurement.replace('show_','')
 
-    to_return = []
-    for datapoint in datapoints:
-      datapoint['measurement'] = measurement
-      datapoint['tags'].update(self.facts)
-      to_return.append(datapoint)
+      to_return = []
+      for datapoint in datapoints:
+        datapoint['measurement'] = measurement
+        datapoint['tags'].update(self.facts)
+        to_return.append(datapoint)
 
-    return to_return
+      return to_return
+    else:
+      logger.debug ('Not parser found for command',command)
+      return None
