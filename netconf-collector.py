@@ -141,33 +141,34 @@ def print_format_influxdb(datapoints):
     """
 
     ## Format Tags
-    for datapoint in datapoints:
-        tags = ''
-        first_tag = 1
-        for tag, value in datapoint['tags'].iteritems():
+    if datapoints is not None:
+      for datapoint in datapoints:
+          tags = ''
+          first_tag = 1
+          for tag, value in datapoint['tags'].iteritems():
 
-            if first_tag == 1:
-                first_tag = 0
-            else:
-                tags = tags + ','
+              if first_tag == 1:
+                  first_tag = 0
+              else:
+                  tags = tags + ','
 
-            tags = tags + '{0}={1}'.format(tag,value)
+              tags = tags + '{0}={1}'.format(tag,value)
 
-        ## Format Measurement
-        fields = ''
-        first_field = 1
-        for tag, value in datapoint['fields'].iteritems():
+          ## Format Measurement
+          fields = ''
+          first_field = 1
+          for tag, value in datapoint['fields'].iteritems():
 
-            if first_field == 1:
-                first_field = 0
-            else:
-                fields = fields + ','
+              if first_field == 1:
+                  first_field = 0
+              else:
+                  fields = fields + ','
 
-            fields = fields + '{0}={1}'.format(tag,value)
+              fields = fields + '{0}={1}'.format(tag,value)
 
-        print "{0},{1} {2}".format(datapoint['measurement'], tags, fields)
+          print "{0},{1} {2}".format(datapoint['measurement'], tags, fields)
 
-    logger.info('Printing Datapoint to STDOUT:')
+      logger.info('Printing Datapoint to STDOUT:')
 
 ################################################################################################
 ################################################################################################
