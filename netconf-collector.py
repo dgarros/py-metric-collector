@@ -19,7 +19,7 @@ import re # For regular expression usage
 import requests
 import string
 import string  # For split multiline script into multiple lines
-import StringIO   # Used for file read/write
+import io   # Used for file read/write
 import sys  # For exec to work
 import threading
 import time
@@ -73,7 +73,7 @@ def get_credentials(my_host):
     my_host_tags = hosts[my_host]
     my_target_credentials = {'username': None,
                              'password': None,
-                             'port': 830,
+                             'port': 22,
                              'method': None,
                              'key_file': None }
 
@@ -140,12 +140,33 @@ def print_format_influxdb(datapoints):
     Print all datapoints to STDOUT in influxdb format for Telegraf to pick them up
     """
 
+    for data in format_datapoints_inlineprotocol(datapoints):
+        print(data)
+
+    logger.info('Printing Datapoint to STDOUT:')
+
+def post_format_influxdb(datapoints, addr="http://localhost:8186/write"):
+    
+    for datapoint in format_datapoints_inlineprotocol(datapoints):
+        requests.post(addr, data=datapoint)
+
+    logger.info('Sending Datapoint to: %s' % addr)
+
+
+def format_datapoints_inlineprotocol(datapoints):
+    """
+    Format all datapoints with the inlineprotocol (influxdb)
+    Return a list of string formatted datapoint
+    """
+    
+    formatted_data = []
+
     ## Format Tags
     if datapoints is not None:
       for datapoint in datapoints:
           tags = ''
           first_tag = 1
-          for tag, value in datapoint['tags'].iteritems():
+          for tag, value in datapoint['tags'].items():
 
               if first_tag == 1:
                   first_tag = 0
@@ -157,7 +178,7 @@ def print_format_influxdb(datapoints):
           ## Format Measurement
           fields = ''
           first_field = 1
-          for tag, value in datapoint['fields'].iteritems():
+          for tag, value in datapoint['fields'].items():
 
               if first_field == 1:
                   first_field = 0
@@ -166,9 +187,10 @@ def print_format_influxdb(datapoints):
 
               fields = fields + '{0}={1}'.format(tag,value)
 
-          print "{0},{1} {2}".format(datapoint['measurement'], tags, fields)
+          formatted_data.append("{0},{1} {2}".format(datapoint['measurement'], tags, fields))
 
-      logger.info('Printing Datapoint to STDOUT:')
+    return formatted_data
+
 
 ################################################################################################
 ################################################################################################
@@ -209,7 +231,9 @@ full_parser.add_argument("--hosts", default="hosts.yaml", help="Hosts file in ya
 full_parser.add_argument("--commands", default="commands.yaml", help="Commands file in Yaml")
 full_parser.add_argument("--credentials", default="credentials.yaml", help="Credentials file in Yaml")
 
-full_parser.add_argument("--output", default="influxdb", help="Format of the output")
+full_parser.add_argument("--output-format", default="influxdb", help="Format of the output")
+full_parser.add_argument("--output-type", default="stdout", choices=['stdout', 'http'], help="Type of output")
+full_parser.add_argument("--output-addr", default="http://localhost:8186/write", help="Addr information for output action")
 
 dynamic_args = vars(full_parser.parse_args())
 
@@ -255,8 +279,8 @@ timestamp = time.strftime("%Y-%m-%d", time.localtime(time.time()))
 log_dir = BASE_DIR + "/" + dynamic_args['logdir']
 logger = logging.getLogger("main")
 
-if not os.path.exists(log_dir):
-    os.makedirs(log_dir, 0755)
+# if not os.path.exists(log_dir):
+#     os.makedirs(log_dir, '0755')
 
 formatter = '%(asctime)s %(name)s %(levelname)s %(threadName)-10s:  %(message)s'
 logging.basicConfig(filename=log_dir + "/"+ timestamp + '_open-nti.log',
@@ -285,7 +309,7 @@ logger.info('Importing credentials file: %s ',credentials_yaml_file)
 try:
     with open(credentials_yaml_file) as f:
         credentials = yaml.load(f)
-except Exception, e:
+except Exception as e:
     logger.error('Error importing credentials file: %s', credentials_yaml_file)
     sys.exit(0)
 
@@ -309,7 +333,7 @@ else:
   try:
     with open(hosts_yaml_file) as f:
       hosts = yaml.load(f)
-  except Exception, e:
+  except Exception as e:
     logger.error('Error importing host file: %s', hosts_yaml_file)
     sys.exit(0)
 
@@ -329,7 +353,7 @@ with open(commands_yaml_file) as f:
     try:
         for document in yaml.load_all(f):
             commands.append(document)
-    except Exception, e:
+    except Exception as e:
         logger.error('Error importing commands file: %s', commands_yaml_file)
         sys.exit(0)
 
@@ -372,14 +396,16 @@ if __name__ == "__main__":
       target_commands = get_target_commands(host)
       credential = get_credentials(host)
 
-      # pp.pprint(target_commands)
-      # pp.pprint(credential)
       logger.info('Collector starting for: %s', host)
       jdev = netconf_collector.NetconfCollector(host=host, credential=credential, parsers=parsers_manager)
       jdev.connect()
       jdev.collect_facts()
+
       for command in target_commands:
         values = jdev.collect(command=command)
-        print_format_influxdb(values)
-        # values = parsers_manager.parse(input=command, data=data)
-        # pp.pprint(values)
+        if dynamic_args['output_type'] == 'stdout':
+            print_format_influxdb(values)
+        elif dynamic_args['output_type'] == 'http':
+            post_format_influxdb(values)
+        else:
+            logger.warn('Output format unknown: %s', dynamic_args['output_type'])

@@ -90,7 +90,7 @@ class NetconfCollector():
             self.pyez.timeout = self.__timeout
             self.__is_connected = True
             break
-      except Exception, e:
+      except Exception as e:
           if i < self.__retry:
             logger.error('[%s]: Connection failed %s time(s), retrying....', self.hostname, i)
             time.sleep(1)

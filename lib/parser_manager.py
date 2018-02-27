@@ -47,7 +47,7 @@ class ParserManager:
       try:
         with open(full_junos_parsers_file) as f:
           parser["data"] = yaml.load(f)
-      except Exception, e:
+      except Exception as e:
         logger.error('Error importing junos parser, yaml non valid: %s. %s', junos_parsers_file, str(e))
         continue
 
@@ -56,12 +56,12 @@ class ParserManager:
         continue
 
       ## Check if parser contain a key "parser"
-      if not ( parser['data'].has_key("parser") ):
+      if not "parser" in parser['data'].keys():
         logger.error('Error loading junos parser: %s, parser structure is missing', parser['name'])
         continue
 
       # Check parser type
-      if not ( parser["data"]["parser"].has_key("type") ):
+      if not "type" in parser["data"]["parser"].keys():
         logger.warn('Type is not defined for parser %s, default XML', parser['name'])
 
       elif parser["data"]["parser"]['type'] == 'xml' or parser["data"]["parser"]["type"] == 'regex':
@@ -71,10 +71,10 @@ class ParserManager:
         continue
 
       ## Extract the command from the parser
-      if parser['data']['parser'].has_key( "regex-command" ):
+      if "regex-command" in parser['data']['parser'].keys():
         parser['command'] = parser['data']['parser']['regex-command']
 
-      elif parser['data']['parser'].has_key( "command" ):
+      elif 'command' in parser['data']['parser'].keys():
         parser['command'] = parser['data']['parser']['command']
       else:
         logger.error('Unable to find the command for parser: %s', parser['name'])
@@ -92,7 +92,7 @@ class ParserManager:
     """
 
     ## Check with parser name
-    for name, parser in self.parsers.iteritems():
+    for name, parser in self.parsers.items():
       if name == input:
         return parser
 
@@ -117,7 +117,7 @@ class ParserManager:
     ## Check for parsers pyez, xml and regex
     for type in ['pyez', 'xml', 'regex']:
 
-      for name, parser in self.parsers.iteritems():
+      for name, parser in self.parsers.items():
         if parser['type'] != type:
           continue
 
@@ -197,6 +197,8 @@ class ParserManager:
         return self.__parse_regex__(parser=parser, data=data)
     except TypeError as t_err:
       return None    
+
+
   def __parse_xml__(self, parser=None, data=None):
 
     datas_to_return = []
@@ -256,7 +258,7 @@ class ParserManager:
             for sub_match in match["loop"]["sub-matches"]:
               logger.debug('Looking for a sub-match: %s', sub_match["xpath"])
               if node.xpath(sub_match["xpath"]):
-                if "regex" in sub_match:
+                if "regex" in sub_match.keys():
                     value_tmp = node.xpath(sub_match["xpath"])[0].text.strip()
                     regex = sub_match["regex"]
                     text_matches = re.search(regex,value_tmp,re.MULTILINE)
@@ -274,12 +276,16 @@ class ParserManager:
                             key_tmp = self.cleanup_xpath(sub_match["variables"][i]['xpath'])
                             tmp_data['fields'][key_tmp] = value_tmp
                       else:
-                        logger.error('More matches found on regex than variables especified on parser: %s', regex_command)
+                        logger.error('More matches found on regex than variables specified on parser: %s', regex_command)
                     else:
                       logger.debug('No matches found for regex: %s', regex)
                 else:
                     value_tmp = node.xpath(sub_match["xpath"])[0].text.strip()
-                    key_tmp = self.cleanup_xpath(sub_match['xpath'])
+                    if 'variable-name' in sub_match.keys():
+                      key_tmp = sub_match['variable-name']
+                    else: 
+                      key_tmp = self.cleanup_xpath(sub_match['xpath'])
+                      
                     tmp_data['fields'][key_tmp] = value_tmp
 
               else:
@@ -395,6 +401,7 @@ class ParserManager:
 
     if xpath:
       xpath = xpath.replace("./", "")
+      xpath = xpath.replace("..", "")
       xpath = xpath.replace("//", "")
 
       return xpath
