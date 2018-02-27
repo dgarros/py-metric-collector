@@ -1,0 +1,17 @@
+parser:
+    regex-command: show services rpm probe-results
+    type: xml
+    matches:
+    -
+        type: multi-value
+        method: xpath
+        xpath: //probe-results/probe-test-results/probe-last-test-results/probe-test-generic-results
+        loop:
+            test-name: ./../../test-name
+            sub-matches:
+            -   xpath: ./loss-percentage
+                variable-name:  loss-percentage
+            -   xpath: ./probe-test-rtt/probe-summary-results/min-delay
+                variable-name:  min-delay
+            -   xpath: ./probe-test-rtt/probe-summary-results/max-delay
+                variable-name:  max-delay

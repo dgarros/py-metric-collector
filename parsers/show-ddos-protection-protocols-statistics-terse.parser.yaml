@@ -1,0 +1,24 @@
+parser:
+    regex-command: show ddos-protection protocols statistics terse
+    type: xml
+    matches:
+    -
+        type: multi-value
+        method: xpath
+        xpath: //ddos-protocol-group/ddos-protocol/ddos-system-statistics
+        loop:
+            group_name: ./group-name
+            packet_type: ./packet-type
+            sub-matches:
+            -
+                xpath: ./packet-received
+                variable-name:  packet-received
+            -
+                xpath: ./packet-dropped
+                variable-name:  packet-dropped
+            -
+                xpath: ./packet-arrival-rate
+                variable-name:  packet-arrival-rate
+            -
+                xpath: ./policer-violation-count
+                variable-name:  policer-violation-count
