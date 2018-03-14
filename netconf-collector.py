@@ -48,7 +48,7 @@ def get_target_hosts():
             for hosts_tag in hosts[host].split():
                 if re.search(tag, hosts_tag, re.IGNORECASE):
                     my_target_hosts[host] = 1
-    return my_target_hosts.keys()
+    return list(my_target_hosts.keys())
 
 def get_target_commands(my_host):
   my_host_tags = hosts[my_host]
@@ -235,6 +235,9 @@ full_parser.add_argument("--output-format", default="influxdb", help="Format of 
 full_parser.add_argument("--output-type", default="stdout", choices=['stdout', 'http'], help="Type of output")
 full_parser.add_argument("--output-addr", default="http://localhost:8186/write", help="Addr information for output action")
 
+full_parser.add_argument("--use-thread", default=True, help="Spawn multiple threads to collect the information on the devices")
+full_parser.add_argument("--nbr-thread", default=10, help="Maximum number of thread to spawn")
+
 dynamic_args = vars(full_parser.parse_args())
 
 ## Change BASE_DIR_INPUT if we are in "test" mode
@@ -363,6 +366,27 @@ general_commands = commands[0]
 ###########################################################
 parsers_manager = parser_manager.ParserManager( parser_dir = dynamic_args['parserdir'] )
 
+def collector(host_list): 
+
+    for host in host_list: 
+      target_commands = get_target_commands(host)
+      credential = get_credentials(host)
+
+      logger.info('Collector starting for: %s', host)
+      jdev = netconf_collector.NetconfCollector(host=host, credential=credential, parsers=parsers_manager)
+      jdev.connect()
+      jdev.collect_facts()
+
+      for command in target_commands:
+        values = jdev.collect(command=command)
+        if dynamic_args['output_type'] == 'stdout':
+            print_format_influxdb(values)
+        elif dynamic_args['output_type'] == 'http':
+            post_format_influxdb(values)
+        else:
+            logger.warn('Output format unknown: %s', dynamic_args['output_type'])
+
+
 if __name__ == "__main__":
 
   logger.debug('Getting hosts that matches the specified tags')
@@ -370,10 +394,11 @@ if __name__ == "__main__":
   target_hosts = get_target_hosts()
   logger.debug('The following hosts are being selected: %s', target_hosts)
 
-  use_threads = False
+  use_threads = dynamic_args['use_thread']
 
   if use_threads:
-    target_hosts_lists = [target_hosts[x:x+len(target_hosts)/max_collector_threads+1] for x in range(0, len(target_hosts), len(target_hosts)/max_collector_threads+1)]
+    max_collector_threads = dynamic_args['nbr_thread']
+    target_hosts_lists = [target_hosts[x:x+int(len(target_hosts)/max_collector_threads+1)] for x in range(0, len(target_hosts), int(len(target_hosts)/max_collector_threads+1))]
 
     jobs = []
     i=1
@@ -387,9 +412,10 @@ if __name__ == "__main__":
     for j in jobs:
       j.start()
 
-      # Ensure all of the threads have finished
-      for j in jobs:
-        j.join()
+    # Ensure all of the threads have finished
+    for j in jobs:
+      j.join()
+  
   else:
     # Execute everythings in the main thread
     for host in target_hosts:
