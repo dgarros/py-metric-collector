@@ -369,23 +369,46 @@ parsers_manager = parser_manager.ParserManager( parser_dir = dynamic_args['parse
 def collector(host_list): 
 
     for host in host_list: 
-      target_commands = get_target_commands(host)
-      credential = get_credentials(host)
+        target_commands = get_target_commands(host)
+        credential = get_credentials(host)
 
-      logger.info('Collector starting for: %s', host)
-      jdev = netconf_collector.NetconfCollector(host=host, credential=credential, parsers=parsers_manager)
-      jdev.connect()
-      jdev.collect_facts()
+        logger.info('Collector starting for: %s', host)
+        jdev = netconf_collector.NetconfCollector(host=host, credential=credential, parsers=parsers_manager)
+        jdev.connect()
+        jdev.collect_facts()
+      
+        values = []
+        time_start = time.time()
 
-      for command in target_commands:
-        values = jdev.collect(command=command)
+        ### Execute commands on the device
+        for command in target_commands:
+            values += jdev.collect(command=command)
+
+        ### Save collector statistics 
+        time_end = time.time()
+        time_execution = time_end - time_start
+
+        exec_time_datapoint = [{
+            'measurement': 'jnpr_netconf_collector_stats',
+            'tags': {
+                'device': jdev.hostname
+            },
+            'fields': {
+                'execution_time_sec': "%.4f" % time_execution,
+                'nbr_commands':  len(target_commands),
+            }
+        }]
+
+        values += exec_time_datapoint
+
+        ### Send results to the right output
         if dynamic_args['output_type'] == 'stdout':
             print_format_influxdb(values)
         elif dynamic_args['output_type'] == 'http':
             post_format_influxdb(values)
         else:
             logger.warn('Output format unknown: %s', dynamic_args['output_type'])
-
+        
 
 if __name__ == "__main__":
 
@@ -419,19 +442,23 @@ if __name__ == "__main__":
   else:
     # Execute everythings in the main thread
     for host in target_hosts:
-      target_commands = get_target_commands(host)
-      credential = get_credentials(host)
 
-      logger.info('Collector starting for: %s', host)
-      jdev = netconf_collector.NetconfCollector(host=host, credential=credential, parsers=parsers_manager)
-      jdev.connect()
-      jdev.collect_facts()
+        collector([host])
 
-      for command in target_commands:
-        values = jdev.collect(command=command)
-        if dynamic_args['output_type'] == 'stdout':
-            print_format_influxdb(values)
-        elif dynamic_args['output_type'] == 'http':
-            post_format_influxdb(values)
-        else:
-            logger.warn('Output format unknown: %s', dynamic_args['output_type'])
+    #   target_commands = get_target_commands(host)
+    #   credential = get_credentials(host)
+
+    #   logger.info('Collector starting for: %s', host)
+    #   jdev = netconf_collector.NetconfCollector(host=host, credential=credential, parsers=parsers_manager)
+    #   jdev.connect()
+    #   jdev.collect_facts()
+
+ 
+    #   for command in target_commands:
+    #     values = jdev.collect(command=command)
+    #     if dynamic_args['output_type'] == 'stdout':
+    #         print_format_influxdb(values)
+    #     elif dynamic_args['output_type'] == 'http':
+    #         post_format_influxdb(values)
+    #     else:
+    #         logger.warn('Output format unknown: %s', dynamic_args['output_type'])
