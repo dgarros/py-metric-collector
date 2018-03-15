@@ -146,7 +146,7 @@ class NetconfCollector():
     
     if datapoints is not None:
 
-    ## For now, generate_measurement from command
+      ## For now, generate_measurement from command
       measurement = command.replace(' ','_')
       measurement = measurement.replace('show_','')
 
@@ -158,5 +158,5 @@ class NetconfCollector():
 
       return to_return
     else:
-      logger.debug ('Not parser found for command',command)
+      logger.warn('Not parser found for command > %s',command)
       return None
