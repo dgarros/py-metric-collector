@@ -5,22 +5,32 @@ parser:
     -
         type: multi-value
         method: xpath
-        xpath: //route-engine
+        xpath: //route-engine-information/route-engine
         loop:
-            key: ./slot
+            member: ./slot
+            mastership-state: ./mastership-state
             sub-matches:
-            -
-                xpath: ./mastership-state
-                variable-name:  $host.chassis.routing-engine.$key.mastership-state
-            -
-                xpath: ./memory-buffer-utilization
-                variable-name:  $host.chassis.routing-engine.$key.memory-buffer-utilization
-#            -
-#                xpath: ./up-time/@seconds
-#                variable-name:  $host.chassis.routing-engine.$key.up-time-msec
-            -
-                xpath: ./up-time
+            # -   xpath: ./mastership-state
+            #     variable-name:  mastership-state
+            -   xpath: ./memory-buffer-utilization
+                variable-name:  memory-buffer-utilization
+            -   xpath: ./up-time
                 variable-name:  $host.chassis.routing-engine.$key.up-time-date
-            -
-                xpath: ./cpu-idle
-                variable-name:  $host.chassis.routing-engine.$key.cpu-idle
+            -   xpath: ./cpu-idle
+                variable-name:  cpu-idle
+            -   xpath: ./cpu-user
+                variable-name:  cpu-user
+            -   xpath: ./cpu-background
+                variable-name: cpu-background
+            -   xpath: ./cpu-system
+                variable-name: cpu-system
+            -   xpath: ./cpu-interrupt
+                variable-name: cpu-interrupt
+
+            -   xpath: ./load-average-one
+                variable-name: load-average-one
+            -   xpath: ./load-average-five
+                variable-name: load-average-five
+            -   xpath: ./load-average-fifteen
+                variable-name: load-average-fifteen
+
