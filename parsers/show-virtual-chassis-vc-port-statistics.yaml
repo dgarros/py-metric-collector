@@ -1,0 +1,19 @@
+parser:
+    command: show virtual-chassis vc-port statistics
+    type: xml
+    matches:
+    -   type: multi-value
+        method: xpath
+        xpath: //multi-routing-engine-item/virtual-chassis-port-statistics-information/statistics-port-list/statistics
+        loop:
+            fpc: ./../../../re-name
+            port-name: ./port-name
+            sub-matches:
+            -   xpath: ./input-bytes
+                variable-name: input-bytes
+            -   xpath: ./input-packets
+                variable-name: input-packets
+            -   xpath: ./output-bytes
+                variable-name: output-bytes
+            -   xpath: ./output-packets
+                variable-name: output-packets

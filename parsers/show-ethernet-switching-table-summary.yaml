@@ -1,0 +1,8 @@
+parser:
+    command: show ethernet-switching table summary
+    type: xml
+    matches:
+    -   type: single-value
+        method: xpath
+        xpath: //l2ng-l2-total-mac-count
+        variable-name: total-mac-count

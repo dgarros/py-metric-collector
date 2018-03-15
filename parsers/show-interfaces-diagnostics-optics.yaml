@@ -1,0 +1,17 @@
+parser:
+    command: show interfaces diagnostics optics
+    type: xml
+    matches:
+    -   type: multi-value
+        method: xpath
+        xpath: //interface-information/physical-interface/optics-diagnostics/optics-diagnostics-lane-values
+        loop:
+            interface: ./../../name
+            lane: ./lane-index
+            sub-matches:
+            -   xpath: ./laser-rx-optical-power
+                variable-name: rx-optical-power
+            -   xpath: ./laser-rx-optical-power-dbm
+                variable-name: rx-optical-power-dbm
+            -   xpath: ./laser-output-power
+                variable-name: output-power

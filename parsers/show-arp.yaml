@@ -1,0 +1,8 @@
+parser:
+    command: show arp no-resolve
+    type: xml
+    matches:
+    -   type: single-value
+        method: xpath
+        xpath: //arp-entry-count
+        variable-name: arp-count
