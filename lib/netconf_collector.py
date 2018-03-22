@@ -139,7 +139,7 @@ class NetconfCollector():
 
     return etree.tostring(command_result)
 
-  def collect( self, command=None):
+  def collect( self, command=None ):
 
     raw_data = self.execute_command(command=command)
     datapoints = self.parsers.parse(input=command, data=raw_data)
@@ -147,8 +147,10 @@ class NetconfCollector():
     if datapoints is not None:
 
       ## For now, generate_measurement from command
-      measurement = command.replace(' ','_')
-      measurement = measurement.replace('show_','')
+      # measurement = command.replace(' ','_')
+      # measurement = measurement.replace('show_','')
+
+      measurement = self.parsers.get_measurement_name(input=command)
 
       to_return = []
       for datapoint in datapoints:

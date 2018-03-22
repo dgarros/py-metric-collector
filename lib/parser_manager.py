@@ -39,6 +39,7 @@ class ParserManager:
         "name": junos_parsers_file,
         "command": None,
         "data": None,
+        "measurement": None,
         "type": 'xml'
       }
 
@@ -79,6 +80,9 @@ class ParserManager:
       else:
         logger.error('Unable to find the command for parser: %s', parser['name'])
         continue
+
+      if "measurement" in parser['data']['parser'].keys():
+        parser['measurement'] = parser['data']['parser']['measurement']
 
       self.__add_parser__( name=parser['name'], parser=parser )
 
@@ -171,20 +175,20 @@ class ParserManager:
     else:
       return None
 
-  def get_command( self, input=None):
+  # def get_command( self, input=None):
 
-     ## Get parser
-     ## extract Command
-     ## Return Command
+  #    ## Get parser
+  #    ## extract Command
+  #    ## Return Command
 
-        format = "text"
-        command_tmp = command
-        if re.search("\| display xml", command, re.IGNORECASE):
-            format = "xml"
-            command_tmp = command.replace("| display xml","")
-        elif re.search("\| count", command, re.IGNORECASE):
-            format = "txt-filtered"
-            command_tmp = command.split("|")[0]
+  #   format = "text"
+  #   command_tmp = command
+  #   if re.search("\| display xml", command, re.IGNORECASE):
+  #       format = "xml"
+  #       command_tmp = command.replace("| display xml","")
+  #   elif re.search("\| count", command, re.IGNORECASE):
+  #       format = "txt-filtered"
+  #       command_tmp = command.split("|")[0]
 
   def parse( self, input=None, data=None):
 
@@ -197,6 +201,27 @@ class ParserManager:
         return self.__parse_regex__(parser=parser, data=data)
     except TypeError as t_err:
       return None    
+
+  def get_measurement_name(self, input=None):
+
+    parser = self.__find_parser__(input=input)
+    
+    logger.warn('Looking for a measurement name: %s', input)
+    
+    
+    if parser:
+      logger.warn('Looking for a measurement name (keys): %s', parser.keys())
+      if 'measurement' in parser.keys():
+        return parser['measurement']
+
+    measurement_name = parser['command']
+
+    ## For now, generate_measurement from command
+    measurement_name = measurement_name.replace(' ','_')
+    measurement_name = measurement_name.replace('-','_')
+    measurement_name = measurement_name.replace('show_','')
+
+    return measurement_name
 
 
   def __parse_xml__(self, parser=None, data=None):
@@ -316,8 +341,13 @@ class ParserManager:
         'fields': {}
     }
 
+    # logger.debug('REGEX, will try to parse %s' % data)
+    logger.debug('REGEX, parser %s' % parser) 
+    
     for match in parser["data"]["parser"]["matches"]:
-
+      
+      logger.debug('REGEX, matches of type %s' % match["type"]) 
+    
       if match["type"] == "single-value":
         regex = match["regex"]
         text_matches = re.search(regex,data,re.MULTILINE)
@@ -344,15 +374,16 @@ class ParserManager:
                   tmp_data_structure['fields'][key_tmp] = value_tmp
 
               else:
-                logger.error('More matches found on regex than variables especified on parser: %s', regex_command)
+                logger.error('More matches found on regex than variables especified on parser: %s', parser['name'])
 
             datas_to_return.append(tmp_data_structure)
         else:
           logger.debug('No matches found for regex: %s', regex)
       else:
-       logger.error('An unkown match-type found in parser with regex: %s', regex_command)
+       logger.error('An unkown match-type found in parser with regex: %s', parser['name'])
 
-    # pp.pprint([data_structure])
+
+    logger.debug('REGEX returned: %s', datas_to_return)
     return datas_to_return
 
   def eval_variable_name(self, variable,**kwargs):
