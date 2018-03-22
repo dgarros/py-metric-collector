@@ -1,4 +1,5 @@
 parser:
+    measurement: jnpr_mac_address
     command: show ethernet-switching table summary
     type: xml
     matches:

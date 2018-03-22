@@ -1,4 +1,6 @@
+
 parser:
+    measurement: jnpr_arp
     command: show arp no-resolve
     type: xml
     matches:

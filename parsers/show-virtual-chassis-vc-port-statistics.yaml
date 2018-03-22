@@ -1,4 +1,5 @@
 parser:
+    measurement: jnpr_virtual_chassis_ports
     command: show virtual-chassis vc-port statistics
     type: xml
     matches:

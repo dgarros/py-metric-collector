@@ -1,4 +1,5 @@
 parser:
+    measurement: jnpr_interface_optics
     command: show interfaces diagnostics optics
     type: xml
     matches:

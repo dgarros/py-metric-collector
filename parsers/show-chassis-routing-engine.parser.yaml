@@ -1,4 +1,5 @@
 parser:
+    measurement: jnpr_routing_engine
     command: show chassis routing-engine
     type: xml
     matches:
