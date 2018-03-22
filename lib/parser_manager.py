@@ -206,11 +206,8 @@ class ParserManager:
 
     parser = self.__find_parser__(input=input)
     
-    logger.warn('Looking for a measurement name: %s', input)
-    
-    
     if parser:
-      logger.warn('Looking for a measurement name (keys): %s', parser.keys())
+      logger.debug('Looking for a measurement name (keys): %s', parser.keys())
       if 'measurement' in parser.keys():
         return parser['measurement']
 
