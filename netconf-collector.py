@@ -382,6 +382,7 @@ def collector(host_list):
 
         ### Execute commands on the device
         for command in target_commands:
+            logger.info('[%s] Collecting > %s' % (host,command))
             values += jdev.collect(command=command)
 
         ### Save collector statistics 
