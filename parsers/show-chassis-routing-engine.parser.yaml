@@ -15,12 +15,12 @@ parser:
             #     variable-name:  mastership-state
             -   xpath: ./memory-buffer-utilization
                 variable-name:  memory-buffer-utilization
-            -   xpath: ./up-time
-                variable-name:  $host.chassis.routing-engine.$key.up-time-date
+            # -   xpath: ./up-time/@seconds
+            #     variable-name: up-time
             -   xpath: ./cpu-idle
-                variable-name:  cpu-idle
+                variable-name: cpu-idle
             -   xpath: ./cpu-user
-                variable-name:  cpu-user
+                variable-name: cpu-user
             -   xpath: ./cpu-background
                 variable-name: cpu-background
             -   xpath: ./cpu-system
