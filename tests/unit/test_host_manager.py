@@ -137,3 +137,16 @@ class Test_Validate_Main_Block(unittest.TestCase):
                                                         'tags': ['router1'],
                                                         'username': 'user1'})
         
+  def test_get_context(self):
+
+      hm = HostManager( inventory=inventory_2,
+                        credentials=cred_pwd_02,
+                        commands=commands_1 )
+
+      expected_list = [
+        { 'site': 'site1' },
+        { 'role': 'router' }
+      ]
+
+      self.assertEqual(hm.get_context('router1'), expected_list)
+        
