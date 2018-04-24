@@ -298,6 +298,17 @@ def collector(host_list):
 
         values += exec_time_datapoint
 
+        ### if context information are provided add these in the tag list
+        ### the context is a list of dict, go over all element and 
+        ### check if a similar tag already exist 
+        host_context = hosts_manager.get_context(host)
+        for value in values:
+            for item in host_context:
+                for k, v in item.items():
+                    if k in value['tags']: 
+                        continue
+                    value['tags'][k] = v
+
         ### Send results to the right output
         if dynamic_args['output_type'] == 'stdout':
             print_format_influxdb(values)
