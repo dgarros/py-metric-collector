@@ -237,3 +237,9 @@ class HostManager(object):
 
         return None
                         
+    def get_context(self, host):
+
+        if host not in self.hosts:
+            return None
+
+        return self.hosts[host]['context']
