@@ -13,7 +13,7 @@ logger = logging.getLogger('parser_manager' )
 pp = pprint.PrettyPrinter(indent=4)
 
 ## Pyez is not fully supported, need to work on that 
-SUPPORTED_PARSER_TYPE = ['xml', 'pyez', 'regex', 'textfsm']
+SUPPORTED_PARSER_TYPE = ['xml', 'textfsm', 'pyez', 'regex' ]
 
 class ParserManager:
 
@@ -23,6 +23,7 @@ class ParserManager:
 
     self.nbr_regex_parsers = 0
     self.nbr_xml_parsers = 0
+    self.nbr_textfsm_parsers = 0
     self.nbr_pyez_parsers = 0
 
     ## Check if parser_dir exist
@@ -94,7 +95,7 @@ class ParserManager:
   def __find_parser__( self, input=None ):
     """
     ## First check parser by name
-    ## if nothing found, keep searching by type  base on order defined in SUPPORTED_PARSER_TYPE
+    ## if nothing found, keep searching by type base on order defined in SUPPORTED_PARSER_TYPE
     """
 
     ## Check with parser name
@@ -121,10 +122,12 @@ class ParserManager:
       command_xml = input + " | display xml"
 
     ## Check for parsers by type
-    for type in SUPPORTED_PARSER_TYPE:
+    for parser_type in SUPPORTED_PARSER_TYPE:
+      
+      # logger.debug('Searching parser for %s', parser_type)
 
       for name, parser in self.parsers.items():
-        if parser['type'] != type:
+        if parser['type'] != parser_type:
           continue
 
         # Check if command in file is regex or not
@@ -150,12 +153,15 @@ class ParserManager:
     if not name:
       return False
 
+    logger.debug('Adding parser: %s [%s]' %( name, parser['type']))
+
     ##TODO Check if parser is valid
-    ## If XML check that matches exist
 
     ## Count numbers of parsers of each type
     if parser['type'] == 'xml':
       self.nbr_xml_parsers += 1
+    elif parser['type'] == 'textfsm':
+      self.nbr_textfsm_parsers += 1
     elif parser['type'] == 'regex':
       self.nbr_regex_parsers += 1
     elif parser['type'] == 'pyez':
@@ -166,7 +172,7 @@ class ParserManager:
     return True
 
   def get_nbr_parsers( self ):
-    return self.nbr_pyez_parsers + self.nbr_xml_parsers + self.nbr_regex_parsers
+    return self.nbr_pyez_parsers + self.nbr_textfsm_parsers + self.nbr_xml_parsers + self.nbr_regex_parsers
 
   def get_parser_name_for( self, input=None ):
 
@@ -195,7 +201,7 @@ class ParserManager:
   def parse( self, input=None, data=None):
 
     parser = self.__find_parser__(input=input)
-    
+  
     try:
       if parser['type'] == 'xml':
         return self.__parse_xml__(parser=parser, data=data)
@@ -204,8 +210,10 @@ class ParserManager:
       elif parser['type'] == 'regex':
         return self.__parse_regex__(parser=parser, data=data)
     except TypeError as t_err:
-      return None    
+      logger.debug('Something went wrong while parsing : %s', parser['name'])
+      return []
 
+      
   def get_measurement_name(self, input=None):
 
     parser = self.__find_parser__(input=input)
@@ -279,10 +287,8 @@ class ParserManager:
               key_name = self.cleanup_xpath(xpath=keys_tmp[key_tmp])
               tmp_data['tags'][key_name] = node.xpath(keys_tmp[key_tmp])[0].text.replace(" ","_").strip()
 
-            ## pp.pprint(tmp_data)
-
             for sub_match in match["loop"]["sub-matches"]:
-              logger.debug('Looking for a sub-match: %s', sub_match["xpath"])
+              # logger.debug('Looking for a sub-match: %s', sub_match["xpath"])
               if node.xpath(sub_match["xpath"]):
                 if "regex" in sub_match.keys():
                     value_tmp = node.xpath(sub_match["xpath"])[0].text.strip()
@@ -351,7 +357,7 @@ class ParserManager:
 
     # The argument 'template' is a file handle and 'raw_text_data' is a string.
     res_table = textfsm.TextFSM(tpl_file)
-    res_data = res_table.ParseText(data)
+    res_data = res_table.ParseText(data.decode())
 
     headers = list(res_table.header)
     ## Extract 

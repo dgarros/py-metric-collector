@@ -1,184 +1,20 @@
 parser:
-    regex-command: show\s+system\s+processes\s+extensive
-    type: regex
-    matches:
-    -
-        type: single-value
-        method: regex
-        regex: (\d+[K|M|G]?)\s+(\d+[K|M|G]?)\s+\S+\s*[\d+]?\s+\S+\s+(\S+)%\s+(rpd)$
-        variables:
-        -
-            variable-name:  size
-            variable-type:  integer
-        -
-            variable-name:  res
-            variable-type:  integer
-        -
-            variable-name:  cpu
-            variable-type:  integer
-        -
-            variable-name:  daemon
-            variable-type:  string
-            tag: true
-    -
-        type: single-value
-        method: regex
-        regex: (\d+[K|M|G]?)\s+(\d+[K|M|G]?)\s+\S+\s*[\d+]?\s+\S+\s+(\S+)%\s+(dcd)$
-        variables:
-        -
-            variable-name:  size
-            variable-type:  integer
-        -
-            variable-name:  res
-            variable-type:  integer
-        -
-            variable-name:  cpu
-            variable-type:  integer
-        -
-            variable-name:  daemon
-            variable-type:  string
-            tag: true
-    -
-        type: single-value
-        method: regex
-        regex: (\d+[K|M|G]?)\s+(\d+[K|M|G]?)\s+\S+\s*[\d+]?\s+\S+\s+(\S+)%\s+(snmpd)$
-        variables:
-        -
-            variable-name:  size
-            variable-type:  integer
-        -
-            variable-name:  res
-            variable-type:  integer
-        -
-            variable-name:  cpu
-            variable-type:  integer
-        -
-            variable-name:  daemon
-            variable-type:  string
-            tag: true
-    -
-        type: single-value
-        method: regex
-        regex: (\d+[K|M|G]?)\s+(\d+[K|M|G]?)\s+\S+\s*[\d+]?\s+\S+\s+(\S+)%\s+(mib2d)$
-        variables:
-        -
-            variable-name:  size
-            variable-type:  integer
-        -
-            variable-name:  res
-            variable-type:  integer
-        -
-            variable-name:  cpu
-            variable-type:  integer
-        -
-            variable-name:  daemon
-            variable-type:  string
-            tag: true
-    -
-        type: single-value
-        method: regex
-        regex: (\d+[K|M|G]?)\s+(\d+[K|M|G]?)\s+\S+\s*[\d+]?\s+\S+\s+(\S+)%\s+(dfwd)$
-        variables:
-        -
-            variable-name:  size
-            variable-type:  integer
-        -
-            variable-name:  res
-            variable-type:  integer
-        -
-            variable-name:  cpu
-            variable-type:  integer
-        -
-            variable-name:  daemon
-            variable-type:  string
-            tag: true
-    -
-        type: single-value
-        method: regex
-        regex: (\d+[K|M|G]?)\s+(\d+[K|M|G]?)\s+\S+\s*[\d+]?\s+\S+\s+(\S+)%\s+(cosd)$
-        variables:
-        -
-            variable-name:  size
-            variable-type:  integer
-        -
-            variable-name:  res
-            variable-type:  integer
-        -
-            variable-name:  cpu
-            variable-type:  integer
-        -
-            variable-name:  daemon
-            variable-type:  string
-            tag: true
-    -
-        type: single-value
-        method: regex
-        regex: (\d+[K|M|G]?)\s+(\d+[K|M|G]?)\s+\S+\s*[\d+]?\s+\S+\s+(\S+)%\s+(sampled)$
-        variables:
-        -
-            variable-name:  size
-            variable-type:  integer
-        -
-            variable-name:  res
-            variable-type:  integer
-        -
-            variable-name:  cpu
-            variable-type:  integer
-        -
-            variable-name:  daemon
-            variable-type:  string
-            tag: true
-    -
-        type: single-value
-        method: regex
-        regex: (\d+[K|M|G]?)\s+(\d+[K|M|G]?)\s+\S+\s*[\d+]?\s+\S+\s+(\S+)%\s+(smid)$
-        variables:
-        -
-            variable-name:  size
-            variable-type:  integer
-        -
-            variable-name:  res
-            variable-type:  integer
-        -
-            variable-name:  cpu
-            variable-type:  integer
-        -
-            variable-name:  daemon
-            variable-type:  string
-            tag: true
-    -
-        type: single-value
-        method: regex
-        regex: (\d+[K|M|G]?)\s+(\d+[K|M|G]?)\s+\S+\s*[\d+]?\s+\S+\s+(\S+)%\s+(smihelperd)$
-        variables:
-        -
-            variable-name:  size
-            variable-type:  integer
-        -
-            variable-name:  res
-            variable-type:  integer
-        -
-            variable-name:  cpu
-            variable-type:  integer
-        -
-            variable-name:  daemon
-            variable-type:  string
-            tag: true
-    -
-        type: single-value
-        method: regex
-        regex: (\d+[K|M|G]?)\s+(\d+[K|M|G]?)\s+\S+\s*[\d+]?\s+\S+\s+(\S+)%\s+(idle)$
-        variables:
-        -
-            variable-name:  size
-            variable-type:  integer
-        -
-            variable-name:  res
-            variable-type:  integer
-        -
-            variable-name:  cpu
-            variable-type:  integer
-        -
-            variable-name:  daemon
-            variable-type:  string
-            tag: true
+    command: show system processes extensive
+    type: textfsm
+    tags: 
+        PROCESS: process
+    fields:
+        CPU: cpu
+        MEMORY: memory
+    measurement: jnpr_system_process
+    template: |
+        Value PROCESS (\w+)
+        Value CPU (\d+\.\d+)
+        Value MEMORY ([0-9]{2,}[MKG]{1})
+        Value RESERVE ([0-9]+[MKG]{1})
+
+        Start
+          ^.*\s${MEMORY}\s+${RESERVE}.*\s${CPU}\%\s+${PROCESS} -> Record
+
+        EOF
+
