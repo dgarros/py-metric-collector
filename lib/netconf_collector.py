@@ -160,5 +160,5 @@ class NetconfCollector():
 
       return to_return
     else:
-      logger.warn('Not parser found for command > %s',command)
+      logger.warn('No parser found for command > %s',command)
       return None
