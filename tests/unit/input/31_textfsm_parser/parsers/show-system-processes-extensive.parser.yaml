@@ -1,0 +1,20 @@
+parser:
+    command: show system processes extensive
+    type: textfsm
+    tags: 
+        PROCESS: process
+    fields:
+        CPU: cpu
+        MEMORY: memory
+    measurement: jnpr_system_process
+    template: |
+        Value PROCESS (\w+)
+        Value CPU (\d+\.\d+)
+        Value MEMORY ([0-9]{2,}[MKG]{1})
+        Value RESERVE ([0-9]+[MKG]{1})
+
+        Start
+          ^.*\s${MEMORY}\s+${RESERVE}.*\s${CPU}\%\s+${PROCESS} -> Record
+
+        EOF
+

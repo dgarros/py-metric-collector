@@ -1,0 +1,18 @@
+last pid:  2270;  load averages:  0.00,  0.01,  0.02  up 0+00:34:57    16:20:04
+133 processes: 5 running, 108 sleeping, 1 zombie, 19 waiting
+
+Mem: 304M Active, 48M Inact, 56M Wired, 332M Cache, 69M Buf, 233M Free
+Swap: 1024M Total, 1024M Free
+
+
+  PID USERNAME PRI NICE   SIZE    RES STATE    TIME   WCPU COMMAND
+   10 root     171   52     0K    12K RUN     31:03 91.85% idle
+   12 root     -20 -139     0K    12K WAIT     0:49  0.88% swi7: clock sio
+ 1451 root      96    0   112M 38208K RUN      0:29  0.59% authd
+   14 root     -20 -139     0K    12K WAIT     0:11  0.05% swi7: +
+   30 root     -16    0     0K    12K client   0:10  0.00% ifstate notify
+ 1438 root      96    0 55532K 21876K select   0:10  0.00% pfed
+ 1447 root      96    0 98872K 16340K select   0:08  0.00% jdhcpd
+  173 root      -8    0     0K    12K mdwait   0:08  0.00% md1
+ 1430 root      96    0 32212K  9236K select   0:06  0.00% mib2d
+ 

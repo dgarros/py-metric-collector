@@ -5,10 +5,15 @@ import yaml
 from lxml import etree
 import copy
 import re
+import textfsm
+from io import StringIO
 
 logger = logging.getLogger('parser_manager' )
 
 pp = pprint.PrettyPrinter(indent=4)
+
+## Pyez is not fully supported, need to work on that 
+SUPPORTED_PARSER_TYPE = ['xml', 'pyez', 'regex', 'textfsm']
 
 class ParserManager:
 
@@ -65,7 +70,7 @@ class ParserManager:
       if not "type" in parser["data"]["parser"].keys():
         logger.warn('Type is not defined for parser %s, default XML', parser['name'])
 
-      elif parser["data"]["parser"]['type'] == 'xml' or parser["data"]["parser"]["type"] == 'regex':
+      elif parser["data"]["parser"]['type'] in SUPPORTED_PARSER_TYPE:
         parser['type'] = parser['data']['parser']['type']
       else:
         logger.warn('Parser type %s is not supported, %s', parser['data']['parser']['type'], parser['name'])
@@ -88,11 +93,8 @@ class ParserManager:
 
   def __find_parser__( self, input=None ):
     """
-    ## Check parser in this order
-    # 0- parser name
-    # 1- pyez
-    # 2- xml
-    # 3- regex
+    ## First check parser by name
+    ## if nothing found, keep searching by type  base on order defined in SUPPORTED_PARSER_TYPE
     """
 
     ## Check with parser name
@@ -118,8 +120,8 @@ class ParserManager:
       command = input
       command_xml = input + " | display xml"
 
-    ## Check for parsers pyez, xml and regex
-    for type in ['pyez', 'xml', 'regex']:
+    ## Check for parsers by type
+    for type in SUPPORTED_PARSER_TYPE:
 
       for name, parser in self.parsers.items():
         if parser['type'] != type:
@@ -197,6 +199,8 @@ class ParserManager:
     try:
       if parser['type'] == 'xml':
         return self.__parse_xml__(parser=parser, data=data)
+      elif  parser['type'] == 'textfsm':
+        return self.__parse_textfsm__(parser=parser, data=data)
       elif parser['type'] == 'regex':
         return self.__parse_regex__(parser=parser, data=data)
     except TypeError as t_err:
@@ -326,6 +330,62 @@ class ParserManager:
 
     # pp.pprint(data_to_return)
     return datas_to_return
+
+
+  def __parse_textfsm__(self, parser=None, data=None):
+
+    datas_to_return = []
+
+    ## Empty structure that needs to be filled and return for each input
+    data_structure = {
+        'measurement': None,
+        'tags': {},
+        'fields': {}
+    }
+
+    if 'measurement' in parser:
+      data_structure['measurement'] = parser['measurement']
+
+    ## TODO Check if template exist
+    tpl_file = StringIO(parser['data']['parser']['template'])
+
+    # The argument 'template' is a file handle and 'raw_text_data' is a string.
+    res_table = textfsm.TextFSM(tpl_file)
+    res_data = res_table.ParseText(data)
+
+    headers = list(res_table.header)
+    ## Extract 
+    for row in res_data:
+      tmp_data = copy.deepcopy(data_structure)
+        
+      for field in parser['data']['parser']['fields']:
+        if field not in headers: 
+          continue
+        
+        idx = headers.index(field)
+        field_name = parser['data']['parser']['fields'][field]
+
+        ## Attempt to clean data if it contains KMG info
+        if 'M' in row[idx] or 'K' in row[idx] or 'G' in row[idx]:
+          value = self.eval_variable_value(row[idx], type='integer')
+        else:
+          value = row[idx]
+
+        tmp_data['fields'][field_name] = str(value)
+        
+      for tag in parser['data']['parser']['tags']:
+        if tag not in headers: 
+          continue
+        
+        idx = headers.index(tag)
+        tag_name = parser['data']['parser']['tags'][tag]
+        tmp_data['tags'][tag_name] = row[idx]
+         
+      datas_to_return.append(tmp_data)
+  
+    # pprint.pprint(datas_to_return)
+    return datas_to_return
+
 
   def __parse_regex__(self, parser=None, data=None):
 

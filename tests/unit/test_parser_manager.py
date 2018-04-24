@@ -20,7 +20,7 @@ class Test_Validate_Main_Block(unittest.TestCase):
   def test_invalid_dir(self):
     try:
       parser_manager.ParserManager( parser_dir='donotexist')
-    except Exception, e:
+    except Exception as e:
       self.assertTrue(1)
 
   def test_invalid_yaml(self):
@@ -112,35 +112,69 @@ class Test_Validate_Main_Block(unittest.TestCase):
     }
 
     data = pm.parse( input="show-route-summary.parser.yaml", data=xml_data )
-    # pp.pprint(data)
 
     self.assertDictEqual( expected_dict_0, data[0] )
     self.assertDictEqual( expected_dict_1, data[1] )
 
     self.assertTrue( len(data) == 2 )
 
-  def test_parse_valid_regex(self):
-    test_dir = here+'/input/21_regex_parser'
+  # def test_parse_valid_regex(self):
+  #   test_dir = here+'/input/21_regex_parser'
+
+  #   pm = parser_manager.ParserManager( parser_dir= test_dir + "/parsers" )
+
+  #   ## Read XML content
+  #   xml_data = open( test_dir + "/rpc-reply/show_system_processes_extensive/command.xml").read()
+
+  #   ## Return a list dict
+  #   data = pm.parse( input="show-system-processes-extensive.parser.yaml", data=xml_data )
+
+  #   # pp.pprint(data)
+  #   expected_dict = {
+  #       'fields': {   're.memory.rpd-CPU': 0,
+  #                     're.memory.rpd-RES': 16648000,
+  #                     're.memory.rpd-SIZE': 70372000,
+  #                     're.memory.snmpd-CPU': 0,
+  #                     're.memory.snmpd-RES': 10144000,
+  #                     're.memory.snmpd-SIZE': 20804000},
+  #       'measurement': None,
+  #       'tags': {   }
+  #   }
+
+  #   self.assertDictEqual( expected_dict, data[0] )
+  #   self.assertTrue( len(data) == 1 )
+
+  def test_parse_valid_textfsm(self):
+    test_dir = here+'/input/31_textfsm_parser'
 
     pm = parser_manager.ParserManager( parser_dir= test_dir + "/parsers" )
 
     ## Read XML content
-    xml_data = open( test_dir + "/rpc-reply/show_system_processes_extensive/command.xml").read()
+    xml_data = open( test_dir + "/rpc-reply/show_system_processes_extensive/command_short.xml").read()
 
     ## Return a list dict
     data = pm.parse( input="show-system-processes-extensive.parser.yaml", data=xml_data )
 
     # pp.pprint(data)
-    expected_dict = {
-        'fields': {   're.memory.rpd-CPU': 0,
-                      're.memory.rpd-RES': 16648000,
-                      're.memory.rpd-SIZE': 70372000,
-                      're.memory.snmpd-CPU': 0,
-                      're.memory.snmpd-RES': 10144000,
-                      're.memory.snmpd-SIZE': 20804000},
-        'measurement': None,
-        'tags': {   }
-    }
+    expected_dict_1 = {
+        'fields': {'cpu': '0.59', 'memory': '112000000'},
+        'measurement': 'jnpr_system_process',
+        'tags': {'process': 'authd'}
+      }
 
-    self.assertDictEqual( expected_dict, data[0] )
-    self.assertTrue( len(data) == 1 )
+    expected_dict_2 = {
+        'fields': {'cpu': '0.00', 'memory': '55532000'},
+        'measurement': 'jnpr_system_process',
+        'tags': {'process': 'pfed'}
+      }
+
+    expected_dict_3 = {
+        'fields': {'cpu': '0.00', 'memory': '98872000'},
+        'measurement': 'jnpr_system_process',
+        'tags': {'process': 'jdhcpd'}
+      }
+
+    self.assertDictEqual( expected_dict_1, data[0] )
+    self.assertDictEqual( expected_dict_2, data[1] )
+    self.assertDictEqual( expected_dict_3, data[2] )
+    self.assertTrue( len(data) == 4 )
