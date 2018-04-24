@@ -11,32 +11,32 @@ parser:
             sub-matches:
             -
                 xpath: ./destination-count
-                variable-name:  $host.route-table.summary.$key.destinations
+                variable-name:  destinations
                 tags:
                 -
                     table: $key
                     test: delete_me
             -
                 xpath: ./total-route-count
-                variable-name:  $host.route-table.summary.$key.routes
+                variable-name:  routes
                 tags:
                 -
                     table: $key
             -
                 xpath: ./active-route-count
-                variable-name:  $host.route-table.summary.$key.actives
+                variable-name:  actives
                 tags:
                 -
                     table: $key
             -
                 xpath: ./holddown-route-count
-                variable-name:  $host.route-table.summary.$key.holddown
+                variable-name:  holddown
                 tags:
                 -
                     table: $key
             -
                 xpath: ./hidden-route-count
-                variable-name:  $host.route-table.summary.$key.hidden
+                variable-name:  hidden
                 tags:
                 -
                     table: $key
@@ -49,31 +49,31 @@ parser:
             sub-matches:
             -
                 xpath: ./destination-count
-                variable-name:  $host.route-table.summary.$key.destinations
+                variable-name:  destinations
                 tags:
                 -
                     table: $key
             -
                 xpath: ./total-route-count
-                variable-name:  $host.route-table.summary.$key.routes
+                variable-name:  routes
                 tags:
                 -
                     table: $key
             -
                 xpath: ./active-route-count
-                variable-name:  $host.route-table.summary.$key.actives
+                variable-name:  actives
                 tags:
                 -
                     table: $key
             -
                 xpath: ./holddown-route-count
-                variable-name:  $host.route-table.summary.$key.holddown
+                variable-name:  holddown
                 tags:
                 -
                     table: $key
             -
                 xpath: ./hidden-route-count
-                variable-name:  $host.route-table.summary.$key.hidden
+                variable-name:  hidden
                 tags:
                 -
                     table: $key
@@ -86,31 +86,31 @@ parser:
             sub-matches:
             -
                 xpath: ./destination-count
-                variable-name:  $host.route-table.summary.$key.destinations
+                variable-name:  destinations
                 tags:
                 -
                     table: $key
             -
                 xpath: ./total-route-count
-                variable-name:  $host.route-table.summary.$key.routes
+                variable-name:  routes
                 tags:
                 -
                     table: $key
             -
                 xpath: ./active-route-count
-                variable-name:  $host.route-table.summary.$key.actives
+                variable-name:  actives
                 tags:
                 -
                     table: $key
             -
                 xpath: ./holddown-route-count
-                variable-name:  $host.route-table.summary.$key.holddown
+                variable-name:  holddown
                 tags:
                 -
                     table: $key
             -
                 xpath: ./hidden-route-count
-                variable-name:  $host.route-table.summary.$key.hidden
+                variable-name:  hidden
                 tags:
                 -
                     table: $key
@@ -123,31 +123,31 @@ parser:
             sub-matches:
             -
                 xpath: ./destination-count
-                variable-name:  $host.route-table.summary.$key.destinations
+                variable-name:  destinations
                 tags:
                 -
                     table: $key
             -
                 xpath: ./total-route-count
-                variable-name:  $host.route-table.summary.$key.routes
+                variable-name:  routes
                 tags:
                 -
                     table: $key
             -
                 xpath: ./active-route-count
-                variable-name:  $host.route-table.summary.$key.actives
+                variable-name:  actives
                 tags:
                 -
                     table: $key
             -
                 xpath: ./holddown-route-count
-                variable-name:  $host.route-table.summary.$key.holddown
+                variable-name:  holddown
                 tags:
                 -
                     table: $key
             -
                 xpath: ./hidden-route-count
-                variable-name:  $host.route-table.summary.$key.hidden
+                variable-name:  hidden
                 tags:
                 -
                     table: $key
