@@ -17,7 +17,6 @@ import os  # For exec to work
 import pprint
 import re # For regular expression usage
 import requests
-import string
 import string  # For split multiline script into multiple lines
 import io   # Used for file read/write
 import sys  # For exec to work
@@ -29,111 +28,16 @@ import copy
 
 from lib import parser_manager
 from lib import netconf_collector
+from lib import host_manager
 
 logging.getLogger("paramiko").setLevel(logging.INFO)
 logging.getLogger("ncclient").setLevel(logging.WARNING) # In order to remove http request from ssh/paramiko
 logging.getLogger("requests").setLevel(logging.INFO)
 logging.getLogger("urllib3").setLevel(logging.WARNING)  # In order to remove http request from InfluxDBClient
 
-####################################################################################
-####################################################################################
-# Defining the classes and procedures used later on the script
-####################################################################################
-####################################################################################
-
-def get_target_hosts():
-    my_target_hosts = {}
-    for host in sorted(hosts.keys()):
-        for tag in tag_list:
-            for hosts_tag in hosts[host].split():
-                if re.search(tag, hosts_tag, re.IGNORECASE):
-                    my_target_hosts[host] = 1
-    return list(my_target_hosts.keys())
-
-def get_target_commands(my_host):
-  my_host_tags = hosts[my_host]
-  my_target_commands = {}
-  for group_command in sorted(general_commands.keys()):
-    for my_host_tag in my_host_tags.strip().split():
-      for command_tag in general_commands[group_command]["tags"].split():
-        if re.search(my_host_tag, command_tag, re.IGNORECASE):
-          if "netconf" in general_commands[group_command].keys():
-            cmd_list = []
-            if isinstance(general_commands[group_command]["netconf"], str):
-              cmd_list = general_commands[group_command]["netconf"].strip().split("\n")
-            else:
-              cmd_list = general_commands[group_command]["netconf"]
-
-            for cmd in cmd_list:
-              my_target_commands[cmd] = 1
-
-  return my_target_commands.keys()
-
-def get_credentials(my_host):
-    my_host_tags = hosts[my_host]
-    my_target_credentials = {'username': None,
-                             'password': None,
-                             'port': 22,
-                             'method': None,
-                             'key_file': None }
-
-    for credential in sorted(credentials.keys()):
-        for my_host_tag in my_host_tags.strip().split():
-            for credential_tag in credentials[credential]["tags"].split():
-                if re.search(my_host_tag, credential_tag, re.IGNORECASE):
-
-                    if not ("username" in credentials[credential].keys()):
-                        logger.error("Missing username information")
-                        sys.exit(0)
-                    else:
-                        my_target_credentials['username'] = credentials[credential]["username"]
-
-                    ## Port
-                    if ("port" in credentials[credential].keys()):
-                        my_target_credentials['port'] = credentials[credential]["port"]
-
-                    if ("method" in credentials[credential].keys()):
-                        my_target_credentials['method'] = credentials[credential]["method"]
-
-
-                        if (credentials[credential]["method"] == "key"):
-                            if not ("key_file" in credentials[credential].keys()):
-                                logger.error("Missing key_file information")
-                                sys.exit(0)
-
-                            my_target_credentials['key_file'] = credentials[credential]["key_file"]
-                            return my_target_credentials
-
-                        elif (credentials[credential]["method"] == "enc_key"):
-                            if not ("key_file" in credentials[credential].keys()):
-                                logger.error("Missing key_file information")
-                                sys.exit(0)
-
-                            if not ("password" in credentials[credential].keys()):
-                                logger.error("Missing password information")
-                                sys.exit(0)
-
-                            my_target_credentials['password'] = credentials[credential]["password"]
-                            my_target_credentials['key_file'] = credentials[credential]["key_file"]
-
-                            return my_target_credentials
-
-                        elif (credentials[credential]["method"] == "password"):
-                            my_target_credentials['password'] = credentials[credential]["password"]
-                            my_target_credentials['key_file'] = credentials[credential]["key_file"]
-
-                            return my_target_credentials
-
-                        else:
-                            logger.error("Unknown authentication method found")
-                            sys.exit(0)
-                    else:
-                        if not ("password" in credentials[credential].keys()):
-                            logger.error("Missing password information")
-                            sys.exit(0)
-                        my_target_credentials['password'] = credentials[credential]["password"]
-
-                        return my_target_credentials
+### ------------------------------------------------------------------------------
+### Defining the classes and procedures used later on the script
+### ------------------------------------------------------------------------------
 
 def print_format_influxdb(datapoints):
     """
@@ -192,16 +96,14 @@ def format_datapoints_inlineprotocol(datapoints):
     return formatted_data
 
 
-################################################################################################
-################################################################################################
-################################################################################################
+### ------------------------------------------------------------------------------
+### ------------------------------------------------------------------------------
 
 # SCRIPT STARTS HERE
 
-################################################################################################
-# Create and Parse Arguments
-################################################################################################
-
+### ------------------------------------------------------------------------------
+### Create and Parse Arguments
+### ------------------------------------------------------------------------------
 if getattr(sys, 'frozen', False):
     # frozen
     BASE_DIR = os.path.dirname(sys.executable)
@@ -216,7 +118,7 @@ full_parser.add_argument( "--test", action='store_true', help="Use emulated Juno
 full_parser.add_argument("-s", "--start", action='store_true', help="Start collecting (default 'no')")
 full_parser.add_argument("-i", "--input", default=BASE_DIR, help="Directory where to find input files")
 
-full_parser.add_argument("--loglvl", default=20, help="Logs verbosity, 10-debug, 50 Critical")
+full_parser.add_argument("--loglvl", default=10, help="Logs verbosity, 10-debug, 50 Critical")
 
 full_parser.add_argument("--logdir", default="logs", help="Directory where to store logs")
 full_parser.add_argument("--parserdir", default="parsers", help="Directory where to find parsers")
@@ -244,10 +146,9 @@ dynamic_args = vars(full_parser.parse_args())
 if dynamic_args['test']:
     BASE_DIR_INPUT = dynamic_args['input']
 
-################################################################################
+### ------------------------------------------------------------------------------
 # Loading YAML Default Variables
-################################################################################
-
+### ------------------------------------------------------------------------------
 db_schema = dynamic_args['dbschema']
 max_connection_retries = dynamic_args['retry']
 delay_between_commands = dynamic_args['delay']
@@ -255,9 +156,9 @@ logging_level = dynamic_args['loglvl']
 default_junos_rpc_timeout = dynamic_args['timeout']
 use_hostname = dynamic_args['usehostname']
 
-################################################################################################
-# Validate Arguments
-###############################################################################################
+### ------------------------------------------------------------------------------
+### Validate Arguments
+### ------------------------------------------------------------------------------
 pp = pprint.PrettyPrinter(indent=4)
 
 tag_list = []
@@ -271,22 +172,16 @@ if not(dynamic_args['start']):
     logger.error('Missing <start> option, so nothing to do')
     sys.exit(0)
 
-################################################################################
-################################################################################
-# Netconf Collector starts here start
-################################################################################
-################################################################################
-
+### ------------------------------------------------------------------------------
+### Logging
+### ------------------------------------------------------------------------------
 # Setting up logging directories and files
 timestamp = time.strftime("%Y-%m-%d", time.localtime(time.time()))
 log_dir = BASE_DIR + "/" + dynamic_args['logdir']
 logger = logging.getLogger("main")
 
-# if not os.path.exists(log_dir):
-#     os.makedirs(log_dir, '0755')
-
 formatter = '%(asctime)s %(name)s %(levelname)s %(threadName)-10s:  %(message)s'
-logging.basicConfig(filename=log_dir + "/"+ timestamp + '_open-nti.log',
+logging.basicConfig(filename=log_dir + "/"+ timestamp + '_py_netconf.log',
                     level=logging_level,
                     format=formatter,
                     datefmt='%Y-%m-%d %H:%M:%S')
@@ -297,9 +192,9 @@ if dynamic_args['console']:
     console.setLevel(logging.DEBUG)
     logging.getLogger('').addHandler(console)
 
-###########################################################
-#  LOAD all credentials in a dict
-###########################################################
+### ------------------------------------------------------------------------------
+### LOAD all credentials in a dict
+### ------------------------------------------------------------------------------
 credentials = {}
 credentials_yaml_file = ''
 
@@ -316,33 +211,28 @@ except Exception as e:
     logger.error('Error importing credentials file: %s', credentials_yaml_file)
     sys.exit(0)
 
-###########################################################
-#  LOAD all hosts with their tags in a dict              ##
-#  if 'host' is provided, use that instead of the file   ##
-###########################################################
+### ------------------------------------------------------------------------------
+###  LOAD all hosts       
+### ------------------------------------------------------------------------------
+hosts_yaml_file = ''
 hosts = {}
-if dynamic_args['host']:
-  hosts[dynamic_args['host']] = ' '.join(tag_list)
-else:
-  hosts_yaml_file = ''
-  hosts = {}
 
-  if os.path.isfile(dynamic_args['hosts']):
+if os.path.isfile(dynamic_args['hosts']):
     hosts_yaml_file = dynamic_args['hosts']
-  else:
+else:
     hosts_yaml_file = BASE_DIR + "/"+ dynamic_args['hosts']
 
-  logger.info('Importing host file: %s ',hosts_yaml_file)
-  try:
+logger.info('Importing host file: %s ',hosts_yaml_file)
+try:
     with open(hosts_yaml_file) as f:
       hosts = yaml.load(f)
-  except Exception as e:
-    logger.error('Error importing host file: %s', hosts_yaml_file)
+except Exception as e:
+    logger.error('Error importing host file: %s > %s', (hosts_yaml_file, e))
     sys.exit(0)
 
-###########################################################
-#  LOAD all commands with their tags in a dict           ##
-###########################################################
+### ------------------------------------------------------------------------------
+### LOAD all commands with their tags in a dict           
+### ------------------------------------------------------------------------------
 commands_yaml_file = ''
 commands = []
 
@@ -361,16 +251,22 @@ with open(commands_yaml_file) as f:
         sys.exit(0)
 
 general_commands = commands[0]
-###########################################################
-#  LOAD all parsers                                      ##
-###########################################################
+
+### ------------------------------------------------------------------------------
+### LOAD all parsers                                      
+### ------------------------------------------------------------------------------
 parsers_manager = parser_manager.ParserManager( parser_dir = dynamic_args['parserdir'] )
+hosts_manager = host_manager.HostManager(
+    inventory=hosts, 
+    credentials=credentials,
+    commands=general_commands
+)
 
 def collector(host_list): 
 
     for host in host_list: 
-        target_commands = get_target_commands(host)
-        credential = get_credentials(host)
+        target_commands = hosts_manager.get_target_commands(host)
+        credential = hosts_manager.get_credentials(host)
 
         logger.info('Collector starting for: %s', host)
         jdev = netconf_collector.NetconfCollector(host=host, credential=credential, parsers=parsers_manager)
@@ -415,7 +311,7 @@ if __name__ == "__main__":
 
   logger.debug('Getting hosts that matches the specified tags')
   #  Get all hosts that matches with the tags
-  target_hosts = get_target_hosts()
+  target_hosts = hosts_manager.get_target_hosts(tags=tag_list)
   logger.debug('The following hosts are being selected: %s', target_hosts)
 
   use_threads = dynamic_args['use_thread']
@@ -445,21 +341,3 @@ if __name__ == "__main__":
     for host in target_hosts:
 
         collector([host])
-
-    #   target_commands = get_target_commands(host)
-    #   credential = get_credentials(host)
-
-    #   logger.info('Collector starting for: %s', host)
-    #   jdev = netconf_collector.NetconfCollector(host=host, credential=credential, parsers=parsers_manager)
-    #   jdev.connect()
-    #   jdev.collect_facts()
-
- 
-    #   for command in target_commands:
-    #     values = jdev.collect(command=command)
-    #     if dynamic_args['output_type'] == 'stdout':
-    #         print_format_influxdb(values)
-    #     elif dynamic_args['output_type'] == 'http':
-    #         post_format_influxdb(values)
-    #     else:
-    #         logger.warn('Output format unknown: %s', dynamic_args['output_type'])
