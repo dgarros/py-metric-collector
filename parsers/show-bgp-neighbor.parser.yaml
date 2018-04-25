@@ -1,0 +1,26 @@
+parser:
+    measurement: jnpr_bgp_neighbor
+    command: show bgp neighbor
+    type: xml
+    matches:
+    -   type: multi-value
+        method: xpath
+        xpath: //bgp-information/bgp-peer
+        loop:
+            peer-id: ./peer-id
+            peer-as: ./peer-as
+            peer-state: ./peer-state
+            peer-group: ./peer-group
+            description: ./description
+            peer-type: ./nlri-type-peer
+            sub-matches:
+            -   xpath: ./bgp-rib/active-prefix-count
+                variable-name: active-prefix
+            -   xpath: ./bgp-rib/received-prefix-count
+                variable-name: received-prefix
+            -   xpath: ./bgp-rib/accepted-prefix-count
+                variable-name: accepted-prefix
+            -   xpath: ./bgp-rib/suppressed-prefix-count
+                variable-name: suppressed-prefix
+            -   xpath: ./flap-count
+                variable-name: flap-count
