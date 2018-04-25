@@ -1,0 +1,29 @@
+[[source]]
+
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+
+[packages]
+
+cffi = "*"
+ncclient = "*"
+jxmlease = "*"
+pytest = "*"
+pytest-cov = "*"
+"jinja2" = "*"
+pyyaml = "*"
+requests = "*"
+junos-eznc = "*"
+ipaddress = "*"
+textfsm = "*"
+
+
+[dev-packages]
+
+
+
+[requires]
+
+python_version = "3.6"
