@@ -118,7 +118,7 @@ full_parser.add_argument( "--test", action='store_true', help="Use emulated Juno
 full_parser.add_argument("-s", "--start", action='store_true', help="Start collecting (default 'no')")
 full_parser.add_argument("-i", "--input", default=BASE_DIR, help="Directory where to find input files")
 
-full_parser.add_argument("--loglvl", default=10, help="Logs verbosity, 10-debug, 50 Critical")
+full_parser.add_argument("--loglvl", default=20, help="Logs verbosity, 10-debug, 50 Critical")
 
 full_parser.add_argument("--logdir", default="logs", help="Directory where to store logs")
 full_parser.add_argument("--parserdir", default="parsers", help="Directory where to find parsers")
