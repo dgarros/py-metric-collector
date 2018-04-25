@@ -210,10 +210,10 @@ class ParserManager:
       elif parser['type'] == 'regex':
         return self.__parse_regex__(parser=parser, data=data)
     except TypeError as t_err:
-      logger.debug('Something went wrong while parsing : %s', parser['name'])
+      logger.error('Something went wrong while parsing : %s > %s' % (parser['name'], t_err))
       return []
 
-      
+
   def get_measurement_name(self, input=None):
 
     parser = self.__find_parser__(input=input)
@@ -237,6 +237,8 @@ class ParserManager:
 
     datas_to_return = []
 
+    logger.debug("will parse %s with xml" % parser['command'])
+    # logger.debug("data %s" % data)
     ## Empty structure that needs to be filled and return for each input
     data_structure = {
         'measurement': None,
@@ -244,8 +246,9 @@ class ParserManager:
         'fields': {}
     }
 
-    ## Convert data to etree
-    xml_data = etree.fromstring(data)
+    clean_data = re.sub(r"\sxmlns\=\".*\"", '', data.decode(), re.M)
+
+    xml_data = etree.fromstring(clean_data)
 
     ## NOTE, There is an assumption that all matches will be either
     # - single-value
@@ -253,6 +256,7 @@ class ParserManager:
     ## it might not work as it, if we have a mix of both
 
     for match in parser["data"]["parser"]["matches"]:
+
         if match["type"] == "single-value":
           logger.debug('Looking for a match: %s', match["xpath"])
           if xml_data.xpath(match["xpath"]):
@@ -271,6 +275,7 @@ class ParserManager:
               data_structure['fields'][key_tmp] = value_tmp
 
         elif match["type"] == "multi-value":
+
           nodes = xml_data.xpath(match["xpath"])
           for node in nodes:
             #Look for all posible keys or fields to extract and be used for variable-naming
@@ -284,8 +289,13 @@ class ParserManager:
               del keys_tmp['sub-matches']
 
             for key_tmp in keys_tmp.keys():
-              key_name = self.cleanup_xpath(xpath=keys_tmp[key_tmp])
-              tmp_data['tags'][key_name] = node.xpath(keys_tmp[key_tmp])[0].text.replace(" ","_").strip()
+              # key_name = self.cleanup_xpath(xpath=keys_tmp[key_tmp])
+              key_name = key_tmp
+
+              key_results = node.xpath(keys_tmp[key_tmp])
+
+              if len(key_results) > 0:
+                tmp_data['tags'][key_name] = key_results[0].text.replace(" ","_").strip()
 
             for sub_match in match["loop"]["sub-matches"]:
               # logger.debug('Looking for a sub-match: %s', sub_match["xpath"])
@@ -334,7 +344,6 @@ class ParserManager:
     if len(data_structure['fields'].keys()) > 0:
       datas_to_return.append(data_structure)
 
-    # pp.pprint(data_to_return)
     return datas_to_return
 
 

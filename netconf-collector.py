@@ -12,6 +12,7 @@ from pprint import pprint
 import argparse   # Used for argument parsing
 import json
 import logging
+import traceback
 import logging.handlers
 import os  # For exec to work
 import pprint
@@ -299,9 +300,10 @@ def collector(host_list):
                     values += jdev.collect(command=command)
                     cmd_successful += 1
 
-                except:
+                except Exception as err:
                     cmd_error += 1
-                    logger.error('An issue happened while connecting %s on %s, skipping' % (host,command))
+                    logger.error('An issue happened while collecting %s on %s > %s ' % (host,command, err))
+                    logger.error(traceback.format_exc())
 
             ### Save collector statistics 
             time_end = time.time()
