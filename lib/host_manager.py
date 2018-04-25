@@ -243,3 +243,9 @@ class HostManager(object):
             return None
 
         return self.hosts[host]['context']
+
+    def get_address(self, host):
+        if host not in self.hosts:
+            return None
+
+        return self.hosts[host]['address']

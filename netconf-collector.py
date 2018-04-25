@@ -269,7 +269,8 @@ def collector(host_list):
         credential = hosts_manager.get_credentials(host)
 
         logger.info('Collector starting for: %s', host)
-        jdev = netconf_collector.NetconfCollector(host=host, credential=credential, parsers=parsers_manager)
+        host_address = hosts_manager.get_address(host)
+        jdev = netconf_collector.NetconfCollector(host=host_address, credential=credential, parsers=parsers_manager)
         jdev.connect()
         jdev.collect_facts()
       
