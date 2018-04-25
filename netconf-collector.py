@@ -317,7 +317,8 @@ def collector(host_list):
                 'nbr_commands':  cmd_successful + cmd_error,
                 'nbr_successful_commands':  cmd_successful,
                 'nbr_error_commands':  cmd_error,
-                'reacheable': int(host_reacheable)
+                'reacheable': int(host_reacheable),
+                'unreacheable': int(not host_reacheable)
             }
         }]
 
