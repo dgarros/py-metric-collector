@@ -9,3 +9,4 @@ PyYAML
 requests
 junos-eznc
 ipaddress
+textfsm
