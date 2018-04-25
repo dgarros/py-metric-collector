@@ -3,34 +3,34 @@ parser:
     command: show bgp summary
     type: xml
     matches:
-    # -   type: single-value
-    #     method: xpath
-    #     xpath: //bgp-information/group-count
-    #     variable-name: group-count
-    # -   type: single-value
-    #     method: xpath
-    #     xpath: //bgp-information/peer-count
-    #     variable-name: peer-count
-    # -   type: single-value
-    #     method: xpath
-    #     xpath: //bgp-information/down-peer-count
-    #     variable-name: down-peer-count
-
-    -   type: multi-value
+    -   type: single-value
         method: xpath
-        xpath: //bgp-information/bgp-peer
-        loop:
-            peer-addr: ./peer-address
-            peer-asn: ./peer-as
-            peer-state: ./peer-state
-            sub-matches:
-            -   xpath: ./bgp-rib/active-prefix-count
-                variable-name: active-prefix
-            -   xpath: ./bgp-rib/received-prefix-count
-                variable-name: received-prefix
-            -   xpath: ./bgp-rib/accepted-prefix-count
-                variable-name: accepted-prefix
-            -   xpath: ./bgp-rib/suppressed-prefix-count
-                variable-name: suppressed-prefix
-            -   xpath: ./flap-count
-                variable-name: flap-count
+        xpath: //bgp-information/group-count
+        variable-name: group-count
+    -   type: single-value
+        method: xpath
+        xpath: //bgp-information/peer-count
+        variable-name: peer-count
+    -   type: single-value
+        method: xpath
+        xpath: //bgp-information/down-peer-count
+        variable-name: down-peer-count
+
+    # -   type: multi-value
+    #     method: xpath
+    #     xpath: //bgp-information/bgp-peer
+    #     loop:
+    #         peer-addr: ./peer-address
+    #         peer-asn: ./peer-as
+    #         peer-state: ./peer-state
+    #         sub-matches:
+    #         -   xpath: ./bgp-rib/active-prefix-count
+    #             variable-name: active-prefix
+    #         -   xpath: ./bgp-rib/received-prefix-count
+    #             variable-name: received-prefix
+    #         -   xpath: ./bgp-rib/accepted-prefix-count
+    #             variable-name: accepted-prefix
+    #         -   xpath: ./bgp-rib/suppressed-prefix-count
+    #             variable-name: suppressed-prefix
+    #         -   xpath: ./flap-count
+    #             variable-name: flap-count
