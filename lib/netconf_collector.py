@@ -162,3 +162,6 @@ class NetconfCollector():
     else:
       logger.warn('No parser found for command > %s',command)
       return None
+
+  def is_connected(self):
+    return self.__is_connected

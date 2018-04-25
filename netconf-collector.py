@@ -268,23 +268,44 @@ def collector(host_list):
         target_commands = hosts_manager.get_target_commands(host)
         credential = hosts_manager.get_credentials(host)
 
+        host_reacheable = False
+
         logger.info('Collector starting for: %s', host)
         host_address = hosts_manager.get_address(host)
+        
         jdev = netconf_collector.NetconfCollector(host=host_address, credential=credential, parsers=parsers_manager)
         jdev.connect()
-        jdev.collect_facts()
-      
+
+        if jdev.is_connected():
+            jdev.collect_facts()
+            host_reacheable = True
+
+        else:
+            logger.error('Unable to connect to %s, skipping', host)
+            host_reacheable = False
+
         values = []
-        time_start = time.time()
+        time_execution = 0
+        cmd_successful = 0
+        cmd_error = 0
 
-        ### Execute commands on the device
-        for command in target_commands:
-            logger.info('[%s] Collecting > %s' % (host,command))
-            values += jdev.collect(command=command)
+        if host_reacheable == True:
+            time_start = time.time()
+            
+            ### Execute commands on the device
+            for command in target_commands:
+                try:
+                    logger.info('[%s] Collecting > %s' % (host,command))
+                    values += jdev.collect(command=command)
+                    cmd_successful += 1
 
-        ### Save collector statistics 
-        time_end = time.time()
-        time_execution = time_end - time_start
+                except:
+                    cmd_error += 1
+                    logger.error('An issue happened while connecting %s on %s, skipping' % (host,command))
+
+            ### Save collector statistics 
+            time_end = time.time()
+            time_execution = time_end - time_start
 
         exec_time_datapoint = [{
             'measurement': 'jnpr_netconf_collector_stats',
@@ -293,7 +314,10 @@ def collector(host_list):
             },
             'fields': {
                 'execution_time_sec': "%.4f" % time_execution,
-                'nbr_commands':  len(target_commands),
+                'nbr_commands':  cmd_successful + cmd_error,
+                'nbr_successful_commands':  cmd_successful,
+                'nbr_error_commands':  cmd_error,
+                'reacheable': int(host_reacheable)
             }
         }]
 
