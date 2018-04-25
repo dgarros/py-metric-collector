@@ -260,10 +260,14 @@ class ParserManager:
         if match["type"] == "single-value":
           logger.debug('Looking for a match: %s', match["xpath"])
           if xml_data.xpath(match["xpath"]):
-            value_tmp = xml_data.xpath(match["xpath"])[0].text.strip()
-            key_tmp = self.cleanup_xpath(match['xpath'])
 
-            data_structure['fields'][key_tmp] = value_tmp
+            if 'variable-name' in match:
+              key_name = match['variable-name']
+            else: 
+              key_name = self.cleanup_xpath(match['xpath'])
+
+            value_tmp = xml_data.xpath(match["xpath"])[0].text.strip()
+            data_structure['fields'][key_name] = value_tmp
 
           else:
             logger.debug('No match found: %s', match["xpath"])
@@ -289,7 +293,6 @@ class ParserManager:
               del keys_tmp['sub-matches']
 
             for key_tmp in keys_tmp.keys():
-              # key_name = self.cleanup_xpath(xpath=keys_tmp[key_tmp])
               key_name = key_tmp
 
               key_results = node.xpath(keys_tmp[key_tmp])
