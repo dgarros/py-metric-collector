@@ -1,0 +1,112 @@
+parser:
+    measurement: jnpr_interface_stat
+    command: show interfaces extensive
+    type: xml
+    matches:
+### ----------------------------------------------------------------
+### Interface traffic statistics
+### ----------------------------------------------------------------
+    -   type: multi-value
+        method: xpath
+        measurement: jnpr_interface_stat
+        xpath: //interface-information/physical-interface[logical-interface]
+        loop:
+            name: ./name
+            admin-status: ./admin-status
+            description: ./description
+            parent: ./logical-interface/address-family/ae-bundle-name
+            sub-matches:
+            -   { xpath: ./traffic-statistics/input-bytes,          variable-name: input-bytes }
+            -   { xpath: ./traffic-statistics/output-bytes,         variable-name: output-bytes }
+            -   { xpath: ./traffic-statistics/input-packets,        variable-name: input-packets }
+            -   { xpath: ./traffic-statistics/output-packets,       variable-name: output-packets }
+            -   { xpath: ./traffic-statistics/ipv6-transit-statistics/input-bytes,          variable-name: ipv6-input-bytes }
+            -   { xpath: ./traffic-statistics/ipv6-transit-statistics/output-bytes,         variable-name: ipv6-output-bytes }
+            -   { xpath: ./traffic-statistics/ipv6-transit-statistics/input-packets,        variable-name: ipv6-input-packets }
+            -   { xpath: ./traffic-statistics/ipv6-transit-statistics/output-packets,       variable-name: ipv6-output-packets }
+
+            -   { xpath: ./ethernet-mac-statistics/input-unicasts,      variable-name: input-unicasts }
+            -   { xpath: ./ethernet-mac-statistics/output-unicasts,     variable-name: output-unicasts }
+            -   { xpath: ./ethernet-mac-statistics/input-broadcasts,    variable-name: input-broadcasts }
+            -   { xpath: ./ethernet-mac-statistics/output-broadcasts,   variable-name: output-broadcasts }
+            -   { xpath: ./ethernet-mac-statistics/input-multicasts,    variable-name: input-multicasts }
+            -   { xpath: ./ethernet-mac-statistics/output-multicasts,   variable-name: output-multicasts }
+
+### ----------------------------------------------------------------
+### Interface MTU
+### ----------------------------------------------------------------
+    # -   type: multi-value
+    #     method: xpath
+    #     measurement: jnpr_interface_mtu
+    #     xpath: //interface-information/physical-interface[logical-interface]
+    #     loop:
+    #         name: ./name
+    #         admin-status: ./admin-status
+    #         description: ./description
+    #         parent: ./logical-interface/address-family/ae-bundle-name
+    #         sub-matches:
+    #         -   { xpath: ./mtu, variable-name: mtu }
+
+    # -   type: multi-value
+    #     method: xpath
+    #     measurement: jnpr_interface_mtu
+    #     xpath: //interface-information/physical-interface[logical-interface]
+    #     loop:
+    #         name: ./name
+    #         admin-status: ./admin-status
+    #         description: ./description
+    #         parent: ./logical-interface/address-family/ae-bundle-name
+    #         sub-matches:
+    #         -   { xpath: ./mtu, variable-name: mtu }
+### ----------------------------------------------------------------
+### Statistic per Queue
+### ----------------------------------------------------------------
+    -   type: multi-value
+        method: xpath
+        measurement: jnpr_interface_queue_stat
+        xpath: //interface-information/physical-interface/queue-counters/queue
+        loop:
+            name: ./../../name
+            admin-status: ./../../admin-status
+            queue-number: ./queue-number
+            sub-matches:
+            -   { xpath: ./forwarding-class-name,             variable-name: queue-forwarding-class }
+            -   { xpath: ./queue-counters-queued-packets,     variable-name: queue-packet-queued }
+            -   { xpath: ./queue-counters-trans-packets,      variable-name: queue-packet-transit }
+            -   { xpath: ./queue-counters-total-drop-packets, variable-name: queue-packet-drop }
+      
+### ----------------------------------------------------------------
+### Interface errors
+### ----------------------------------------------------------------
+    -   type: multi-value
+        method: xpath
+        measurement: jnpr_interface_error
+        xpath: //interface-information/physical-interface[logical-interface]
+        loop:
+            name: ./name
+            description: ./description
+            parent: ./logical-interface/address-family/ae-bundle-name
+            sub-matches:
+            ### Input Errors
+            -   { xpath: ./input-error-list/input-errors,               variable-name: input-errors }
+            -   { xpath: ./input-error-list/input-drops,                variable-name: input-drops }
+            -   { xpath: ./input-error-list/framing-errors,             variable-name: input-framing-errors }
+            -   { xpath: ./input-error-list/input-runts,                variable-name: input-runts }
+            -   { xpath: ./input-error-list/input-discards,             variable-name: input-discards }
+            -   { xpath: ./input-error-list/input-l3-incompletes,       variable-name: input-l3-incompletes }
+            -   { xpath: ./input-error-list/input-l2-channel-errors,    variable-name: input-l2-channel-errors }
+            -   { xpath: ./input-error-list/input-l2-mismatch-timeouts, variable-name: input-l2-mismatch-timeouts }
+            -   { xpath: ./input-error-list/input-fifo-errors,          variable-name: input-fifo-errors }
+            -   { xpath: ./input-error-list/input-resource-errors,      variable-name: input-resource-errors }
+
+            ### Output Errors 
+            -   { xpath: ./output-error-list/carrier-transitions,       variable-name: carrier-transitions }
+            -   { xpath: ./output-error-list/output-errors,             variable-name: output-errors }
+            -   { xpath: ./output-error-list/output-collisions,         variable-name: output-collisions }
+            -   { xpath: ./output-error-list/output-drops,              variable-name: output-drops }
+            -   { xpath: ./output-error-list/aged-packets,              variable-name: aged-packets }
+            -   { xpath: ./output-error-list/mtu-errors,                variable-name: mtu-errors }
+            -   { xpath: ./output-error-list/hs-link-crc-errors,        variable-name: hs-link-crc-errors }
+            -   { xpath: ./output-error-list/output-fifo-errors,        variable-name: output-fifo-errors }
+            -   { xpath: ./output-error-list/output-resource-errors,    variable-name: output-resource-errors }
+
