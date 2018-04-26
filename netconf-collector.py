@@ -139,7 +139,7 @@ full_parser.add_argument("--output-type", default="stdout", choices=['stdout', '
 full_parser.add_argument("--output-addr", default="http://localhost:8186/write", help="Addr information for output action")
 
 full_parser.add_argument("--use-thread", default=True, help="Spawn multiple threads to collect the information on the devices")
-full_parser.add_argument("--nbr-thread", default=10, help="Maximum number of thread to spawn")
+full_parser.add_argument("--nbr-thread", default=25, help="Maximum number of thread to spawn")
 
 dynamic_args = vars(full_parser.parse_args())
 
