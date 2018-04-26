@@ -146,15 +146,12 @@ class NetconfCollector():
     
     if datapoints is not None:
 
-      ## For now, generate_measurement from command
-      # measurement = command.replace(' ','_')
-      # measurement = measurement.replace('show_','')
-
       measurement = self.parsers.get_measurement_name(input=command)
 
       to_return = []
       for datapoint in datapoints:
-        datapoint['measurement'] = measurement
+        if datapoint['measurement'] == None:
+          datapoint['measurement'] = measurement
         datapoint['tags'].update(self.facts)
         to_return.append(datapoint)
 

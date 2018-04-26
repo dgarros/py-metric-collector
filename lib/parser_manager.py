@@ -246,6 +246,8 @@ class ParserManager:
         'fields': {}
     }
 
+    single_match = copy.deepcopy(data_structure)
+
     clean_data = re.sub(r"\sxmlns\=\".*\"", '', data.decode(), re.M)
 
     xml_data = etree.fromstring(clean_data)
@@ -258,6 +260,7 @@ class ParserManager:
     for match in parser["data"]["parser"]["matches"]:
 
         if match["type"] == "single-value":
+          
           logger.debug('Looking for a match: %s', match["xpath"])
           if xml_data.xpath(match["xpath"]):
 
@@ -267,7 +270,7 @@ class ParserManager:
               key_name = self.cleanup_xpath(match['xpath'])
 
             value_tmp = xml_data.xpath(match["xpath"])[0].text.strip()
-            data_structure['fields'][key_name] = value_tmp
+            single_match['fields'][key_name] = value_tmp
 
           else:
             logger.debug('No match found: %s', match["xpath"])
@@ -276,7 +279,7 @@ class ParserManager:
               value_tmp = match["default-if-missing"]
               key_tmp = self.cleanup_xpath(match['xpath'])
 
-              data_structure['fields'][key_tmp] = value_tmp
+              single_match['fields'][key_tmp] = value_tmp
 
         elif match["type"] == "multi-value":
 
@@ -288,6 +291,10 @@ class ParserManager:
             keys = {}
             tmp_data = copy.deepcopy(data_structure)
             keys_tmp = copy.deepcopy(match["loop"])
+
+            ## Assign measurement name if defined 
+            if 'measurement' in match:
+              tmp_data['measurement'] = match['measurement']
 
             if 'sub-matches' in keys_tmp.keys():
               del keys_tmp['sub-matches']
@@ -344,8 +351,8 @@ class ParserManager:
             datas_to_return.append(tmp_data)
 
     # if it's not empty, add it to the list
-    if len(data_structure['fields'].keys()) > 0:
-      datas_to_return.append(data_structure)
+    if len(single_match['fields'].keys()) > 0:
+      datas_to_return.append(single_match)
 
     return datas_to_return
 
