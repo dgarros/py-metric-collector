@@ -5,7 +5,7 @@ parser:
     matches:
     -   type: multi-value
         method: xpath
-        xpath: //interface-information/physical-interface/optics-diagnostics/optics-diagnostics-lane-values
+        xpath: "//interface-information/physical-interface/optics-diagnostics/optics-diagnostics-lane-values[not(laser-rx-optical-power=0.000)]"
         loop:
             interface: ./../../name
             lane: ./lane-index
