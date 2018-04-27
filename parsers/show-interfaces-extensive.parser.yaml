@@ -69,8 +69,8 @@ parser:
             name: ./../../name
             admin-status: ./../../admin-status
             queue-number: ./queue-number
+            forwardding-class: ./forwarding-class-name
             sub-matches:
-            -   { xpath: ./forwarding-class-name,             variable-name: queue-forwarding-class }
             -   { xpath: ./queue-counters-queued-packets,     variable-name: queue-packet-queued }
             -   { xpath: ./queue-counters-trans-packets,      variable-name: queue-packet-transit }
             -   { xpath: ./queue-counters-total-drop-packets, variable-name: queue-packet-drop }
