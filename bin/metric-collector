@@ -1,0 +1,8 @@
+#!/usr/bin/env python
+
+from metric_collector import cli
+
+__author__ = 'Damien Garros <dgarros@gmail.com>'
+
+if __name__ == '__main__':
+    cli.main()

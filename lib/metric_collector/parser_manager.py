@@ -17,7 +17,7 @@ SUPPORTED_PARSER_TYPE = ['xml', 'textfsm', 'pyez', 'regex' ]
 
 class ParserManager:
 
-  def __init__( self, parser_dir='../parsers' ):
+  def __init__( self, parser_dirs=[], default_parser_dir = '../../parsers' ):
 
     self.parsers = {}
 
@@ -26,10 +26,14 @@ class ParserManager:
     self.nbr_textfsm_parsers = 0
     self.nbr_pyez_parsers = 0
 
-    ## Check if parser_dir exist
-    if not os.path.exists(parser_dir):
-       logger.critical('Parser Directory is not present: %s', parser_dir)
-    self.__parser_dir = parser_dir
+    if  isinstance(parser_dirs, list):
+      self.__parser_dirs = parser_dirs
+    else:
+      self.__parser_dirs = []
+
+    if default_parser_dir:
+      current_dir = os.path.dirname(os.path.abspath(__file__))
+      self.__parser_dirs.append(current_dir + "/" + default_parser_dir)
 
     ## Import all parsers
     self.__import_parsers__()
@@ -37,60 +41,66 @@ class ParserManager:
   def __import_parsers__( self ):
 
     ## Get list of all parsers in the directory
-    junos_parsers_files = os.listdir(self.__parser_dir)
+    for parser_dir in self.__parser_dirs:
 
-    ## Load parsers and Classify them properly
-    for junos_parsers_file in junos_parsers_files:
-      parser = {
-        "name": junos_parsers_file,
-        "command": None,
-        "data": None,
-        "measurement": None,
-        "type": 'xml'
-      }
-
-      full_junos_parsers_file = self.__parser_dir + "/" + junos_parsers_file
-
-      try:
-        with open(full_junos_parsers_file) as f:
-          parser["data"] = yaml.load(f)
-      except Exception as e:
-        logger.error('Error importing junos parser, yaml non valid: %s. %s', junos_parsers_file, str(e))
-        continue
-
-      if parser["data"] == {}:
-        logger.error('Error importing junos parser: %s. Yaml empty', junos_parsers_file)
-        continue
-
-      ## Check if parser contain a key "parser"
-      if not "parser" in parser['data'].keys():
-        logger.error('Error loading junos parser: %s, parser structure is missing', parser['name'])
-        continue
-
-      # Check parser type
-      if not "type" in parser["data"]["parser"].keys():
-        logger.warn('Type is not defined for parser %s, default XML', parser['name'])
-
-      elif parser["data"]["parser"]['type'] in SUPPORTED_PARSER_TYPE:
-        parser['type'] = parser['data']['parser']['type']
+      if os.path.exists(parser_dir):
+        junos_parsers_files = os.listdir(parser_dir)
       else:
-        logger.warn('Parser type %s is not supported, %s', parser['data']['parser']['type'], parser['name'])
+        logger.warning("Parser directory %s not found, skipping" % parser_dir)
         continue
 
-      ## Extract the command from the parser
-      if "regex-command" in parser['data']['parser'].keys():
-        parser['command'] = parser['data']['parser']['regex-command']
+      ## Load parsers and Classify them properly
+      for junos_parsers_file in junos_parsers_files:
+        parser = {
+          "name": junos_parsers_file,
+          "command": None,
+          "data": None,
+          "measurement": None,
+          "type": 'xml'
+        }
 
-      elif 'command' in parser['data']['parser'].keys():
-        parser['command'] = parser['data']['parser']['command']
-      else:
-        logger.error('Unable to find the command for parser: %s', parser['name'])
-        continue
+        full_junos_parsers_file = parser_dir + "/" + junos_parsers_file
 
-      if "measurement" in parser['data']['parser'].keys():
-        parser['measurement'] = parser['data']['parser']['measurement']
+        try:
+          with open(full_junos_parsers_file) as f:
+            parser["data"] = yaml.load(f)
+        except Exception as e:
+          logger.error('Error importing junos parser, yaml non valid: %s. %s', junos_parsers_file, str(e))
+          continue
 
-      self.__add_parser__( name=parser['name'], parser=parser )
+        if parser["data"] == {}:
+          logger.error('Error importing junos parser: %s. Yaml empty', junos_parsers_file)
+          continue
+
+        ## Check if parser contain a key "parser"
+        if not "parser" in parser['data'].keys():
+          logger.error('Error loading junos parser: %s, parser structure is missing', parser['name'])
+          continue
+
+        # Check parser type
+        if not "type" in parser["data"]["parser"].keys():
+          logger.warn('Type is not defined for parser %s, default XML', parser['name'])
+
+        elif parser["data"]["parser"]['type'] in SUPPORTED_PARSER_TYPE:
+          parser['type'] = parser['data']['parser']['type']
+        else:
+          logger.warn('Parser type %s is not supported, %s', parser['data']['parser']['type'], parser['name'])
+          continue
+
+        ## Extract the command from the parser
+        if "regex-command" in parser['data']['parser'].keys():
+          parser['command'] = parser['data']['parser']['regex-command']
+
+        elif 'command' in parser['data']['parser'].keys():
+          parser['command'] = parser['data']['parser']['command']
+        else:
+          logger.error('Unable to find the command for parser: %s', parser['name'])
+          continue
+
+        if "measurement" in parser['data']['parser'].keys():
+          parser['measurement'] = parser['data']['parser']['measurement']
+
+        self.__add_parser__( name=parser['name'], parser=parser )
 
   def __find_parser__( self, input=None ):
     """

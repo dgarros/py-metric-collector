@@ -12,7 +12,6 @@ logger = logging.getLogger('netconf_collector')
 
 pp = pprint.PrettyPrinter(indent=4)
 
-
 class NetconfCollector():
 
   def __init__( self, host=None, credential={}, test=False, timeout=60, retry=5, use_hostname=True, parsers=None ):
