@@ -1,4 +1,2 @@
 lastfailed
-logs
-cmd.local.yaml
-cred.local.yaml
+lib/py_metric_collector.egg-info
