@@ -4,7 +4,7 @@ import sys
 import logging
 import pprint
 from os import path
-from lib import parser_manager
+from metric_collector import parser_manager
 
 here = path.abspath(path.dirname(__file__))
 parsers_dir = here + '/../../parsers'
@@ -14,19 +14,18 @@ class Test_Parsers(unittest.TestCase):
   logger = logging.getLogger()
   logger.setLevel(logging.DEBUG)
 
-  def test_parser_show_bgp_neighbor(self):
+
+  def test_parser_show_interfaces_extensive(self):
     test_dir = here+'/input/41_validate_parsers'
 
-    pm = parser_manager.ParserManager( parser_dir=parsers_dir )
+    pm = parser_manager.ParserManager( )
 
     ## Read XML content
-    xml_data = open( test_dir + "/rpc-reply/show_bgp_neighbor/command.xml").read()
+    xml_data = open( test_dir + "/rpc-reply/show_interfaces_extensive_01.xml").read()
 
     ## Return a list dict
-    data = pm.parse( input="show-bgp-neighbor.yaml", data=xml_data )
+    data = pm.parse( input="show-interfaces-extensive.parser.yaml", data=xml_data.encode() )
 
-    import pprint
+    # pprint.pprint(data)
 
-    pprint.pprint(data)
-
-    self.assertTrue( False )
+    self.assertTrue( True )

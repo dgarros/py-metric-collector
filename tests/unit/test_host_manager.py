@@ -4,7 +4,7 @@ import sys
 import logging
 import pprint
 from os import path
-from lib.host_manager import HostManager
+from metric_collector.host_manager import HostManager
 
 here = path.abspath(path.dirname(__file__))
 

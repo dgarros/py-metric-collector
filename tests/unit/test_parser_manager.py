@@ -4,7 +4,7 @@ import sys
 import logging
 import pprint
 from os import path
-from lib import parser_manager
+from metric_collector import parser_manager
 
 here = path.abspath(path.dirname(__file__))
 
@@ -17,28 +17,22 @@ class Test_Validate_Main_Block(unittest.TestCase):
   def test_import_parser_namager(self):
     self.assertTrue(1)
 
-  def test_invalid_dir(self):
-    try:
-      parser_manager.ParserManager( parser_dir='donotexist')
-    except Exception as e:
-      self.assertTrue(1)
-
   def test_invalid_yaml(self):
     test_dir = here+'/input/01_wrong_yaml/parsers'
-    pm = parser_manager.ParserManager( parser_dir=test_dir )
+    pm = parser_manager.ParserManager( parser_dirs=[test_dir], default_parser_dir=False  )
 
     self.assertTrue( pm.get_nbr_parsers() == 0 )
 
   def test_no_parser_key(self):
     test_dir = here+'/input/02_no_parser_key/parsers'
-    pm = parser_manager.ParserManager( parser_dir=test_dir )
+    pm = parser_manager.ParserManager( parser_dirs=[test_dir], default_parser_dir=False  )
 
     self.assertTrue( pm.get_nbr_parsers() == 0 )
 
   def test_load_valid_xml_parser(self):
     test_dir = here+'/input/03_valid_xml_parser/parsers'
 
-    pm = parser_manager.ParserManager( parser_dir=test_dir )
+    pm = parser_manager.ParserManager( parser_dirs=[test_dir], default_parser_dir=False )
     name = pm.get_parser_name_for(input='show-bgp-summary.parser.yaml')
 
     self.assertTrue( pm.get_nbr_parsers() == 1 )
@@ -48,7 +42,7 @@ class Test_Validate_Main_Block(unittest.TestCase):
   def test_load_valid_regex_parser(self):
     test_dir = here+'/input/04_valid_regex_parser/parsers'
 
-    pm = parser_manager.ParserManager( parser_dir=test_dir )
+    pm = parser_manager.ParserManager( parser_dirs=[test_dir], default_parser_dir=False )
     name = pm.get_parser_name_for(input='show-system-processes-extensive.parser.yaml')
 
     self.assertTrue( pm.get_nbr_parsers() == 1 )
@@ -58,7 +52,7 @@ class Test_Validate_Main_Block(unittest.TestCase):
   def test_find_parser(self):
     test_dir = here+'/input/05_find_parsers/parsers'
 
-    pm = parser_manager.ParserManager( parser_dir=test_dir )
+    pm = parser_manager.ParserManager( parser_dirs=[test_dir], default_parser_dir=False )
 
     by_name = pm.get_parser_name_for(input='type-regex-regex-command.parser.yaml')
     # by_name_2 = pm.get_parser_name_for(input='type-regex-regex-command.parser')
@@ -87,7 +81,7 @@ class Test_Validate_Main_Block(unittest.TestCase):
   def test_parse_valid_xml(self):
     test_dir = here+'/input/20_xml_parser'
 
-    pm = parser_manager.ParserManager( parser_dir= test_dir + "/parsers" )
+    pm = parser_manager.ParserManager( parser_dirs=[test_dir + "/parsers"], default_parser_dir=False )
 
     ## Read XML content
     xml_data = open( test_dir + "/rpc-reply/show_route_summary/command.xml").read()
@@ -99,7 +93,7 @@ class Test_Validate_Main_Block(unittest.TestCase):
                       'holddown-route-count': '0',
                       'total-route-count': '21'},
         'measurement': None,
-        'tags': {   'table-name': 'inet.0'}
+        'tags': {   'key': 'inet.0'}
     }
     expected_dict_1 = {
         'fields': {   'active-route-count': '2',
@@ -108,10 +102,10 @@ class Test_Validate_Main_Block(unittest.TestCase):
                       'holddown-route-count': '0',
                       'total-route-count': '2'},
         'measurement': None,
-        'tags': {   'table-name': 'inet6.0'}
+        'tags': {   'key': 'inet6.0'}
     }
 
-    data = pm.parse( input="show-route-summary.parser.yaml", data=xml_data )
+    data = pm.parse( input="show-route-summary.parser.yaml", data=xml_data.encode() )
 
     self.assertDictEqual( expected_dict_0, data[0] )
     self.assertDictEqual( expected_dict_1, data[1] )
@@ -147,13 +141,13 @@ class Test_Validate_Main_Block(unittest.TestCase):
   def test_parse_valid_textfsm(self):
     test_dir = here+'/input/31_textfsm_parser'
 
-    pm = parser_manager.ParserManager( parser_dir= test_dir + "/parsers" )
+    pm = parser_manager.ParserManager( parser_dirs=[test_dir + "/parsers"], default_parser_dir=False )
 
     ## Read XML content
     xml_data = open( test_dir + "/rpc-reply/show_system_processes_extensive/command_short.xml").read()
 
     ## Return a list dict
-    data = pm.parse( input="show-system-processes-extensive.parser.yaml", data=xml_data )
+    data = pm.parse( input="show-system-processes-extensive.parser.yaml", data=xml_data.encode() )
 
     # pp.pprint(data)
     expected_dict_1 = {
