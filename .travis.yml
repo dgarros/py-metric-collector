@@ -7,10 +7,11 @@ services:
 
 python:
   - "2.7"
+  - "3.6"
 
 install:
   - "pip install -r requirements.txt"
-
+  - "python setup.py develop"
+  
 script:
-  - make build
   - make test
