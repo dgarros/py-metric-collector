@@ -1,1 +1,17 @@
-10.92.71.99: test
+device1:
+  tags: [ junos, router ]
+  address: 192.168.0.1
+  context: 
+    - site: sitea
+    - role: router
+
+device2:
+  tags: [ junos, switch ]
+  address: 192.168.0.2
+  context: 
+    - site: siteb
+    - role: switch
+
+device3:
+  tags: [ junos ]
+  address: 192.168.0.3
