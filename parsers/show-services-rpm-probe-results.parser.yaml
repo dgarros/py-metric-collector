@@ -1,5 +1,6 @@
 parser:
-    regex-command: show services rpm probe-results
+    measurement: jnpr_rpm_results
+    command: show services rpm probe-results
     type: xml
     matches:
     -
@@ -8,6 +9,9 @@ parser:
         xpath: //probe-results/probe-test-results/probe-last-test-results/probe-test-generic-results
         loop:
             test-name: ./../../test-name
+            test-group: ./../../owner
+            probe-type: ./../../probe-type
+            probe-target: ./../../target-address
             sub-matches:
             -   xpath: ./loss-percentage
                 variable-name:  loss-percentage
