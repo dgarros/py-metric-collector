@@ -272,8 +272,9 @@ class ParserManager:
         if match["type"] == "single-value":
           
           logger.debug('Looking for a match: %s', match["xpath"])
-          if xml_data.xpath(match["xpath"]):
-
+          value_tmp = xml_data.xpath(match["xpath"])
+          if value_tmp:
+          
             if 'variable-name' in match:
               key_name = match['variable-name']
             else: 
