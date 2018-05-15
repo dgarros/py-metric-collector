@@ -259,7 +259,7 @@ class ParserManager:
     single_match = copy.deepcopy(data_structure)
 
     clean_data = re.sub(r"\sxmlns\=\".*\"", '', data.decode(), re.M)
-
+    clean_data = re.sub(r"\sjunos\:", ' ', clean_data, re.M)
     xml_data = etree.fromstring(clean_data)
 
     ## NOTE, There is an assumption that all matches will be either
@@ -279,8 +279,10 @@ class ParserManager:
             else: 
               key_name = self.cleanup_xpath(match['xpath'])
 
-            value_tmp = xml_data.xpath(match["xpath"])[0].text.strip()
-            single_match['fields'][key_name] = value_tmp
+            if isinstance(value_tmp[0], str):
+              single_match['fields'][key_name] = value_tmp[0].strip()
+            else:
+              single_match['fields'][key_name] = value_tmp[0].text.strip()
 
           else:
             logger.debug('No match found: %s', match["xpath"])
@@ -314,16 +316,32 @@ class ParserManager:
 
               key_results = node.xpath(keys_tmp[key_tmp])
 
-              if len(key_results) > 0:
-                tmp_data['tags'][key_name] = key_results[0].text.replace(" ","_").strip()
+              if len(key_results) == 0:
+                continue
+              
+              if isinstance(key_results[0], str):
+                tmp_data['tags'][key_name] = key_results[0].strip()
+              else:
+                tmp_data['tags'][key_name] = key_results[0].text.strip()
+
+              ## Cleanup string
+              tmp_data['tags'][key_name].replace(" ","_")
 
             for sub_match in match["loop"]["sub-matches"]:
+
               # logger.debug('Looking for a sub-match: %s', sub_match["xpath"])
+
               if node.xpath(sub_match["xpath"]):
                 if "regex" in sub_match.keys():
-                    value_tmp = node.xpath(sub_match["xpath"])[0].text.strip()
+
+                    if isinstance(node.xpath(sub_match["xpath"])[0], str):
+                      value_tmp = node.xpath(sub_match["xpath"])[0].strip()
+                    else:
+                      value_tmp = node.xpath(sub_match["xpath"])[0].text.strip()
+
                     regex = sub_match["regex"]
                     text_matches = re.search(regex,value_tmp,re.MULTILINE)
+
                     if text_matches:
                       if text_matches.lastindex == len(sub_match["variables"]):
                         logger.debug('We have (%s) matches with this regex %s', text_matches.lastindex,regex)
@@ -342,7 +360,11 @@ class ParserManager:
                     else:
                       logger.debug('No matches found for regex: %s', regex)
                 else:
-                    value_tmp = node.xpath(sub_match["xpath"])[0].text.strip()
+                    if isinstance(node.xpath(sub_match["xpath"])[0], str):
+                      value_tmp = node.xpath(sub_match["xpath"])[0].strip()
+                    else:
+                      value_tmp = node.xpath(sub_match["xpath"])[0].text.strip()
+
                     if 'variable-name' in sub_match.keys():
                       key_tmp = sub_match['variable-name']
                     else: 
