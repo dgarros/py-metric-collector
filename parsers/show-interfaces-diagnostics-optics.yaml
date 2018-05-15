@@ -3,9 +3,12 @@ parser:
     command: show interfaces diagnostics optics
     type: xml
     matches:
+### -----------------------------------------------------------------------------
+### Received optical power per lane
+### -----------------------------------------------------------------------------
     -   type: multi-value
         method: xpath
-        xpath: "//interface-information/physical-interface/optics-diagnostics/optics-diagnostics-lane-values[not(laser-rx-optical-power=0.000)]"
+        xpath: "//interface-information/physical-interface/optics-diagnostics/optics-diagnostics-lane-values[not(laser-rx-optical-power<0.020)]"
         loop:
             interface: ./../../name
             lane: ./lane-index
@@ -16,3 +19,16 @@ parser:
                 variable-name: rx-optical-power-dbm
             -   xpath: ./laser-output-power
                 variable-name: output-power
+### -----------------------------------------------------------------------------
+### Optic Temperature
+### -----------------------------------------------------------------------------
+    -   type: multi-value
+        method: xpath
+        measurement: jnpr_interface_optics_temp
+        xpath: "//interface-information/physical-interface/optics-diagnostics"
+        loop:
+            interface: ./../name
+            sub-matches:
+            -   xpath: ./module-temperature/@celsius
+                variable-name: temperature 
+          
