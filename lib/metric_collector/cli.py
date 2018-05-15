@@ -95,10 +95,10 @@ def format_datapoints_inlineprotocol(datapoints):
     return formatted_data
 
 
-def collector(host_list, hosts_manager, parsers_manager, output_type='stdout'): 
+def collector(host_list, hosts_manager, parsers_manager, output_type='stdout', command_tags=['.*']): 
 
     for host in host_list: 
-        target_commands = hosts_manager.get_target_commands(host)
+        target_commands = hosts_manager.get_target_commands(host, tags=command_tags)
         credential = hosts_manager.get_credentials(host)
 
         host_reacheable = False
@@ -197,6 +197,8 @@ def main():
 
     full_parser = argparse.ArgumentParser()
     full_parser.add_argument("--tag", nargs='+', help="Collect data from hosts that matches the tag")
+    full_parser.add_argument("--cmd-tag", nargs='+', help="Collect data from command that matches the tag")
+    
     full_parser.add_argument("-c", "--console", action='store_true', help="Console logs enabled")
     full_parser.add_argument( "--test", action='store_true', help="Use emulated Junos device")
     full_parser.add_argument("-s", "--start", action='store_true', help="Start collecting (default 'no')")
@@ -360,6 +362,12 @@ def main():
     logger.debug('The following hosts are being selected: %s', target_hosts)
 
     use_threads = dynamic_args['use_thread']
+    
+    if dynamic_args['cmd_tag']: 
+        print(dynamic_args['cmd_tag'])
+        command_tags = dynamic_args['cmd_tag']
+    else:
+        command_tags = ['.*']
 
     if use_threads:
         max_collector_threads = dynamic_args['nbr_thread']
@@ -373,7 +381,8 @@ def main():
                                       kwargs={"host_list":target_hosts_list,
                                               "parsers_manager":parsers_manager,
                                               "hosts_manager":hosts_manager,
-                                              "output_type":dynamic_args['output_type']
+                                              "output_type":dynamic_args['output_type'],
+                                              "command_tags": command_tags
                                               })
             jobs.append(thread)
             i=i+1

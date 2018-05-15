@@ -202,9 +202,9 @@ class HostManager(object):
         return sorted(target_hosts.keys())
 
 
-    def get_target_commands(self, host):
+    def get_target_commands(self, host, tags=['.*']):
         """
-        Return the list of commands matching for a given target
+        Return the list of commands matching for a given target and a given list of tags
         """
 
         if host not in self.hosts:
@@ -213,13 +213,23 @@ class HostManager(object):
         host_tags = self.hosts[host]['tags']
         target_commands = {}
 
+        groups_matched = []
+
+        ## First do a pass based on host tag and identify all group_command that matches
         for group_command in sorted(self.commands.keys()):
             for host_tag in host_tags:
                 for command_tag in self.commands[group_command]['tags']:
                     if re.search(host_tag, command_tag, re.IGNORECASE):
+                        groups_matched.append(group_command)
+
+        ## Second do a pass on command tag on the list of group_command that passed the previous check
+        for group_command in groups_matched:
+            for tag in tags:
+                for command_tag in self.commands[group_command]['tags']:
+                    if re.search(tag, command_tag, re.IGNORECASE):
                         for cmd in self.commands[group_command]["commands"]:
                             target_commands[cmd] = 1
-
+                                
         return sorted(target_commands.keys())
 
 

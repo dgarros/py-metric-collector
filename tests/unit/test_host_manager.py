@@ -58,11 +58,11 @@ commands_1 = {
   },
   'test2_commands': {
     'netconf':[ 'show test2' ],
-    'tags': ['site1', 'test2']
+    'tags': ['site1', 'test2', '1m']
   },
   'test3_commands': {
     'netconf':[ 'show test3' ],
-    'tags': ['switch', 'test3']
+    'tags': ['switch', 'test3', '5m']
   },
 }
 
@@ -110,7 +110,18 @@ class Test_Validate_Main_Block(unittest.TestCase):
     self.assertEqual(hm.get_target_commands('switch1'), 
                     ['show test2', 'show test3'])
   
-  
+  def test_get_target_commands_command_tag(self):
+
+      hm = HostManager( inventory=inventory_2,
+                        credentials=cred_pwd_01,
+                        commands=commands_1 )
+
+      self.assertEqual(hm.get_target_commands('switch1',tags=['1m']), 
+                      ['show test2'])
+
+      self.assertEqual(hm.get_target_commands('switch1',tags=['5m']), 
+                      ['show test3'])
+
   def test_get_credentials_default_port(self):
 
       hm = HostManager( inventory=inventory_2,
