@@ -364,7 +364,6 @@ def main():
     use_threads = dynamic_args['use_thread']
     
     if dynamic_args['cmd_tag']: 
-        print(dynamic_args['cmd_tag'])
         command_tags = dynamic_args['cmd_tag']
     else:
         command_tags = ['.*']
