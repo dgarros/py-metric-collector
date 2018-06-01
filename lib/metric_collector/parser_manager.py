@@ -321,9 +321,9 @@ class ParserManager:
                 continue
               
               if isinstance(key_results[0], str):
-                tmp_data['tags'][key_name] = key_results[0].strip()
+                tmp_data['tags'][key_name] = self.cleanup_tag(key_results[0].strip())
               else:
-                tmp_data['tags'][key_name] = key_results[0].text.strip()
+                tmp_data['tags'][key_name] = self.cleanup_tag(key_results[0].text.strip())
 
               ## Cleanup string
               tmp_data['tags'][key_name].replace(" ","_")
@@ -437,7 +437,7 @@ class ParserManager:
         
         idx = headers.index(tag)
         tag_name = parser['data']['parser']['tags'][tag]
-        tmp_data['tags'][tag_name] = row[idx]
+        tmp_data['tags'][tag_name] = self.cleanup_tag(row[idx])
          
       datas_to_return.append(tmp_data)
   
@@ -484,7 +484,7 @@ class ParserManager:
 
                 ## Check if this is a Tags or not
                 if 'tag' in match["variables"][i] and match["variables"][i]['tag']:
-                  tmp_data_structure['tags'][key_tmp] = value_tmp
+                  tmp_data_structure['tags'][key_tmp] = self.cleanup_tag(value_tmp)
                 else:
                   tmp_data_structure['fields'][key_tmp] = value_tmp
 
@@ -542,6 +542,14 @@ class ParserManager:
     else:
       logger.error('An unkown variable-type found: %s', kwargs["type"])
       return value
+
+  def cleanup_tag( self, str_in ):
+    """
+    Cleanup a string to make sure it doesn't contain space
+    """
+    tmp_str = str_in.replace(" ", "_")
+  
+    return tmp_str
 
   def cleanup_xpath( self, xpath=None ):
 
