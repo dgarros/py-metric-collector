@@ -21,7 +21,7 @@ class NetconfCollector():
     self.__timeout = timeout
     self.__retry = retry
 
-    self.host = host
+    self.host = address
     self.hostname = host
     self.__credential = credential
 
