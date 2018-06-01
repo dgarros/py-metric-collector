@@ -106,7 +106,7 @@ def collector(host_list, hosts_manager, parsers_manager, output_type='stdout', c
         logger.info('Collector starting for: %s', host)
         host_address = hosts_manager.get_address(host)
         
-        jdev = netconf_collector.NetconfCollector(host=host_address, credential=credential, parsers=parsers_manager)
+        jdev = netconf_collector.NetconfCollector(host=host, address=host_address, credential=credential, parsers=parsers_manager)
         jdev.connect()
 
         if jdev.is_connected():

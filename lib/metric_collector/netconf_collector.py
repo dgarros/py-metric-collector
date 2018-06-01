@@ -14,7 +14,7 @@ pp = pprint.PrettyPrinter(indent=4)
 
 class NetconfCollector():
 
-  def __init__( self, host=None, credential={}, test=False, timeout=60, retry=5, use_hostname=True, parsers=None ):
+  def __init__( self, host=None, address=None, credential={}, test=False, timeout=60, retry=5, use_hostname=True, parsers=None ):
     self.__is_connected = False
     self.__is_test = test
     self.__use_hostname = use_hostname
@@ -115,7 +115,7 @@ class NetconfCollector():
     self.facts['product-model'] = self.pyez.facts['model']
 
     ## Based on parameter defined in config file
-    if self.__use_hostname:
+    if self.__use_hostname and self.pyez.facts['hostname'] != self.hostname:
       hostname = self.pyez.facts['hostname']
       logger.info('[%s]: Host will now be referenced as : %s', self.hostname, hostname)
       self.hostname = hostname
