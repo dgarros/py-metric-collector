@@ -95,7 +95,10 @@ def format_datapoints_inlineprotocol(datapoints):
     return formatted_data
 
 
-def collector(host_list, hosts_manager, parsers_manager, output_type='stdout', command_tags=['.*']): 
+def collector(host_list, hosts_manager, parsers_manager, 
+                output_type='stdout', 
+                command_tags=['.*'], 
+                output_addr='http://localhost:8186/write'): 
 
     for host in host_list: 
         target_commands = hosts_manager.get_target_commands(host, tags=command_tags)
@@ -173,7 +176,7 @@ def collector(host_list, hosts_manager, parsers_manager, output_type='stdout', c
         if output_type == 'stdout':
             print_format_influxdb(values)
         elif output_type == 'http':
-            post_format_influxdb(values)
+            post_format_influxdb(values, output_addr)
         else:
             logger.warn('Output format unknown: %s', output_type)
       
@@ -381,7 +384,8 @@ def main():
                                               "parsers_manager":parsers_manager,
                                               "hosts_manager":hosts_manager,
                                               "output_type":dynamic_args['output_type'],
-                                              "command_tags": command_tags
+                                              "output_addr":dynamic_args['output_addr'],
+                                              "command_tags": command_tags,
                                               })
             jobs.append(thread)
             i=i+1
