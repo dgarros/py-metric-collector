@@ -14,7 +14,7 @@ parser:
             name: ./name
             interface: ./name
             admin-status: ./admin-status
-            # description: ./description
+            description: ./description
             parent: ./logical-interface/address-family/ae-bundle-name
             sub-matches:
             -   { xpath: ./traffic-statistics/input-bytes,          variable-name: input-bytes }
@@ -87,7 +87,7 @@ parser:
         loop:
             name: ./name
             interface: ./name
-            # description: ./description
+            description: ./description
             parent: ./logical-interface/address-family/ae-bundle-name
             sub-matches:
             ### Input Errors
