@@ -39,6 +39,29 @@ logger = logging.getLogger("main")
 ### Defining the classes and procedures used later on the script
 ### ------------------------------------------------------------------------------
 
+def shard_host_list(shard_id, shard_size, hosts): 
+    """
+    Take a dict of hosts as input and return a subset of this dict based on the size of the shard
+
+    shard_id starts at 1
+    """
+
+    if shard_id == 0:
+        return False
+    elif shard_id > shard_size:
+        return False
+
+    shard_id -= 1
+
+    hosts_list = sorted(hosts.keys())
+
+    for i in range(0, len(hosts_list)):
+        if i % shard_size != shard_id:
+            del hosts[hosts_list[i]]
+
+    return hosts
+
+
 def print_format_influxdb(datapoints):
     """
     Print all datapoints to STDOUT in influxdb format for Telegraf to pick them up
@@ -212,6 +235,10 @@ def main():
     full_parser.add_argument("--loglvl", default=20, help="Logs verbosity, 10-debug, 50 Critical")
 
     full_parser.add_argument("--logdir", default="logs", help="Directory where to store logs")
+    
+    full_parser.add_argument("--sharding",  help="Define if the script is part of a shard need to include the place in the shard and the size of the shard [0/3]")
+    full_parser.add_argument("--sharding-offset", default=True, help="Define an offset needs to be applied to the shard_id")
+
     full_parser.add_argument("--parserdir", default="parsers", help="Directory where to find parsers")
     full_parser.add_argument("--timeout", default=600, help="Default Timeout for Netconf session")
     full_parser.add_argument("--delay", default=3, help="Delay Between Commands")
@@ -345,6 +372,22 @@ def main():
     if not is_yaml and not is_exec:
         logger.error('Unable to import the hosts file (%s), either in Yaml or from a dynamic inventory',hosts_file)
         sys.exit(0)
+
+    if 'sharding' in dynamic_args and dynamic_args['sharding'] != None:
+
+        sharding_param = dynamic_args['sharding'].split('/')
+
+        if len(sharding_param) != 2:
+            logger.error('Sharding Parameters not valid %s' % dynamic_args['sharding'])
+            sys.exit(0)
+
+        shard_id = int(sharding_param[0])
+        shard_size = int(sharding_param[1])
+
+        if dynamic_args['sharding_offset']:
+            shard_id += 1
+
+        hosts = shard_host_list(shard_id, shard_size, hosts)
 
     ### ------------------------------------------------------------------------------
     ### LOAD all commands with their tags in a dict           
