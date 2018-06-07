@@ -346,9 +346,6 @@ def main():
         logger.error('Unable to import the hosts file (%s), either in Yaml or from a dynamic inventory',hosts_file)
         sys.exit(0)
 
-
-    print(hosts.keys())
-    sys.exit(0)
     ### ------------------------------------------------------------------------------
     ### LOAD all commands with their tags in a dict           
     ### ------------------------------------------------------------------------------
