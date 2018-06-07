@@ -1,0 +1,32 @@
+netbox:
+    main:
+        api_url: 'http://<netbox_addr>/api/dcim/devices/'
+
+    filters:
+      juniper:
+        - site: [aa, bb, cc]
+        - manufacturer: juniper
+        - limit: 0
+
+    # What tags will be applied
+    tags:
+        # Default section in Netbox.
+        default:
+            - device_role
+            - site
+            - platform
+
+        # Custom sections (custom_fields) could be used.
+        #custom:
+        #    - env
+    
+    # Use Netbox sections as contextial information
+    context:
+        # Any other sections.
+        general:
+            platform: platform
+            role: device_role
+            site: site
+
+        #custom:
+        #    env: env
