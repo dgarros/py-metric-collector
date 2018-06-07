@@ -6,6 +6,8 @@ from lxml import etree  # Used for xml manipulation
 from pprint import pformat
 from pprint import pprint
 import argparse 
+import subprocess
+from subprocess import run
 import json
 import logging
 import traceback
@@ -309,24 +311,44 @@ def main():
         sys.exit(0)
 
     ### ------------------------------------------------------------------------------
-    ###  LOAD all hosts       
+    ###  LOAD all hosts     
+    ###    Host list can come from a yaml file or from a dynamic inventory script
+    ###    Try to load as Yaml First, than try to execute the script an import JSON
     ### ------------------------------------------------------------------------------
-    hosts_yaml_file = ''
+    
     hosts = {}
 
     if os.path.isfile(dynamic_args['hosts']):
-        hosts_yaml_file = dynamic_args['hosts']
+        hosts_file = dynamic_args['hosts']
     else:
-        hosts_yaml_file = BASE_DIR + "/"+ dynamic_args['hosts']
+        hosts_file = BASE_DIR + "/"+ dynamic_args['hosts']
 
-    logger.info('Importing host file: %s ',hosts_yaml_file)
+    logger.info('Importing host file: %s ',hosts_file)
+
+    is_yaml = False
+    is_exec = False
     try:
-        with open(hosts_yaml_file) as f:
+        with open(hosts_file) as f:
             hosts = yaml.load(f)
+        is_yaml = True
     except Exception as e:
-        logger.error('Error importing host file: %s > %s', (hosts_yaml_file, e))
+        logger.debug('Error importing host file in yaml: %s > %s' % (hosts_file, e))
+
+    if not is_yaml:
+        try:
+            output_str = run(["python", hosts_file], stdout=subprocess.PIPE)
+            hosts = json.loads(output_str.stdout)
+            is_exec = True
+        except Exception as e:
+            logger.debug('Error importing executing host file: %s > %s' % (hosts_file, e))
+
+    if not is_yaml and not is_exec:
+        logger.error('Unable to import the hosts file (%s), either in Yaml or from a dynamic inventory',hosts_file)
         sys.exit(0)
 
+
+    print(hosts.keys())
+    sys.exit(0)
     ### ------------------------------------------------------------------------------
     ### LOAD all commands with their tags in a dict           
     ### ------------------------------------------------------------------------------
