@@ -193,20 +193,6 @@ class ParserManager:
     else:
       return None
 
-  # def get_command( self, input=None):
-
-  #    ## Get parser
-  #    ## extract Command
-  #    ## Return Command
-
-  #   format = "text"
-  #   command_tmp = command
-  #   if re.search("\| display xml", command, re.IGNORECASE):
-  #       format = "xml"
-  #       command_tmp = command.replace("| display xml","")
-  #   elif re.search("\| count", command, re.IGNORECASE):
-  #       format = "txt-filtered"
-  #       command_tmp = command.split("|")[0]
 
   def parse( self, input=None, data=None):
 
@@ -330,8 +316,6 @@ class ParserManager:
 
             for sub_match in match["loop"]["sub-matches"]:
 
-              # logger.debug('Looking for a sub-match: %s', sub_match["xpath"])
-
               if node.xpath(sub_match["xpath"]):
                 if "regex" in sub_match.keys():
 
@@ -360,6 +344,7 @@ class ParserManager:
                         logger.error('More matches found on regex than variables specified on parser: %s', regex_command)
                     else:
                       logger.debug('No matches found for regex: %s', regex)
+
                 else:
                     if isinstance(node.xpath(sub_match["xpath"])[0], str):
                       value_tmp = node.xpath(sub_match["xpath"])[0].strip()
@@ -370,8 +355,13 @@ class ParserManager:
                       key_tmp = sub_match['variable-name']
                     else: 
                       key_tmp = self.cleanup_xpath(sub_match['xpath'])
-                      
-                    tmp_data['fields'][key_tmp] = value_tmp
+                    
+                    if 'transform' in sub_match.keys():
+                      if sub_match['transform'] == 'str_2_int':
+                        value_tmp = self.str_2_int(value_tmp)
+                    
+                    if value_tmp:
+                      tmp_data['fields'][key_tmp] = value_tmp
 
               else:
                   logger.debug('No match found: %s', match["xpath"])
@@ -543,7 +533,8 @@ class ParserManager:
       logger.error('An unkown variable-type found: %s', kwargs["type"])
       return value
 
-  def cleanup_tag( self, str_in ):
+  @staticmethod
+  def cleanup_tag( str_in ):
     """
     Cleanup a string to make sure it doesn't contain space
     """
@@ -551,7 +542,8 @@ class ParserManager:
   
     return tmp_str
 
-  def cleanup_xpath( self, xpath=None ):
+  @staticmethod
+  def cleanup_xpath( xpath=None ):
 
     if xpath:
       xpath = xpath.replace("./", "")
@@ -562,12 +554,42 @@ class ParserManager:
 
     return None
 
-  def cleanup_variable( self, name=None ):
+  @staticmethod
+  def cleanup_variable( name=None ):
 
     if name:
         return name.replace("$host.", "")
 
     return None
+
+  @staticmethod
+  def str_2_int(value):
+    """
+    Try to Convert a string into an integer
+    """
+
+    ## if the value provided is not a string 
+    #   or do not contains some integers 
+    #   return None
+    if not isinstance(value, str):
+      return None
+    elif re.match('[0-9]+', value) is None:
+      return None
+
+    value =  re.sub('gbps','000000000', value, flags=re.IGNORECASE)
+    value =  re.sub('mbps','000000', value, flags=re.IGNORECASE)
+    value =  re.sub('kbps','000', value, flags=re.IGNORECASE)
+
+    value =  re.sub('G','000000000', value, flags=re.IGNORECASE)
+    value =  re.sub('M','000000', value, flags=re.IGNORECASE)
+    value =  re.sub('K','000', value, flags=re.IGNORECASE)
+
+    try:
+      return int(value)
+    except:
+      return None
+
+
 
  # TODO See what to do with txt-filtered & | Count
  # elif format == "txt-filtered":
