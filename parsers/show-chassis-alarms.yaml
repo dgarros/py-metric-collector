@@ -1,0 +1,10 @@
+
+parser:
+    measurement: jnpr_chassis_alarm
+    command: show chassis alarms
+    type: xml
+    matches:
+    -   type: single-value
+        method: xpath
+        xpath: //alarm-information/alarm-summary/active-alarm-count
+        variable-name: alarm-count
