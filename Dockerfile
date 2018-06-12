@@ -10,4 +10,4 @@ RUN pip install -r /source/requirements.txt
 
 RUN python setup.py develop
 
-
+ENTRYPOINT ["/usr/local/bin/metric-collector"]
