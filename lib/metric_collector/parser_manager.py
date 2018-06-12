@@ -538,8 +538,11 @@ class ParserManager:
     """
     Cleanup a string to make sure it doesn't contain space
     """
-    tmp_str = str_in.replace(" ", "_")
-  
+
+    forbidden_chars = [" ", "|"]
+    for char in forbidden_chars: 
+      tmp_str = str_in.replace(char, "_")
+
     return tmp_str
 
   @staticmethod
