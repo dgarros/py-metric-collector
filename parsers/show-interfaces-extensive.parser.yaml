@@ -11,12 +11,13 @@ parser:
         measurement: jnpr_interface_stat
         xpath: //interface-information/physical-interface[logical-interface]
         loop:
-            name: ./name
             interface: ./name
             admin-status: ./admin-status
             description: ./description
             parent: ./logical-interface/address-family/ae-bundle-name
             sub-matches:
+            -   { xpath: ./speed,    variable-name: speed,  transform: str_2_int }
+            -   { xpath: ./mtu,      variable-name: mtu }
             -   { xpath: ./traffic-statistics/input-bytes,          variable-name: input-bytes }
             -   { xpath: ./traffic-statistics/output-bytes,         variable-name: output-bytes }
             -   { xpath: ./traffic-statistics/input-packets,        variable-name: input-packets }
@@ -33,32 +34,6 @@ parser:
             -   { xpath: ./ethernet-mac-statistics/input-multicasts,    variable-name: input-multicasts }
             -   { xpath: ./ethernet-mac-statistics/output-multicasts,   variable-name: output-multicasts }
 
-### ----------------------------------------------------------------
-### Interface MTU
-### ----------------------------------------------------------------
-    # -   type: multi-value
-    #     method: xpath
-    #     measurement: jnpr_interface_mtu
-    #     xpath: //interface-information/physical-interface[logical-interface]
-    #     loop:
-    #         name: ./name
-    #         admin-status: ./admin-status
-    #         description: ./description
-    #         parent: ./logical-interface/address-family/ae-bundle-name
-    #         sub-matches:
-    #         -   { xpath: ./mtu, variable-name: mtu }
-
-    # -   type: multi-value
-    #     method: xpath
-    #     measurement: jnpr_interface_mtu
-    #     xpath: //interface-information/physical-interface[logical-interface]
-    #     loop:
-    #         name: ./name
-    #         admin-status: ./admin-status
-    #         description: ./description
-    #         parent: ./logical-interface/address-family/ae-bundle-name
-    #         sub-matches:
-    #         -   { xpath: ./mtu, variable-name: mtu }
 ### ----------------------------------------------------------------
 ### Statistic per Queue
 ### ----------------------------------------------------------------
