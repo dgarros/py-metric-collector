@@ -76,6 +76,9 @@ class NetboxAsInventory(object):
 
         self.inventory_dict = dict()
 
+        self.req = requests.session()
+        self.verify_certs = False
+
         # Script configuration.
         self.script_config = script_config_data
         self.api_url = self._config(["main", "api_url"])
@@ -152,15 +155,14 @@ class NetboxAsInventory(object):
 
         return key_value
 
-    @staticmethod
-    def get_hosts_list(api_url, filters=None):
+    def get_hosts_list(self, filters=None):
         """Retrieves hosts list from netbox API.
 
         Returns:
             A list of all hosts from netbox API.
         """
 
-        if not api_url:
+        if not self.api_url:
             sys.exit("Please check API URL in script configuration file.")
 
         api_url_params = ""
@@ -175,10 +177,7 @@ class NetboxAsInventory(object):
                 filter_groups = filters 
 
         if not filter_groups:
-            hosts_list = requests.get(api_url, params=api_url_params, verify=False)
-            hosts_list.raise_for_status()
-            hosts_list_json = hosts_list.json()
-            return hosts_list_json
+            return self.netbox_get_devices_list()
 
         else:
             global_hosts_list_json = {
@@ -191,15 +190,17 @@ class NetboxAsInventory(object):
 
                 for grp_filter in grp_filters:
                     for key,value in grp_filter.items():
+
+                        if key == "limit" or key == "offset":
+                            continue
+
                         if isinstance(value, list):
                             for v in value:
                                 grp_api_url_params += "%s=%s&" % (key, v)
                         else:
                             grp_api_url_params += "%s=%s&" % (key, value)
 
-                hosts_list = requests.get(api_url, params=grp_api_url_params, verify=False)
-                hosts_list.raise_for_status()
-                grp_hosts_list_json = hosts_list.json()
+                grp_hosts_list_json = self.netbox_get_devices_list(grp_api_url_params)
 
                 global_hosts_list_json['results'] += grp_hosts_list_json['results']
                 global_hosts_list_json['count'] += grp_hosts_list_json['count']
@@ -219,13 +220,6 @@ class NetboxAsInventory(object):
             "custom": host_data.get("custom_fields")
         }
 
-        # ss1-aw23-c1-chi1: 
-        #     tags: [ junos, services-switch ]
-        #     address: 10.129.0.215
-        #     context: 
-        #         - site: chi1
-        #         - role: services-switch
-
         ### Check if the primary IP address is defined
         ### Skip device if not defined
         if not isinstance(host_data['primary_ip'], dict):
@@ -243,6 +237,13 @@ class NetboxAsInventory(object):
             # There are 2 categories that will be used to group hosts.
             # One for default section in netbox, and another for "custom_fields" which are being defined by netbox user.
             for category in self.tags:
+
+                # if the categfory is static, just add these tags without resolution
+                if category == 'static':
+                    for tag in self.tags[category]:
+                        self.inventory_dict[device_name]['tags'].append(tag)
+                    continue
+
                 key_name = self.key_map[category]
                 data_dict = categories_source[category]
 
@@ -310,7 +311,7 @@ class NetboxAsInventory(object):
             A dict has inventory with hosts and their tags and context
         """
 
-        netbox_hosts_list = self.get_hosts_list(self.api_url, self.filters)
+        netbox_hosts_list = self.get_hosts_list(self.filters)
 
         if isinstance(netbox_hosts_list, dict) and "results" in netbox_hosts_list:
             netbox_hosts_list = netbox_hosts_list["results"]
@@ -341,6 +342,43 @@ class NetboxAsInventory(object):
         """
 
         print(json.dumps(inventory_dict, sort_keys=True,indent=4,))
+
+    def netbox_get_devices_list(self, params=''):
+        
+        results = {
+            'count': 0,
+            'results': []
+        }
+
+        offset = 0
+        netbox_batch_size = 1000
+        keep_querying = True
+
+        while keep_querying:
+    
+            paging_params = "offset=%s&limit=%s" % (offset, netbox_batch_size)
+
+            if params == "":
+                api_url_params = paging_params
+            else:
+                api_url_params = params + "&" + paging_params
+              
+            hosts_list = self.req.get(self.api_url, 
+                                    params=api_url_params, 
+                                    verify=self.verify_certs )
+
+            hosts_list.raise_for_status()
+
+            hosts_list_dict = hosts_list.json()
+
+            results['count'] = hosts_list_dict['count']
+            results['results'].extend(hosts_list_dict['results'])
+
+            offset += netbox_batch_size
+            if int(hosts_list_dict['count']) < offset:
+                keep_querying = False
+
+        return results
 
 
 # Main.

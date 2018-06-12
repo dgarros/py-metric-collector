@@ -6,7 +6,6 @@ netbox:
       juniper:
         - site: [aa, bb, cc]
         - manufacturer: juniper
-        - limit: 0
 
     # What tags will be applied
     tags:
@@ -15,6 +14,8 @@ netbox:
             - device_role
             - site
             - platform
+
+        static: [tag1]
 
         # Custom sections (custom_fields) could be used.
         #custom:
