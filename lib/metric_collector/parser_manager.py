@@ -276,7 +276,11 @@ class ParserManager:
             if 'default-if-missing' in match.keys():
               logger.debug('Inserting default-if-missing value: %s', match["default-if-missing"])
               value_tmp = match["default-if-missing"]
-              key_tmp = self.cleanup_xpath(match['xpath'])
+
+              if 'variable-name' in match.keys():
+                key_tmp = match['variable-name']
+              else: 
+                key_tmp = self.cleanup_xpath(match['xpath'])
 
               single_match['fields'][key_tmp] = value_tmp
 
@@ -368,7 +372,11 @@ class ParserManager:
                   if 'default-if-missing' in sub_match.keys():
                     logger.debug('Inserting default-if-missing value: %s', sub_match["default-if-missing"])
                     value_tmp = sub_match["default-if-missing"]
-                    key_tmp = self.cleanup_xpath(sub_match['variable-name']['xpath'])
+                    if 'variable-name' in sub_match.keys():
+                      key_tmp = sub_match['variable-name']
+                    else: 
+                      key_tmp = self.cleanup_xpath(sub_match['xpath'])
+                    
                     tmp_data['fields'][key_tmp] = value_tmp
 
             datas_to_return.append(tmp_data)

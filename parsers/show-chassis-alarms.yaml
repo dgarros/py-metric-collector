@@ -8,3 +8,4 @@ parser:
         method: xpath
         xpath: //alarm-information/alarm-summary/active-alarm-count
         variable-name: alarm-count
+        default-if-missing: 0
