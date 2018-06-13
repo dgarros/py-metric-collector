@@ -70,7 +70,7 @@ def print_format_influxdb(datapoints):
     for data in format_datapoints_inlineprotocol(datapoints):
         print(data)
 
-    logger.info('Printing Datapoint to STDOUT:')
+    logger.debug('Printing Datapoint to STDOUT:')
 
 def post_format_influxdb(datapoints, addr="http://localhost:8186/write"):
     
@@ -115,7 +115,10 @@ def format_datapoints_inlineprotocol(datapoints):
 
               fields = fields + '{0}={1}'.format(tag,value)
 
-          formatted_data.append("{0},{1} {2}".format(datapoint['measurement'], tags, fields))
+          if datapoint['tags']:
+            formatted_data.append("{0},{1} {2}".format(datapoint['measurement'], tags, fields))
+          else:
+            formatted_data.append("{0} {1}".format(datapoint['measurement'], fields))
 
     return formatted_data
 
@@ -210,6 +213,8 @@ def collector(host_list, hosts_manager, parsers_manager,
 ### Create and Parse Arguments
 ### -----------------------------------------------------------------------------    
 def main():
+
+    time_start = time.time()
 
     ### ------------------------------------------------------------------------------
     ### Create and Parse Arguments
@@ -465,6 +470,36 @@ def main():
         for host in target_hosts:
             collector([host],parsers_manager=parsers_manager,
                              hosts_manager=hosts_manager)
+    
+    ### -----------------------------------------------------
+    ### Collect Global Statistics 
+    ### -----------------------------------------------------
+    time_end = time.time()
+    time_execution = time_end - time_start
+
+    global_datapoint = [{
+            'measurement': 'jnpr_metric_collector_stats_agent',
+            'tags': {},
+            'fields': {
+                'execution_time_sec': "%.4f" % time_execution,
+                'nbr_devices': len(target_hosts)
+            }
+        }]
+
+    if 'sharding' in dynamic_args and dynamic_args['sharding'] != None:
+        global_datapoint[0]['tags']['sharding'] = dynamic_args['sharding']
+    
+    if use_threads:
+        global_datapoint[0]['fields']['nbr_threads'] = dynamic_args['nbr_thread']
+
+    ### Send results to the right output
+    if dynamic_args['output_type'] == 'stdout':
+        print_format_influxdb(global_datapoint)
+    elif dynamic_args['output_type'] == 'http':
+        post_format_influxdb(global_datapoint, dynamic_args['output_addr'],)
+    else:
+        logger.warn('Output format unknown: %s', dynamic_args['output_type'])
+    
 
 if __name__ == "__main__":
     main()
