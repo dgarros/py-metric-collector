@@ -35,3 +35,4 @@ class Test_Validate_Main_Block(unittest.TestCase):
 
     pm = parser_manager.ParserManager()
     self.assertEqual( pm.cleanup_tag('my tag'), 'my_tag' )
+    self.assertEqual( pm.cleanup_tag('my tag=true'), 'my_tag_true' )
