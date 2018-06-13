@@ -539,7 +539,7 @@ class ParserManager:
     Cleanup a string to make sure it doesn't contain space
     """
 
-    forbidden_chars = [" ", "|"]
+    forbidden_chars = [" ", "=", ","]
     for char in forbidden_chars: 
       tmp_str = str_in.replace(char, "_")
 
