@@ -261,7 +261,7 @@ def main():
     full_parser.add_argument("--output-addr", default="http://localhost:8186/write", help="Addr information for output action")
 
     full_parser.add_argument("--use-thread", default=True, help="Spawn multiple threads to collect the information on the devices")
-    full_parser.add_argument("--nbr-thread", default=25, help="Maximum number of thread to spawn")
+    full_parser.add_argument("--nbr-thread", default=10, help="Maximum number of thread to spawn (default 10)")
 
     dynamic_args = vars(full_parser.parse_args())
 
@@ -439,7 +439,7 @@ def main():
         command_tags = ['.*']
 
     if use_threads:
-        max_collector_threads = dynamic_args['nbr_thread']
+        max_collector_threads = int(dynamic_args['nbr_thread'])
         target_hosts_lists = [target_hosts[x:x+int(len(target_hosts)/max_collector_threads+1)] for x in range(0, len(target_hosts), int(len(target_hosts)/max_collector_threads+1))]
 
         jobs = []
