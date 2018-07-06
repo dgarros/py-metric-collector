@@ -1,0 +1,25 @@
+parser:
+    measurement: jnpr_pfe_statistics
+    command: show pfe statistics traffic
+    type: xml
+    matches:
+    -   type: single-value
+        method: xpath
+        xpath: //pfe-statistics/pfe-traffic-statistics/input-pps
+        variable-name: input-pps
+    -   type: single-value
+        method: xpath
+        xpath: //pfe-statistics/pfe-traffic-statistics/output-pps
+        variable-name: output-pps
+    -   type: single-value
+        method: xpath
+        xpath: //pfe-statistics/pfe-hardware-discard-statistics/data-error-discard
+        variable-name: data-error-discard
+    -   type: single-value
+        method: xpath
+        xpath: //pfe-statistics/pfe-hardware-discard-statistics/bad-route-discard
+        variable-name: bad-route-discard
+    -   type: single-value
+        method: xpath
+        xpath: //pfe-statistics/pfe-hardware-discard-statistics/fabric-discard
+        variable-name: fabric-discard
