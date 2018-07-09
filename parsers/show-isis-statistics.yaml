@@ -1,0 +1,69 @@
+parser:
+    measurement: jnpr_isis_stat
+    command: show isis statistics
+    type: xml
+    matches:
+### ----------------------------------------------------------------
+### Global ISIS Stats
+### ----------------------------------------------------------------
+    -   type: single-value
+        method: xpath
+        xpath: //isis-statistics/totals-information/packets-received
+        variable-name: packets-received
+    -   type: single-value
+        method: xpath
+        xpath: //isis-statistics/totals-information/packets-sent
+        variable-name: packets-sent
+    -   type: single-value
+        method: xpath
+        xpath: //isis-statistics/snp-queue-length
+        variable-name: snp-queue-length
+    -   type: single-value
+        method: xpath
+        xpath: //isis-statistics/snp-queue-drops
+        variable-name: snp-queue-drops
+    -   type: single-value
+        method: xpath
+        xpath: //isis-statistics/lsp-queue-length
+        variable-name: lsp-queue-length
+    -   type: single-value
+        method: xpath
+        xpath: //isis-statistics/lsp-queue-drops
+        variable-name: lsp-queue-drops
+    -   type: single-value
+        method: xpath
+        xpath: //isis-statistics/spf-runs
+        variable-name: spf-runs
+    -   type: single-value
+        method: xpath
+        xpath: //isis-statistics/fragments-rebuilt
+        variable-name: fragments-rebuilt
+    -   type: single-value
+        method: xpath
+        xpath: //isis-statistics/lsps-regenerated
+        variable-name: lsps-regenerated
+    -   type: single-value
+        method: xpath
+        xpath: //isis-statistics/purges-initiated
+        variable-name: purges-initiated
+
+### ----------------------------------------------------------------
+### Per PDU Stats  
+### ----------------------------------------------------------------
+    -   type: multi-value
+        method: xpath
+        measurement: jnpr_isis_stat_pdu
+        xpath: //isis-statistics/isis-pdu-statistics
+        loop:
+            pdu-type: ./isis-pdu-type
+            sub-matches:
+            -   xpath: ./packets-received
+                variable-name:  packets-received
+            -   xpath: ./packets-processed
+                variable-name:  packets-processed
+            -   xpath: ./packets-dropped
+                variable-name:  packets-dropped
+            -   xpath: ./packets-sent
+                variable-name:  packets-sent
+            -   xpath: ./packets-retransmitted
+                variable-name: packets-retransmitted
