@@ -24,3 +24,9 @@ parser:
                 variable-name: suppressed-prefix
             -   xpath: ./flap-count
                 variable-name: flap-count
+            -   xpath: ./peer-state
+                variable-name: status
+                enumerate:
+                  Establ: 1
+                  Active: 2
+                  Idle: 0

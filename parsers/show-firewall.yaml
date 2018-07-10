@@ -1,0 +1,16 @@
+parser:
+    measurement: jnpr_firewall_counters
+    command: show firewall
+    type: xml
+    matches:
+    -   type: multi-value
+        method: xpath
+        xpath: //filter-information/counter
+        loop:
+            counter-name: ./counter-name
+            filter-name: ./../filter-name
+            sub-matches:
+            - xpath: ./packet-count
+              variable-name: packet-count
+            - xpath: ./byte-count
+              variable-name: byte-count
