@@ -27,6 +27,6 @@ parser:
             -   xpath: ./peer-state
                 variable-name: status
                 enumerate:
-                  Establ: 100
-                  Active: 50
+                  Establ: 1
+                  Active: 2
                   Idle: 0

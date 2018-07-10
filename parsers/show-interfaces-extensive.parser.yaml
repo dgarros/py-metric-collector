@@ -36,12 +36,12 @@ parser:
             -   xpath: ./oper-status
                 variable-name: oper-status
                 enumerate:
-                  up: 100
+                  up: 1
                   down: 0
             -   xpath: ./admin-status
                 variable-name: admin-status
                 enumerate:
-                  up: 100
+                  up: 1
                   down: 0
 ### ----------------------------------------------------------------
 ### Statistic per Queue
