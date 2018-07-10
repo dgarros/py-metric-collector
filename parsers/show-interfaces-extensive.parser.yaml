@@ -33,7 +33,16 @@ parser:
             -   { xpath: ./ethernet-mac-statistics/output-broadcasts,   variable-name: output-broadcasts }
             -   { xpath: ./ethernet-mac-statistics/input-multicasts,    variable-name: input-multicasts }
             -   { xpath: ./ethernet-mac-statistics/output-multicasts,   variable-name: output-multicasts }
-
+            -   xpath: ./oper-status
+                variable-name: oper-status
+                enumerate:
+                  up: 100
+                  down: 0
+            -   xpath: ./admin-status
+                variable-name: admin-status
+                enumerate:
+                  up: 100
+                  down: 0
 ### ----------------------------------------------------------------
 ### Statistic per Queue
 ### ----------------------------------------------------------------
