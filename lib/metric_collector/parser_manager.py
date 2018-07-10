@@ -364,7 +364,19 @@ class ParserManager:
                       if sub_match['transform'] == 'str_2_int':
                         value_tmp = self.str_2_int(value_tmp)
                     
-                    if value_tmp:
+                    if 'enumerate' in sub_match.keys():
+                      enum_match = False
+                      for enum_item in sub_match['enumerate']:
+                        if value_tmp == enum_item:
+                          enum_match = True
+                          tmp_data['fields'][key_tmp] = sub_match['enumerate'][enum_item]
+                        
+                      if not enum_match and 'default-if-missing' in sub_match.keys():
+                        tmp_data['fields'][key_tmp] = sub_match['default-if-missing']
+                      elif not enum_match:
+                        tmp_data['fields'][key_tmp] = 0
+
+                    elif value_tmp:
                       tmp_data['fields'][key_tmp] = value_tmp
 
               else:
