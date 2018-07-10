@@ -1,0 +1,23 @@
+parser:
+    measurement: jnpr_isis_adj
+    command: show isis adjacency
+    type: xml
+    matches:
+    -   type: multi-value
+        method: xpath
+        xpath: //isis-adjacency-information/isis-adjacency
+        loop:
+            system-name: ./system-name
+            adjacency-state: ./adjacency-state
+            sub-matches:
+            -   xpath: ./holdtime
+                variable-name:  holdtime
+            -   xpath: ./level
+                variable-name: level
+            -   xpath: ./adjacency-state
+                variable-name: status
+                enumerate:
+                  Up: 100
+                  Down: 0
+
+
