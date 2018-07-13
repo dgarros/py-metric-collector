@@ -329,23 +329,20 @@ class ParserManager:
                       value_tmp = node.xpath(sub_match["xpath"])[0].text.strip()
 
                     regex = sub_match["regex"]
-                    text_matches = re.search(regex,value_tmp,re.MULTILINE)
+                    text_matches = re.findall(regex,value_tmp,re.MULTILINE)
 
                     if text_matches:
-                      if text_matches.lastindex == len(sub_match["variables"]):
-                        logger.debug('We have (%s) matches with this regex %s', text_matches.lastindex,regex)
-                        for i in range(0,text_matches.lastindex):
-                          j=i+1
-                          variable_name = self.eval_variable_name(sub_match["variables"][i]["variable-name"],host=host)
-                          value_tmp = text_matches.group(j).strip()
+                      if len(text_matches) == len(sub_match["variables"]):
+                        logger.debug('We have (%s) matches with this regex %s', len(text_matches), regex)
+                        for i, value in enumerate(text_matches):
+                          variable_name = sub_match["variables"][i]["variable-name"]
 
                           # Begin function  (pero pendiente de ver si variable-type existe y su valor)
                           if "variable-type" in sub_match["variables"][i]:
-                            value_tmp = self.eval_variable_value(value_tmp, type=sub_match["variables"][i]["variable-type"])
-                            key_tmp = self.cleanup_xpath(sub_match["variables"][i]['xpath'])
-                            tmp_data['fields'][key_tmp] = value_tmp
+                            value = self.eval_variable_value(value, type=sub_match["variables"][i]["variable-type"])
+                          tmp_data['fields'][variable_name] = value
                       else:
-                        logger.error('More matches found on regex than variables specified on parser: %s', regex_command)
+                        logger.error('More matches found on regex %s for %s than variables specified on parser', regex, value_tmp)
                     else:
                       logger.debug('No matches found for regex: %s', regex)
 
@@ -363,6 +360,10 @@ class ParserManager:
                     if 'transform' in sub_match.keys():
                       if sub_match['transform'] == 'str_2_int':
                         value_tmp = self.str_2_int(value_tmp)
+
+                    if 'variable-type' in sub_match.keys():
+                      value_tmp = self.eval_variable_value(value_tmp, type=sub_match['variable-type'])
+                      tmp_data['fields'][key_tmp] = value_tmp
                     
                     if 'enumerate' in sub_match.keys():
                       enum_match = False
@@ -376,7 +377,7 @@ class ParserManager:
                       elif not enum_match:
                         tmp_data['fields'][key_tmp] = 0
 
-                    elif value_tmp:
+                    elif value_tmp and key_tmp not in tmp_data['fields']:
                       tmp_data['fields'][key_tmp] = value_tmp
 
               else:
@@ -546,6 +547,7 @@ class ParserManager:
       value =  re.sub('G','000000000',value)
       value =  re.sub('M','000000',value)
       value =  re.sub('K','000',value)
+      value =  re.sub('bps', '', value)
       return(int(float(value)))
     elif kwargs["type"] == "string":
       return value
