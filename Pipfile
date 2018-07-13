@@ -18,6 +18,8 @@ requests = "*"
 junos-eznc = "*"
 ipaddress = "*"
 textfsm = "*"
+jmespath = "*"
+f5-sdk = "*"
 
 
 [dev-packages]

@@ -1,0 +1,93 @@
+import logging
+import time
+# need to monkey patch this as this prevents the code from running in threads
+import f5.bigip as bigip
+bigip.HAS_SIGNAL = False
+
+logger = logging.getLogger('f5_rest_collector')
+
+
+class F5Collector(object):
+
+    def __init__(self, host, address, credential, port=443, timeout=30, retry=3, parsers=None):
+        self.hostname = host
+        self.host = address
+        self.credential = credential
+        self.__port = port
+        self.__timeout = timeout
+        self.__retry = retry
+        self.__is_connected = False
+        self.parsers = parsers
+        self.facts = {}
+
+    def connect(self):
+        logger.info('Connecting to host: %s at %s', self.hostname, self.host)
+
+        use_token = False
+        user = self.credential.get('username')
+        passwd = self.credential.get('password')
+        if self.credential['method'] == 'vault':
+            user, passwd = self._get_credentials_from_vault()
+        if self.credential.get('use_token', 'false').lower() == 'true':
+            use_token = True
+        if not user or not passwd:
+            logger.error('Invalid or no credentials specified')
+            return
+        for retry in range(self.__retry):
+            try:
+                self.mgmt = bigip.ManagementRoot(
+                    self.host, user, passwd,
+                    port=self.__port, timeout=self.__timeout, token=use_token)
+                self.__is_connected = True
+                break
+            except Exception as ex:
+                logger.debug('Failed to connect on %d: %s,  retrying', retry, str(ex))
+                time.sleep(2)
+                continue
+        if not self.is_connected():
+            logger.error('Failed to connect to %s at %s', self.hostname, self.host)
+            return
+
+    def collect_facts(self):
+        logger.info('[%s]: Collecting Facts on device', self.hostname)
+
+        self.facts['tmos_version'] = self.mgmt.tmos_version
+        self.facts['device'] = self.mgmt.hostname
+
+        # TODO(Mayuresh) Collect any other relevant facts here
+
+    def execute_query(self, query):
+
+        base_url = 'https://{}/'.format(self.host)
+        try:
+            query = base_url + query
+            logger.debug('[%s]: execute : %s', self.hostname, query)
+            result = self.mgmt.icrs.get(query)
+            return result.json()
+        except Exception as ex:
+            logger.error('Failed to execute query: %s on %s: %s', query, self.hostname, str(ex))
+            return
+
+    def collect(self, command):
+
+        # find the command/query to execute
+        parser = self.parsers.get_parser_for(command)
+        raw_data = self.execute_query(parser['data']['parser']['query'])
+        datapoints = self.parsers.parse(command, raw_data)
+
+        if datapoints is not None:
+            measurement = self.parsers.get_measurement_name(input=command)
+            to_return = []
+            for datapoint in datapoints:
+                if datapoint['measurement'] is None:
+                    datapoint['measurement'] = measurement
+                datapoint['tags'].update(self.facts)
+                to_return.append(datapoint)
+
+            return to_return
+        else:
+            logger.warn('No parser found for command > %s', command)
+            return None
+
+    def is_connected(self):
+        return self.__is_connected

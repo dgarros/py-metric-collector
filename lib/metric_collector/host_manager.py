@@ -71,44 +71,44 @@ class HostManager(object):
         ### -------------------------------------------------------------    
         ### Check commands provided
         ### -------------------------------------------------------------
-        for command_grp in commands:
+        for command_grp, command_set in commands.items():
 
-            if not isinstance(commands[command_grp], dict):
+            if not isinstance(command_set, dict):
                 self.log.warn('command: format for %s not supported, skipping' % command_grp)
                 continue
             
             tags = []
             command_list = []
 
-            if 'tags' not in commands[command_grp]:
+            if 'tags' not in command_set:
                 self.log.warn('command: unable to find tags for %s, skipping' % command_grp)
                 continue
-            elif 'netconf' not in commands[command_grp] and 'commands' not in commands[command_grp]:
+            elif 'netconf' not in command_set and 'commands' not in command_set:
                 self.log.warn('command: unable to find the list of commands for %s, skipping' % command_grp)
                 continue
 
             ### Extract the tag information
-            if isinstance(commands[command_grp]['tags'], str):
-                tags = commands[command_grp]['tags'].split()
-            elif isinstance(commands[command_grp]['tags'], list):
-                tags = commands[command_grp]['tags']
+            if isinstance(command_set['tags'], str):
+                tags = command_set['tags'].split()
+            elif isinstance(command_set['tags'], list):
+                tags = command_set['tags']
             else:
                 self.log.warn('command: format for %s tags is not supported, skipping' % command_grp)
                 continue
 
             ### Extract the command information
-            if 'netconf' in commands[command_grp]:
-                if isinstance(commands[command_grp]['netconf'], list):
-                    command_list = command_list + commands[command_grp]['netconf']
-                elif isinstance(commands[command_grp]['netconf'], str):
-                   command_list = command_list + commands[command_grp]["netconf"].strip().split("\n")
+            if 'netconf' in command_set:
+                if isinstance(command_set['netconf'], list):
+                    command_list = command_list + command_set['netconf']
+                elif isinstance(command_set['netconf'], str):
+                   command_list = command_list + command_set["netconf"].strip().split("\n")
             
-            if 'commands' in commands[command_grp]:
-                if isinstance(commands[command_grp]['commands'], list):
-                    command_list = command_list + commands[command_grp]['commands']
-                elif isinstance(commands[command_grp]['commands'], str):
-                    command_list = command_list + commands[command_grp]["commands"].strip().split("\n")
-                    
+            if 'commands' in command_set:
+                if isinstance(command_set['commands'], list):
+                    command_list = command_list + command_set['commands']
+                elif isinstance(command_set['commands'], str):
+                    command_list = command_list + command_set["commands"].strip().split("\n")
+
             self.commands[command_grp] = {
                 'tags': tags,
                 'commands': command_list
@@ -152,7 +152,7 @@ class HostManager(object):
             ### Method
             if 'method' not in credentials[credential_grp]:
                 credential['method'] = 'password'
-            elif credentials[credential_grp]['method'] not in ['password', 'key']:
+            elif credentials[credential_grp]['method'] not in ['password', 'key', 'vault']:
                 self.log.warn('credential: method %s for %s not supported, skipping' % (credentials[credential_grp]['method'], credential_grp))
                 continue
             else:
@@ -246,7 +246,8 @@ class HostManager(object):
                         return self.credentials[credential]
 
         return None
-                        
+                       
+
     def get_context(self, host):
 
         if host not in self.hosts:
@@ -254,8 +255,13 @@ class HostManager(object):
 
         return self.hosts[host]['context']
 
+
     def get_address(self, host):
         if host not in self.hosts:
             return None
 
         return self.hosts[host]['address']
+
+
+    def get_device_type(self, host):
+        return self.hosts[host].get('device_type', 'juniper')

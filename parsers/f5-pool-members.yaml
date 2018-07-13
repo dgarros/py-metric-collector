@@ -1,0 +1,36 @@
+parser:
+    measurement: f5-pool-member-stats
+    command: f5-pool-members
+    query: mgmt/tm/ltm/pool/members/stats
+    type: json
+    matches:
+    -   type: multi-value
+        method: jmespath
+        jmespath: entries.*.nestedStats | [].entries.*.nestedStats | [].entries.*.nestedStats | []
+        loop:
+            partition_poolname: entries.poolName.description
+            nodename: entries.nodeName.description
+            monitor_status: entries.monitorStatus.description
+            port: entries.port.value
+            state: entries.status.availabilityState.description
+            sub-matches:
+                - jmespath: entries.curSessions.value 
+                  variable-name: current_sessions
+                - jmespath: entries."serverside.bitsIn".value
+                  variable-name: bits_in
+                - jmespath: entries."serverside.bitsOut".value
+                  variable-name: bits_out
+                - jmespath: entries."serverside.curConns".value
+                  variable-name: current_conns
+                - jmespath: entries."serverside.maxConns".value
+                  variable-name: max_conns
+                - jmespath: entries."serverside.pktsIn".value
+                  variable-name: packets_in
+                - jmespath: entries."serverside.pktsOut".value
+                  variable-name: packets_out
+                - jmespath: entries."serverside.totConns".value
+                  variable-name: total_conns
+                - jmespath: entries.totRequests.value
+                  variable-name: total_requests
+                - jmespath: entries.addr.description
+                  variable-name: vip-address
