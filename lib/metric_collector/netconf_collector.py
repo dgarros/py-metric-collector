@@ -140,7 +140,9 @@ class NetconfCollector():
 
   def collect( self, command=None ):
 
-    raw_data = self.execute_command(command=command)
+    # find the command to execute from the parser directly
+    parser = self.parsers.get_parser_for(command)
+    raw_data = self.execute_command(parser['data']['parser']['command'])
     datapoints = self.parsers.parse(input=command, data=raw_data)
     
     if datapoints is not None:
