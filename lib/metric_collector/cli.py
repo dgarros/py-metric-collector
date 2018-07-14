@@ -35,6 +35,8 @@ logging.getLogger("urllib3").setLevel(logging.WARNING)  # In order to remove htt
 
 logger = logging.getLogger("main")
 
+global_measurement_prefix = 'metric_collector'
+
 ### ------------------------------------------------------------------------------
 ### Defining the classes and procedures used later on the script
 ### ------------------------------------------------------------------------------
@@ -173,7 +175,7 @@ def collector(host_list, hosts_manager, parsers_manager,
             time_execution = time_end - time_start
 
         exec_time_datapoint = [{
-            'measurement': 'jnpr_netconf_collector_stats',
+            'measurement': global_measurement_prefix + '_stats',
             'tags': {
                 'device': jdev.hostname
             },
@@ -478,7 +480,7 @@ def main():
     time_execution = time_end - time_start
 
     global_datapoint = [{
-            'measurement': 'jnpr_metric_collector_stats_agent',
+            'measurement': global_measurement_prefix + '_stats_agent',
             'tags': {},
             'fields': {
                 'execution_time_sec': "%.4f" % time_execution,
