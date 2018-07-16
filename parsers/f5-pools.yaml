@@ -1,5 +1,5 @@
 parser:
-    measurement: f5-pool-stats
+    measurement: f5_pool_stats
     command: f5-pools
     query: mgmt/tm/ltm/pool/stats
     type: json

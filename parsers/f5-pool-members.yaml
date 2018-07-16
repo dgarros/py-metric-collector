@@ -1,5 +1,5 @@
 parser:
-    measurement: f5-pool-member-stats
+    measurement: f5_pool_member_stats
     command: f5-pool-members
     query: mgmt/tm/ltm/pool/members/stats
     type: json
@@ -13,6 +13,7 @@ parser:
             monitor_status: entries.monitorStatus.description
             port: entries.port.value
             state: entries.status.availabilityState.description
+            vip-address: entries.addr.description
             sub-matches:
                 - jmespath: entries.curSessions.value 
                   variable-name: current_sessions
@@ -32,5 +33,8 @@ parser:
                   variable-name: total_conns
                 - jmespath: entries.totRequests.value
                   variable-name: total_requests
-                - jmespath: entries.addr.description
-                  variable-name: vip-address
+                - jmespath: entries.status.availabilityState.description
+                  variable-name: state
+                  enumerate:
+                      available: 0
+                      offline: 1
