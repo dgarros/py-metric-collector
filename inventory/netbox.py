@@ -86,6 +86,8 @@ class NetboxAsInventory(object):
         self.filters = self._config(["filters"], default={})
         self.context = self._config(["context"], default={})
 
+        self.device_type = self._config(["device_type"], default='device_type/manufacturer/slug')
+
         # Get value based on key.
         self.key_map = {
             "default": "name",
@@ -232,6 +234,10 @@ class NetboxAsInventory(object):
             'address': ip_address,
             'context': []
         }
+
+        if self.device_type:
+            device_type = self._get_value_by_path(host_data, self.device_type.split('/'))
+            self.inventory_dict[device_name]['device_type'] = device_type
 
         if self.tags:
             # There are 2 categories that will be used to group hosts.

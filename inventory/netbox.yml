@@ -1,6 +1,9 @@
 netbox:
     main:
         api_url: 'http://<netbox_addr>/api/dcim/devices/'
+        
+    # Value to use as the device_type, default to (device_type/manufacturer/slug)
+    # device_type: platform
 
     filters:
       juniper:
@@ -29,5 +32,3 @@ netbox:
             role: device_role
             site: site
 
-        #custom:
-        #    env: env
