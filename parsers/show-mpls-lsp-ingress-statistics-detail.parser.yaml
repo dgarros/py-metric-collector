@@ -15,8 +15,8 @@ parser:
                 - xpath: ./lsp-state
                   variable-name: state
                   enumerate:
-                      Up: 1
-                      Dn: 0
+                      Up: 0
+                      Dn: 1
                 - xpath: ./aggregate-lsp-pktbytes
                   regex: \d+
                   variables:
