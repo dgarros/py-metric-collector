@@ -10,3 +10,5 @@ requests
 junos-eznc
 ipaddress
 textfsm
+f5-sdk
+jmespath

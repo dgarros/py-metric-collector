@@ -3,6 +3,7 @@ import yaml
 import sys
 import logging
 import pprint
+import json
 from os import path
 from metric_collector import parser_manager
 
@@ -29,3 +30,19 @@ class Test_Parsers(unittest.TestCase):
     # pprint.pprint(data)
 
     self.assertTrue( True )
+
+
+  def test_parser_f5_pools_json(self):
+    test_dir = here+'/input/41_validate_parsers'
+
+    pm = parser_manager.ParserManager()
+
+    # Read JSON Content
+    with open(test_dir + "/json-reply/f5-pools.json") as f:
+        data = f.read()
+
+    json_data = json.loads(data)
+
+    data = pm.parse(input="f5-pools.yaml", data=json_data)
+
+    self.assertTrue(True)

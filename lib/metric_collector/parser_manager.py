@@ -7,13 +7,15 @@ import copy
 import re
 import textfsm
 from io import StringIO
+import jmespath
+import json
 
 logger = logging.getLogger('parser_manager' )
 
 pp = pprint.PrettyPrinter(indent=4)
 
 ## Pyez is not fully supported, need to work on that 
-SUPPORTED_PARSER_TYPE = ['xml', 'textfsm', 'pyez', 'regex' ]
+SUPPORTED_PARSER_TYPE = ['xml', 'textfsm', 'pyez', 'regex', 'json']
 
 class ParserManager:
 
@@ -25,6 +27,7 @@ class ParserManager:
     self.nbr_xml_parsers = 0
     self.nbr_textfsm_parsers = 0
     self.nbr_pyez_parsers = 0
+    self.nbr_json_parsers = 0
 
     if  isinstance(parser_dirs, list):
       self.__parser_dirs = parser_dirs
@@ -176,13 +179,19 @@ class ParserManager:
       self.nbr_regex_parsers += 1
     elif parser['type'] == 'pyez':
       self.nbr_pyez_parsers += 1
-
+    elif parser['type'] == 'json':
+      self.nbr_json_parsers += 1 
+    
     self.parsers[name] = parser
 
     return True
 
   def get_nbr_parsers( self ):
-    return self.nbr_pyez_parsers + self.nbr_textfsm_parsers + self.nbr_xml_parsers + self.nbr_regex_parsers
+    return (
+        self.nbr_pyez_parsers + self.nbr_textfsm_parsers + 
+        self.nbr_xml_parsers + self.nbr_regex_parsers +
+        self.nbr_json_parsers
+    )
 
   def get_parser_name_for( self, input=None ):
 
@@ -193,6 +202,8 @@ class ParserManager:
     else:
       return None
 
+  def get_parser_for(self, input):
+    return self.__find_parser__(input)
 
   def parse( self, input=None, data=None):
 
@@ -205,6 +216,8 @@ class ParserManager:
         return self.__parse_textfsm__(parser=parser, data=data)
       elif parser['type'] == 'regex':
         return self.__parse_regex__(parser=parser, data=data)
+      elif parser['type'] == 'json':
+        return self.__parse_json__(parser=parser, data=data)
     except TypeError as t_err:
       logger.error('Something went wrong while parsing : %s > %s' % (parser['name'], t_err))
       return []
@@ -511,6 +524,95 @@ class ParserManager:
 
     logger.debug('REGEX returned: %s', datas_to_return)
     return datas_to_return
+
+
+  def __parse_json__(self, parser=None, data=None):
+
+    datas_to_return = []
+    logger.debug("will parse %s with json" % parser['command'])
+
+    json_data = data
+    if isinstance(data, str):
+        try:
+            json_data = json.loads(data)
+        except json.JSONDecodeError as ex:
+            logger.error('Unable to decode data into json: ', str(ex))
+            return datas_to_return
+    elif not isinstance(data, dict):
+        logger.error('Data must be either a json string or a dict')
+        return datas_to_return
+    for match in parser['data']['parser']['matches']:
+      if match['method'] != 'jmespath':
+        logger.error('Match type %s for json is not supported', match['method'])
+        return datas_to_return
+      if match['type'] == 'single-value':
+        datas_to_return.append(self._parse_json_single_value(match, json_data))
+      elif match['type'] == 'multi-value':
+        datas_to_return += self._parse_json_multi_value(match, json_data)
+    return datas_to_return
+
+  
+  def _parse_json_single_value(self, match, json_data):
+    ## Empty structure that needs to be filled and return for each input
+    data = {
+      'measurement': None,
+      'tags': {},
+      'fields': {}
+    }
+    ## Assign measurement name if defined
+    if 'measurement' in match:
+      data['measurement'] = match['measurement']
+    # parse the match fields
+    key = match['variable-name']
+    value = jmespath.search(match['jmespath'], json_data)
+    if value is None:
+        return data
+    data['fields'][key] = value
+    return data
+
+    
+  def _parse_json_multi_value(self, match, json_data):
+
+    datas_to_return = []
+    nodes = jmespath.search(match['jmespath'], json_data)
+    loop = match['loop']
+    for node in nodes:
+      ## Empty structure that needs to be filled and return for each input
+      data = {
+        'measurement': None,
+        'tags': {},
+        'fields': {}
+      }
+      ## Assign measurement name if defined
+      if 'measurement' in match:
+        data['measurement'] = match['measurement'] 
+
+      # parse the sub-match fields
+      for sm in loop['sub-matches']:
+        key = sm['variable-name']
+        value = jmespath.search(sm['jmespath'], node)
+        if value is None:
+          logger.debug('SubMatch %s not found in node', sm['jmespath'])
+          continue
+        if 'transform' in sm:
+          if sm['transform'] == 'str_2_int':
+            value = self.str_2_int(value)
+        data['fields'][key] = value
+      
+      # parse the sub-match tags
+      for tag_name, tag_jmespath in loop.items():
+        if tag_name == 'sub-matches':
+          continue
+        tag_value = jmespath.search(tag_jmespath, node)
+        if not tag_value:
+          logger.debug('Tag value  %s not found in node', tag_jmespath)
+          continue
+        data['tags'][tag_name] = self.cleanup_tag(str(tag_value))
+
+      datas_to_return.append(data)
+
+    return datas_to_return
+     
 
   def eval_variable_name(self, variable,**kwargs):
     

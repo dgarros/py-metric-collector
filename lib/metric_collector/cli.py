@@ -4,7 +4,6 @@ from datetime import timedelta
 
 from lxml import etree  # Used for xml manipulation
 from pprint import pformat
-from pprint import pprint
 import argparse 
 import subprocess
 from subprocess import run
@@ -26,6 +25,7 @@ import copy
 
 from metric_collector import parser_manager
 from metric_collector import netconf_collector
+from metric_collector import f5_rest_collector
 from metric_collector import host_manager
 
 logging.getLogger("paramiko").setLevel(logging.INFO)
@@ -136,12 +136,18 @@ def collector(host_list, hosts_manager, parsers_manager,
 
         logger.info('Collector starting for: %s', host)
         host_address = hosts_manager.get_address(host)
+        device_type = hosts_manager.get_device_type(host)
         
-        jdev = netconf_collector.NetconfCollector(host=host, address=host_address, credential=credential, parsers=parsers_manager)
-        jdev.connect()
+        if device_type == 'juniper':
+            dev = netconf_collector.NetconfCollector(
+                    host=host, address=host_address, credential=credential, parsers=parsers_manager)
+        elif device_type == 'f5':
+            dev = f5_rest_collector.F5Collector(
+                host=host, address=host_address, credential=credential, parsers=parsers_manager)
+        dev.connect()
 
-        if jdev.is_connected():
-            jdev.collect_facts()
+        if dev.is_connected():
+            dev.collect_facts()
             host_reacheable = True
 
         else:
@@ -160,7 +166,7 @@ def collector(host_list, hosts_manager, parsers_manager,
             for command in target_commands:
                 try:
                     logger.info('[%s] Collecting > %s' % (host,command))
-                    values += jdev.collect(command=command)
+                    values += dev.collect(command)
                     cmd_successful += 1
 
                 except Exception as err:
@@ -175,7 +181,7 @@ def collector(host_list, hosts_manager, parsers_manager,
         exec_time_datapoint = [{
             'measurement': 'jnpr_netconf_collector_stats',
             'tags': {
-                'device': jdev.hostname
+                'device': dev.hostname
             },
             'fields': {
                 'execution_time_sec': "%.4f" % time_execution,
