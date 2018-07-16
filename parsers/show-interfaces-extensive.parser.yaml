@@ -51,7 +51,6 @@ parser:
         measurement: jnpr_interface_queue_stat
         xpath: //interface-information/physical-interface/queue-counters/queue
         loop:
-            name: ./../../name
             interface: ./name
             admin-status: ./../../admin-status
             queue-number: ./queue-number
@@ -69,7 +68,6 @@ parser:
         measurement: jnpr_interface_error
         xpath: //interface-information/physical-interface[logical-interface]
         loop:
-            name: ./name
             interface: ./name
             description: ./description
             parent: ./logical-interface/address-family/ae-bundle-name
