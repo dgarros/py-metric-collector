@@ -1,0 +1,33 @@
+parser:
+    measurement: jnpr_mpls_stats
+    command: show mpls lsp ingress statistics detail
+    type: xml
+    matches:
+    -   type: multi-value
+        method: xpath
+        xpath: //mpls-lsp-information/rsvp-session-data/rsvp-session/mpls-lsp
+        loop:
+            name: ./name
+            source-address: ./source-address
+            destination-address: ./destination-address
+            metric: ./metric
+            sub-matches:
+                - xpath: ./lsp-state
+                  variable-name: state
+                  enumerate:
+                      Up: 1
+                      Dn: 0
+                - xpath: ./aggregate-lsp-pktbytes
+                  regex: \d+
+                  variables:
+                      - variable-name: lsp_packets
+                      - variable-name: lsp_bytes
+                - xpath: ./mpls-lsp-autobandwidth/maximum-average-bandwidth
+                  variable-name: max_avg_bw_bps
+                  variable-type: integer
+                - xpath: ./mpls-lsp-autobandwidth/minimum-bandwidth
+                  variable-name: minimum_bw_bps
+                  variable-type: integer
+                - xpath: ./mpls-lsp-path/bandwidth
+                  variable-name: reserved_bw_bps
+                  variable-type: integer
