@@ -656,17 +656,10 @@ class ParserManager:
   def eval_variable_value(self, value, **kwargs):
 
     if (kwargs["type"] == "integer"):
-      value = value.lower()
-      if "gbps" in value:
-        value = float(re.sub('gbps', '' , value)) * 1e9  
-      elif "mbps" in value:
-        value = float(re.sub('mbps', '' , value)) * 1e6
-      elif "kbps" in value:
-        value = float(re.sub('kbps', '', value)) * 1e3
-        value = float(value) * 1e3
-      elif 'bps' in value:
-        value = float(re.sub('bps', '', value))
-      return int(value)
+      value =  re.sub('G','000000000',value)
+      value =  re.sub('M','000000',value)
+      value =  re.sub('K','000',value)
+      return(int(float(value)))
     elif kwargs["type"] == "string":
       return value
     else:
@@ -721,14 +714,16 @@ class ParserManager:
     elif re.match('[0-9]+', value) is None:
       return None
 
-    value =  re.sub('gbps','000000000', value, flags=re.IGNORECASE)
-    value =  re.sub('mbps','000000', value, flags=re.IGNORECASE)
-    value =  re.sub('kbps','000', value, flags=re.IGNORECASE)
-
-    value =  re.sub('G','000000000', value, flags=re.IGNORECASE)
-    value =  re.sub('M','000000', value, flags=re.IGNORECASE)
-    value =  re.sub('K','000', value, flags=re.IGNORECASE)
-
+    value = value.lower()
+    if "gbps" in value or "g" in value:
+      value = float(value.replace('gbps', '').replace('g', '')) * 1e9
+    elif "mbps" in value or 'm' in value:
+      value = float(value.replace('mbps', '').replace('m', '')) * 1e6
+    elif "kbps" in value:
+      value = float(value.replace('kbps', '').replace('k', '')) * 1e3
+    elif 'bps' in value:
+      value = float(value.replace('bps', ''))
+        
     try:
       return int(value)
     except:

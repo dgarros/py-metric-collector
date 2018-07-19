@@ -24,10 +24,10 @@ parser:
                       - variable-name: lsp_bytes
                 - xpath: ./mpls-lsp-autobandwidth/maximum-average-bandwidth
                   variable-name: max_avg_bw_bps
-                  variable-type: integer
+                  transform: str_2_int
                 - xpath: ./mpls-lsp-autobandwidth/minimum-bandwidth
                   variable-name: minimum_bw_bps
-                  variable-type: integer
+                  transform: str_2_int
                 - xpath: ./mpls-lsp-path/bandwidth
                   variable-name: reserved_bw_bps
-                  variable-type: integer
+                  transform: str_2_int
