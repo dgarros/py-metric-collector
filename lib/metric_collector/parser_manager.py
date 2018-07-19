@@ -656,11 +656,17 @@ class ParserManager:
   def eval_variable_value(self, value, **kwargs):
 
     if (kwargs["type"] == "integer"):
-      value =  re.sub('G','000000000',value)
-      value =  re.sub('M','000000',value)
-      value =  re.sub('K','000',value)
-      value =  re.sub('bps', '', value)
-      return(int(float(value)))
+      value = value.lower()
+      if "gbps" in value:
+        value = float(re.sub('gbps', '' , value)) * 1e9  
+      elif "mbps" in value:
+        value = float(re.sub('mbps', '' , value)) * 1e6
+      elif "kbps" in value:
+        value = float(re.sub('kbps', '', value)) * 1e3
+        value = float(value) * 1e3
+      elif 'bps' in value:
+        value = float(re.sub('bps', '', value))
+      return int(value)
     elif kwargs["type"] == "string":
       return value
     else:
