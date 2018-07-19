@@ -566,7 +566,12 @@ class ParserManager:
     key = match['variable-name']
     value = jmespath.search(match['jmespath'], json_data)
     if value is None:
-        return data
+      return data
+    if 'enumerate' in match:
+      for enum_key, enum_value in match['enumerate'].items():
+        if value == enum_key:
+          value = enum_value
+          break
     data['fields'][key] = value
     return data
 
@@ -597,6 +602,11 @@ class ParserManager:
         if 'transform' in sm:
           if sm['transform'] == 'str_2_int':
             value = self.str_2_int(value)
+        if 'enumerate' in sm:
+          for enum_key, enum_value in sm['enumerate'].items():
+            if value == enum_key:
+              value = enum_value
+              break
         data['fields'][key] = value
       
       # parse the sub-match tags
@@ -604,7 +614,7 @@ class ParserManager:
         if tag_name == 'sub-matches':
           continue
         tag_value = jmespath.search(tag_jmespath, node)
-        if not tag_value:
+        if tag_value is None:
           logger.debug('Tag value  %s not found in node', tag_jmespath)
           continue
         data['tags'][tag_name] = self.cleanup_tag(str(tag_value))

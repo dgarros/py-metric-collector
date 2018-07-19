@@ -1,0 +1,30 @@
+parser:
+    measurement: f5_memory_stats
+    command: f5-memory
+    query: mgmt/tm/sys/memory 
+    type: json
+    matches:
+        -  type: single-value
+           method: jmespath
+           jmespath: entries.*.nestedStats | [0].entries.*.nestedStats | [0].entries.memoryFree.value
+           variable-name: mem-free
+        -  type: single-value
+           method: jmespath
+           jmespath: entries.*.nestedStats | [0].entries.*.nestedStats | [0].entries.memoryTotal.value
+           variable-name: mem-total
+        -  type: single-value
+           method: jmespath
+           jmespath: entries.*.nestedStats | [0].entries.*.nestedStats | [0].entries.memoryUsed.value
+           variable-name: mem-used
+        -  type: single-value
+           method: jmespath
+           jmespath: entries.*.nestedStats | [0].entries.*.nestedStats | [0].entries.tmmMemoryFree.value
+           variable-name: tmm-mem-free
+        -  type: single-value
+           method: jmespath
+           jmespath: entries.*.nestedStats | [0].entries.*.nestedStats | [0].entries.tmmMemoryTotal.value
+           variable-name: tmm-mem-total
+        -  type: single-value
+           method: jmespath
+           jmespath: entries.*.nestedStats | [0].entries.*.nestedStats | [0].entries.tmmMemoryUsed.value
+           variable-name: tmm-mem-used

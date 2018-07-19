@@ -10,4 +10,7 @@ RUN pip install -r /source/requirements.txt
 
 RUN python setup.py develop
 
+RUN apt-get -y update
+RUN apt-get -y install vim
+
 ENTRYPOINT ["/usr/local/bin/metric-collector"]

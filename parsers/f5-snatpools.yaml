@@ -1,0 +1,20 @@
+parser:
+    measurement: f5_snatpool_stats
+    command: f5-snatpools
+    query: mgmt/tm/ltm/snatpool/stats
+    type: json
+    matches:
+    -   type: multi-value
+        method: jmespath
+        jmespath: entries.*.nestedStats
+        loop:
+            name: entries.tmName.description
+            sub-matches:
+                - jmespath: entries."serverside.bitsIn".value
+                  variable-name: bits-in
+                - jmespath: entries."serverside.bitsOut".value
+                  variable-name: bits-out
+                - jmespath: entries."serverside.curConns".value
+                  variable-name: current-conns
+                - jmespath: entries."serverside.totConns".value
+                  variable-name: total-conns
