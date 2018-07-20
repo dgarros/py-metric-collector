@@ -52,7 +52,10 @@ class F5Collector(object):
         logger.info('[%s]: Collecting Facts on device', self.hostname)
 
         self.facts['tmos_version'] = self.mgmt.tmos_version
-        self.facts['device'] = self.mgmt.hostname
+        if self.hostname:
+            self.facts['device'] = self.hostname
+        else:
+            self.facts['device'] = self.mgmt.hostname
 
         # TODO(Mayuresh) Collect any other relevant facts here
 
