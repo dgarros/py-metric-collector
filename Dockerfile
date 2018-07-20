@@ -1,4 +1,4 @@
-FROM python:3.6.5
+FROM python:3.6
 LABEL maintainer="dgarros@gmail.com"
 
 RUN mkdir /source
@@ -9,5 +9,8 @@ COPY . /source
 RUN pip install -r /source/requirements.txt
 
 RUN python setup.py develop
+
+RUN apt-get -y update
+RUN apt-get -y install vim
 
 ENTRYPOINT ["/usr/local/bin/metric-collector"]

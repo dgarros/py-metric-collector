@@ -1,0 +1,14 @@
+parser:
+    measurement: f5_cpu_usage
+    command: f5-cpu
+    query: mgmt/tm/sys/cpu
+    type: json
+    matches:
+    -   type: multi-value
+        method: jmespath
+        jmespath: entries.*.nestedStats | [0].entries.*.nestedStats | [0].entries.*.nestedStats
+        loop:
+            cpu-id: entries.cpuId.value
+            sub-matches:
+                - jmespath: entries.usageRatio.value
+                  variable-name: cpu_usage

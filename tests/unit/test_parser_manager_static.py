@@ -22,7 +22,6 @@ class Test_Validate_Main_Block(unittest.TestCase):
     pm = parser_manager.ParserManager()
     self.assertEqual( pm.str_2_int('notanint'), None )
     self.assertEqual( pm.str_2_int('Undefined'), None )
-    self.assertEqual( pm.str_2_int('100giga'), None )
 
   def test_str_2_int(self):
 

@@ -566,7 +566,12 @@ class ParserManager:
     key = match['variable-name']
     value = jmespath.search(match['jmespath'], json_data)
     if value is None:
-        return data
+      return data
+    if 'enumerate' in match:
+      for enum_key, enum_value in match['enumerate'].items():
+        if value == enum_key:
+          value = enum_value
+          break
     data['fields'][key] = value
     return data
 
@@ -597,6 +602,11 @@ class ParserManager:
         if 'transform' in sm:
           if sm['transform'] == 'str_2_int':
             value = self.str_2_int(value)
+        if 'enumerate' in sm:
+          for enum_key, enum_value in sm['enumerate'].items():
+            if value == enum_key:
+              value = enum_value
+              break
         data['fields'][key] = value
       
       # parse the sub-match tags
@@ -604,7 +614,7 @@ class ParserManager:
         if tag_name == 'sub-matches':
           continue
         tag_value = jmespath.search(tag_jmespath, node)
-        if not tag_value:
+        if tag_value is None:
           logger.debug('Tag value  %s not found in node', tag_jmespath)
           continue
         data['tags'][tag_name] = self.cleanup_tag(str(tag_value))
@@ -649,7 +659,6 @@ class ParserManager:
       value =  re.sub('G','000000000',value)
       value =  re.sub('M','000000',value)
       value =  re.sub('K','000',value)
-      value =  re.sub('bps', '', value)
       return(int(float(value)))
     elif kwargs["type"] == "string":
       return value
@@ -705,14 +714,16 @@ class ParserManager:
     elif re.match('[0-9]+', value) is None:
       return None
 
-    value =  re.sub('gbps','000000000', value, flags=re.IGNORECASE)
-    value =  re.sub('mbps','000000', value, flags=re.IGNORECASE)
-    value =  re.sub('kbps','000', value, flags=re.IGNORECASE)
-
-    value =  re.sub('G','000000000', value, flags=re.IGNORECASE)
-    value =  re.sub('M','000000', value, flags=re.IGNORECASE)
-    value =  re.sub('K','000', value, flags=re.IGNORECASE)
-
+    value = value.lower()
+    if "gbps" in value or "g" in value:
+      value = float(value.replace('gbps', '').replace('g', '')) * 1e9
+    elif "mbps" in value or 'm' in value:
+      value = float(value.replace('mbps', '').replace('m', '')) * 1e6
+    elif "kbps" in value:
+      value = float(value.replace('kbps', '').replace('k', '')) * 1e3
+    elif 'bps' in value:
+      value = float(value.replace('bps', ''))
+        
     try:
       return int(value)
     except:
