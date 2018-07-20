@@ -1,4 +1,4 @@
-FROM python:3.6.5
+FROM python:3.6
 LABEL maintainer="dgarros@gmail.com"
 
 RUN mkdir /source
