@@ -2,7 +2,6 @@
 from datetime import datetime 
 from datetime import timedelta
 
-from lxml import etree  # Used for xml manipulation
 from pprint import pformat
 import argparse 
 import subprocess
@@ -13,6 +12,7 @@ import traceback
 import logging.handlers
 import os 
 import pprint
+import queue
 import re 
 import requests
 import string  
@@ -23,10 +23,9 @@ import time
 import yaml
 import copy
 
-from metric_collector import parser_manager
-from metric_collector import netconf_collector
-from metric_collector import f5_rest_collector
-from metric_collector import host_manager
+from metric_collector import (
+    parser_manager, host_manager, collector, scheduler, utils
+)
 
 logging.getLogger("paramiko").setLevel(logging.INFO)
 logging.getLogger("ncclient").setLevel(logging.WARNING) # In order to remove http request from ssh/paramiko
@@ -47,7 +46,7 @@ def shard_host_list(shard_id, shard_size, hosts):
 
     shard_id starts at 1
     """
-
+    logger.info('Using shard_id: {} , shard_size: {} on {} hosts'.format(shard_id, shard_size, len(hosts)))
     if shard_id == 0:
         return False
     elif shard_id > shard_size:
@@ -61,162 +60,10 @@ def shard_host_list(shard_id, shard_size, hosts):
         if i % shard_size != shard_id:
             del hosts[hosts_list[i]]
 
+    logger.info('Got {} hosts in this shard'.format(len(hosts)))
     return hosts
 
 
-def print_format_influxdb(datapoints):
-    """
-    Print all datapoints to STDOUT in influxdb format for Telegraf to pick them up
-    """
-
-    for data in format_datapoints_inlineprotocol(datapoints):
-        print(data)
-
-    logger.debug('Printing Datapoint to STDOUT:')
-
-def post_format_influxdb(datapoints, addr="http://localhost:8186/write"):
-    
-    s = requests.session()
-    for datapoint in format_datapoints_inlineprotocol(datapoints):
-        s.post(addr, data=datapoint)
-
-    logger.info('Sending Datapoint to: %s' % addr)
-
-
-def format_datapoints_inlineprotocol(datapoints):
-    """
-    Format all datapoints with the inlineprotocol (influxdb)
-    Return a list of string formatted datapoint
-    """
-    
-    formatted_data = []
-
-    ## Format Tags
-    if datapoints is not None:
-      for datapoint in datapoints:
-          tags = ''
-          first_tag = 1
-          for tag, value in datapoint['tags'].items():
-
-              if first_tag == 1:
-                  first_tag = 0
-              else:
-                  tags = tags + ','
-
-              tags = tags + '{0}={1}'.format(tag,value)
-
-          ## Format Measurement
-          fields = ''
-          first_field = 1
-          for tag, value in datapoint['fields'].items():
-
-              if first_field == 1:
-                  first_field = 0
-              else:
-                  fields = fields + ','
-
-              fields = fields + '{0}={1}'.format(tag,value)
-
-          if datapoint['tags']:
-            formatted_data.append("{0},{1} {2}".format(datapoint['measurement'], tags, fields))
-          else:
-            formatted_data.append("{0} {1}".format(datapoint['measurement'], fields))
-
-    return formatted_data
-
-
-def collector(host_list, hosts_manager, parsers_manager, 
-                output_type='stdout', 
-                command_tags=['.*'], 
-                output_addr='http://localhost:8186/write'): 
-
-    for host in host_list: 
-        target_commands = hosts_manager.get_target_commands(host, tags=command_tags)
-        credential = hosts_manager.get_credentials(host)
-
-        host_reacheable = False
-
-        logger.info('Collector starting for: %s', host)
-        host_address = hosts_manager.get_address(host)
-        device_type = hosts_manager.get_device_type(host)
-        
-        if device_type == 'juniper':
-            dev = netconf_collector.NetconfCollector(
-                    host=host, address=host_address, credential=credential, parsers=parsers_manager)
-        elif device_type == 'f5':
-            dev = f5_rest_collector.F5Collector(
-                host=host, address=host_address, credential=credential, parsers=parsers_manager)
-        dev.connect()
-
-        if dev.is_connected():
-            dev.collect_facts()
-            host_reacheable = True
-
-        else:
-            logger.error('Unable to connect to %s, skipping', host)
-            host_reacheable = False
-
-        values = []
-        time_execution = 0
-        cmd_successful = 0
-        cmd_error = 0
-
-        if host_reacheable == True:
-            time_start = time.time()
-            
-            ### Execute commands on the device
-            for command in target_commands:
-                try:
-                    logger.info('[%s] Collecting > %s' % (host,command))
-                    values += dev.collect(command)
-                    cmd_successful += 1
-
-                except Exception as err:
-                    cmd_error += 1
-                    logger.error('An issue happened while collecting %s on %s > %s ' % (host,command, err))
-                    logger.error(traceback.format_exc())
-
-            ### Save collector statistics 
-            time_end = time.time()
-            time_execution = time_end - time_start
-
-        exec_time_datapoint = [{
-            'measurement': global_measurement_prefix + '_stats',
-            'tags': {
-                'device': dev.hostname
-            },
-            'fields': {
-                'execution_time_sec': "%.4f" % time_execution,
-                'nbr_commands':  cmd_successful + cmd_error,
-                'nbr_successful_commands':  cmd_successful,
-                'nbr_error_commands':  cmd_error,
-                'reacheable': int(host_reacheable),
-                'unreacheable': int(not host_reacheable)
-            }
-        }]
-
-        values += exec_time_datapoint
-
-        ### if context information are provided add these in the tag list
-        ### the context is a list of dict, go over all element and 
-        ### check if a similar tag already exist 
-        host_context = hosts_manager.get_context(host)
-        for value in values:
-            for item in host_context:
-                for k, v in item.items():
-                    if k in value['tags']: 
-                        continue
-                    value['tags'][k] = v
-
-        ### Send results to the right output
-        if output_type == 'stdout':
-            print_format_influxdb(values)
-        elif output_type == 'http':
-            post_format_influxdb(values, output_addr)
-        else:
-            logger.warn('Output format unknown: %s', output_type)
-      
-      
 ### ------------------------------------------------------------------------------
 ### Create and Parse Arguments
 ### -----------------------------------------------------------------------------    
@@ -268,8 +115,10 @@ def main():
     full_parser.add_argument("--output-type", default="stdout", choices=['stdout', 'http'], help="Type of output")
     full_parser.add_argument("--output-addr", default="http://localhost:8186/write", help="Addr information for output action")
 
-    full_parser.add_argument("--use-thread", default=True, help="Spawn multiple threads to collect the information on the devices")
-    full_parser.add_argument("--nbr-thread", default=10, help="Maximum number of thread to spawn (default 10)")
+    full_parser.add_argument("--no-collector-threads", action='store_true', help="Dont Spawn multiple threads to collect the information on the devices")
+    full_parser.add_argument("--nbr-collector-threads", type=int, default=10, help="Maximum number of collector thread to spawn (default 10)")
+    full_parser.add_argument("--max-worker-threads", type=int, default=1, help="Maximum number of worker threads per interval for scheduler")
+    full_parser.add_argument("--use-scheduler", action='store_true', help="Use scheduler")
 
     dynamic_args = vars(full_parser.parse_args())
 
@@ -419,7 +268,7 @@ def main():
             for document in yaml.load_all(f):
                 commands.append(document)
         except Exception as e:
-            logger.error('Error importing commands file: %s', commands_yaml_file)
+            logger.error('Error importing commands file: %s, %s', commands_yaml_file, str(e))
             sys.exit(0)
 
     general_commands = commands[0]
@@ -439,28 +288,44 @@ def main():
     target_hosts = hosts_manager.get_target_hosts(tags=tag_list)
     logger.debug('The following hosts are being selected: %s', target_hosts)
 
-    use_threads = dynamic_args['use_thread']
+    use_threads = not(dynamic_args['no_collector_threads'])
     
     if dynamic_args['cmd_tag']: 
         command_tags = dynamic_args['cmd_tag']
     else:
         command_tags = ['.*']
 
+    shard_id = dynamic_args.get('sharding')
+    max_worker_threads = dynamic_args.get('max_worker_threads', 1)
+    max_collector_threads = dynamic_args.get('nbr_collector_threads')
+
+    if dynamic_args.get('use_scheduler', False):
+        device_scheduler = scheduler.Scheduler(
+            shard_id, hosts_manager, parsers_manager,
+            dynamic_args['output_type'], dynamic_args['output_addr'],
+            max_worker_threads=max_worker_threads,
+            use_threads=use_threads, num_threads_per_worker=max_collector_threads
+        )
+        device_scheduler.add_hosts(target_hosts)
+        device_scheduler.start()  # blocking call
+        return
+
+    metric_collector = collector.Collector(hosts_manager, parsers_manager)
+
     if use_threads:
-        max_collector_threads = int(dynamic_args['nbr_thread'])
         target_hosts_lists = [target_hosts[x:x+int(len(target_hosts)/max_collector_threads+1)] for x in range(0, len(target_hosts), int(len(target_hosts)/max_collector_threads+1))]
 
         jobs = []
-        i=1
-        for target_hosts_list in target_hosts_lists:
+        values = []
+        output_queue = queue.Queue()
+
+        for (i, target_hosts_list) in enumerate(target_hosts_lists, 1):
             logger.info('Collector Thread-%s scheduled with following hosts: %s', i, target_hosts_list)
-            thread = threading.Thread(target=collector, 
-                                      kwargs={"host_list":target_hosts_list,
-                                              "parsers_manager":parsers_manager,
-                                              "hosts_manager":hosts_manager,
-                                              "output_type":dynamic_args['output_type'],
-                                              "output_addr":dynamic_args['output_addr'],
-                                              "command_tags": command_tags,
+            thread = threading.Thread(target=metric_collector.collect, 
+                                      args=('global',),
+                                      kwargs={"hosts": target_hosts_list,
+                                              "cmd_tags": command_tags,
+                                              "dump_queue": output_queue
                                               })
             jobs.append(thread)
             i=i+1
@@ -472,12 +337,11 @@ def main():
         # Ensure all of the threads have finished
         for j in jobs:
             j.join()
+            values += output_queue.get()
     
     else:
         # Execute everythings in the main thread
-        for host in target_hosts:
-            collector([host],parsers_manager=parsers_manager,
-                             hosts_manager=hosts_manager)
+        values = metric_collector.collect('global', hosts=target_hosts, cmd_tags=command_tags)
     
     ### -----------------------------------------------------
     ### Collect Global Statistics 
@@ -498,13 +362,15 @@ def main():
         global_datapoint[0]['tags']['sharding'] = dynamic_args['sharding']
     
     if use_threads:
-        global_datapoint[0]['fields']['nbr_threads'] = dynamic_args['nbr_thread']
+        global_datapoint[0]['fields']['nbr_threads'] = dynamic_args['nbr_collector_threads']
+
+    values += global_datapoint
 
     ### Send results to the right output
     if dynamic_args['output_type'] == 'stdout':
-        print_format_influxdb(global_datapoint)
+        utils.print_format_influxdb(values)
     elif dynamic_args['output_type'] == 'http':
-        post_format_influxdb(global_datapoint, dynamic_args['output_addr'],)
+        utils.post_format_influxdb(values, dynamic_args['output_addr'],)
     else:
         logger.warn('Output format unknown: %s', dynamic_args['output_type'])
     

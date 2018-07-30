@@ -245,7 +245,9 @@ class ParserManager:
   def __parse_xml__(self, parser=None, data=None):
 
     datas_to_return = []
-
+    if not data or not parser:
+        logger.debug('No data or parser found')
+        return datas_to_return
     logger.debug("will parse %s with xml" % parser['command'])
     # logger.debug("data %s" % data)
     ## Empty structure that needs to be filled and return for each input

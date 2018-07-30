@@ -7,7 +7,7 @@ class HostManager(object):
     Manage the list of hosts
     Help identify what credential & commands needs to be used for each device
     """
-    def __init__(self, inventory, credentials, commands, log='debug'):
+    def __init__(self, inventory, credentials, commands, log='info'):
 
         self.hosts = {}
         self.commands = {}
@@ -109,9 +109,16 @@ class HostManager(object):
                 elif isinstance(command_set['commands'], str):
                     command_list = command_list + command_set["commands"].strip().split("\n")
 
+            if 'interval' in command_set:
+                interval = int(command_set['interval'])
+            else:
+                # default = 2 min
+                interval = 120
+
             self.commands[command_grp] = {
                 'tags': tags,
-                'commands': command_list
+                'commands': command_list,
+                'interval_secs': interval
             }
 
         ### -------------------------------------------------------------    
@@ -211,26 +218,25 @@ class HostManager(object):
             return None
 
         host_tags = self.hosts[host]['tags']
-        target_commands = {}
 
         groups_matched = []
 
         ## First do a pass based on host tag and identify all group_command that matches
-        for group_command in sorted(self.commands.keys()):
+        for group_command, command in self.commands.items():
             for host_tag in host_tags:
-                for command_tag in self.commands[group_command]['tags']:
+                for command_tag in command['tags']:
                     if re.search(host_tag, command_tag, re.IGNORECASE):
                         groups_matched.append(group_command)
 
         ## Second do a pass on command tag on the list of group_command that passed the previous check
+        final = set()
         for group_command in groups_matched:
             for tag in tags:
                 for command_tag in self.commands[group_command]['tags']:
                     if re.search(tag, command_tag, re.IGNORECASE):
-                        for cmd in self.commands[group_command]["commands"]:
-                            target_commands[cmd] = 1
-                                
-        return sorted(target_commands.keys())
+                        final.add(group_command)
+
+        return [self.commands[group] for group in final]
 
 
     def get_credentials(self, host):
