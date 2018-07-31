@@ -104,22 +104,27 @@ class Test_Validate_Main_Block(unittest.TestCase):
                       credentials=cred_pwd_01,
                       commands=commands_1 )
 
-    self.assertEqual(hm.get_target_commands('router1'), 
-                    ['show cpu', 'show test2', 'show version'])
+    cmds = hm.get_target_commands('router1')
+    all_cmds = [c for cmd in cmds for c in cmd['commands']]
+    self.assertEqual(sorted(all_cmds), 
+                    sorted(['show cpu', 'show test2', 'show version']))
 
-    self.assertEqual(hm.get_target_commands('switch1'), 
-                    ['show test2', 'show test3'])
+    cmds = hm.get_target_commands('switch1')
+    all_cmds = [c for cmd in cmds for c in cmd['commands']]
+    self.assertEqual(sorted(all_cmds), 
+                    sorted(['show test2', 'show test3']))
   
   def test_get_target_commands_command_tag(self):
 
       hm = HostManager( inventory=inventory_2,
                         credentials=cred_pwd_01,
                         commands=commands_1 )
-
-      self.assertEqual(hm.get_target_commands('switch1',tags=['1m']), 
+      cmds = hm.get_target_commands('switch1',tags=['1m'])
+      self.assertEqual(cmds[0]['commands'], 
                       ['show test2'])
 
-      self.assertEqual(hm.get_target_commands('switch1',tags=['5m']), 
+      cmds = hm.get_target_commands('switch1',tags=['5m'])
+      self.assertEqual(cmds[0]['commands'], 
                       ['show test3'])
 
   def test_get_credentials_default_port(self):
