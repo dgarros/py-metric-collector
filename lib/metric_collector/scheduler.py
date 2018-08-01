@@ -42,22 +42,33 @@ class Scheduler:
             self.workers[interval] = interval_workers
         return interval_workers
 
+    def _get_hostcmds(self, hosts, cmd_tags):
+        ''' Group all the hosts by the intervals/commands to be run on them '''
+        hostcmds = {}
+        for host in hosts:
+            target_commands = self.host_mgr.get_target_commands(host, tags=cmd_tags)
+            for cmd in target_commands:
+                cmds_per_interval = hostcmds.setdefault(host, {}).setdefault(cmd['interval_secs'], [])
+                cmds_per_interval += cmd['commands']
+        return hostcmds
+
     def add_hosts(self, hosts, cmd_tags=None):
         '''  Create worker threads per interval and round-robin the hosts amongst them '''
         if not hosts:
             logger.error('Scheduler: No hosts')
             return
         tags = cmd_tags or ['.*']
-        for host in hosts:
-            target_commands = self.host_mgr.get_target_commands(host, tags=tags) 
-            if not target_commands:
-                logger.error('Scheduler: No commands found for host: {}'.format(host))
-            for cmd in target_commands:
-                workers = self._get_workers(cmd['interval_secs'])
+        hostcmds = self._get_hostcmds(hosts, tags)
+        if not hostcmds:
+            logger.error('Scheduler: No commands found to collect')
+            return
+        for host, interval_cmds in hostcmds.items():
+            for interval, cmds in interval_cmds.items():
+                workers = self._get_workers(interval)
                 next_worker = next(workers)
-                next_worker.add_host(host, cmd['commands'])
+                next_worker.add_host(host, cmds)
                 self.working.add(next_worker)
-
+            
     def start(self):
         ''' Start all worker threads and block until stopped '''
         if len(self.working) == 0:
