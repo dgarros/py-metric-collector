@@ -14,7 +14,7 @@ class Scheduler:
         self.shard_id = shard_id
         self.workers = {}
         self.working = set()
-        self.collector = collector.Collector(host_mgr, parser_mgr)
+        self.collector = collector.Collector(host_mgr, parser_mgr, output_type, output_addr)
         self.host_mgr = host_mgr
         self.max_worker_threads = max_worker_threads
         self.output_type = output_type
@@ -91,14 +91,14 @@ class Worker(threading.Thread):
 
     def __init__(self, interval, collector, output_type, output_addr, use_threads, num_collector_threads):
         super().__init__()
+        self.setDaemon(True)
         self.interval = interval
         self.collector = collector
-        self.num_collector_threads = num_collector_threads
-        self.use_threads = use_threads
         self.output_type = output_type
         self.output_addr = output_addr
+        self.num_collector_threads = num_collector_threads
+        self.use_threads = use_threads
         self.hostcmds = {}
-        self._queue = queue.Queue()
         self._run = True
 
     def set_name(self, name, shard_id):
@@ -122,7 +122,6 @@ class Worker(threading.Thread):
             hosts = list(self.hostcmds.keys())
             time_start = time.time()
             if self.use_threads:
-                values = []
                 target_hosts_lists = [
                     hosts[x: x + int(len(hosts) / self.num_collector_threads + 1)]
                         for x in range(
@@ -138,19 +137,17 @@ class Worker(threading.Thread):
                         hostcmds[host] = self.hostcmds[host]
                     job = threading.Thread(target=self.collector.collect,
                                            args=(self.name,),
-                                           kwargs={"host_cmds": hostcmds,
-                                                   "dump_queue": self._queue})
+                                           kwargs={"host_cmds": hostcmds})
                     job.start()
                     jobs.append(job)
 
                 # Ensure all of the threads have finished
                 for j in jobs:
                     j.join()
-                    values += self._queue.get()
 
             else:
                 # Execute everythings in the main thread
-                values = self.collector.collect(self.name, host_cmds=self.hostcmds)
+                self.collector.collect(self.name, host_cmds=self.hostcmds)
 
             time_end = time.time()
             time_execution = time_end - time_start
@@ -170,13 +167,11 @@ class Worker(threading.Thread):
             if self.use_threads:
                 global_datapoint[0]['fields']['nbr_threads'] = self.num_collector_threads
 
-            values += global_datapoint
-
             ### Send results to the right output
             if self.output_type == 'stdout':
-                utils.print_format_influxdb(values)
+                utils.print_format_influxdb(global_datapoint)
             elif self.output_type == 'http':
-                utils.post_format_influxdb(values, self.output_addr)
+                utils.post_format_influxdb(global_datapoint, self.output_addr)
             else:
                 logger.warn('{}: Output format unknown: {}'.format(self.name, self.output_type))
 

@@ -12,7 +12,6 @@ import traceback
 import logging.handlers
 import os 
 import pprint
-import queue
 import re 
 import requests
 import string  
@@ -97,7 +96,7 @@ def main():
     full_parser.add_argument("--logdir", default="logs", help="Directory where to store logs")
     
     full_parser.add_argument("--sharding",  help="Define if the script is part of a shard need to include the place in the shard and the size of the shard [0/3]")
-    full_parser.add_argument("--sharding-offset", default=True, help="Define an offset needs to be applied to the shard_id")
+    full_parser.add_argument("--sharding-offset", default=False, help="Define an offset needs to be applied to the shard_id")
 
     full_parser.add_argument("--parserdir", default="parsers", help="Directory where to find parsers")
     full_parser.add_argument("--timeout", default=600, help="Default Timeout for Netconf session")
@@ -310,22 +309,20 @@ def main():
         device_scheduler.start()  # blocking call
         return
 
-    metric_collector = collector.Collector(hosts_manager, parsers_manager)
+    coll = collector.Collector(hosts_manager, parsers_manager,
+        dynamic_args['output_type'], dynamic_args['output_addr'])
 
     if use_threads:
         target_hosts_lists = [target_hosts[x:x+int(len(target_hosts)/max_collector_threads+1)] for x in range(0, len(target_hosts), int(len(target_hosts)/max_collector_threads+1))]
 
         jobs = []
-        values = []
-        output_queue = queue.Queue()
 
         for (i, target_hosts_list) in enumerate(target_hosts_lists, 1):
             logger.info('Collector Thread-%s scheduled with following hosts: %s', i, target_hosts_list)
-            thread = threading.Thread(target=metric_collector.collect, 
+            thread = threading.Thread(target=coll.collect, 
                                       args=('global',),
                                       kwargs={"hosts": target_hosts_list,
-                                              "cmd_tags": command_tags,
-                                              "dump_queue": output_queue
+                                              "cmd_tags": command_tags
                                               })
             jobs.append(thread)
             i=i+1
@@ -337,11 +334,10 @@ def main():
         # Ensure all of the threads have finished
         for j in jobs:
             j.join()
-            values += output_queue.get()
     
     else:
         # Execute everythings in the main thread
-        values = metric_collector.collect('global', hosts=target_hosts, cmd_tags=command_tags)
+        coll.collect('global', hosts=target_hosts, cmd_tags=command_tags)
     
     ### -----------------------------------------------------
     ### Collect Global Statistics 
@@ -364,13 +360,11 @@ def main():
     if use_threads:
         global_datapoint[0]['fields']['nbr_threads'] = dynamic_args['nbr_collector_threads']
 
-    values += global_datapoint
-
     ### Send results to the right output
     if dynamic_args['output_type'] == 'stdout':
-        utils.print_format_influxdb(values)
+        utils.print_format_influxdb(global_datapoint)
     elif dynamic_args['output_type'] == 'http':
-        utils.post_format_influxdb(values, dynamic_args['output_addr'],)
+        utils.post_format_influxdb(global_datapoint, dynamic_args['output_addr'],)
     else:
         logger.warn('Output format unknown: %s', dynamic_args['output_type'])
     
