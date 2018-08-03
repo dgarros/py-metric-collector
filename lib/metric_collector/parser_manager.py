@@ -251,13 +251,13 @@ class ParserManager:
 
     for match in parser["data"]["parser"]["matches"]:
         ## Empty structure that needs to be filled and return for each input
-        data_structure = {
+
+        if match["type"] == "single-value":
+          data_structure = {
             'measurement': None,
             'tags': {},
             'fields': {}
-        }
-
-        if match["type"] == "single-value":
+          }
           
           logger.debug('Looking for a match: %s', match["xpath"])
           value_tmp = data.xpath(match["xpath"])
@@ -292,6 +292,11 @@ class ParserManager:
 
           nodes = data.xpath(match["xpath"])
           for node in nodes:
+            data_structure = {
+              'measurement': None,
+              'tags': {},
+              'fields': {}
+            }
 
             ## Assign measurement name if defined 
             if 'measurement' in match:
