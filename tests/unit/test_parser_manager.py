@@ -106,7 +106,7 @@ class Test_Validate_Main_Block(unittest.TestCase):
         'tags': {   'key': 'inet6.0'}
     }
 
-    data = pm.parse( input="show-route-summary.parser.yaml", data=xml_data.encode() )
+    data = list(pm.parse( input="show-route-summary.parser.yaml", data=xml_data.encode()))
 
     self.assertDictEqual( expected_dict_0, data[0] )
     self.assertDictEqual( expected_dict_1, data[1] )
@@ -148,7 +148,7 @@ class Test_Validate_Main_Block(unittest.TestCase):
     xml_data = open( test_dir + "/rpc-reply/show_system_processes_extensive/command_short.xml").read()
 
     ## Return a list dict
-    data = pm.parse( input="show-system-processes-extensive.parser.yaml", data=xml_data.encode() )
+    data = list(pm.parse( input="show-system-processes-extensive.parser.yaml", data=xml_data.encode()))
 
     # pp.pprint(data)
     expected_dict_1 = {
