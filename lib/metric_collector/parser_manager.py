@@ -244,7 +244,7 @@ class ParserManager:
 
   def __parse_xml__(self, parser=None, data=None):
 
-    if data is None or parser is None:
+    if not data or not parser:
         logger.debug('No data or parser found')
         return
     logger.debug("will parse %s with xml" % parser['command'])
@@ -262,29 +262,25 @@ class ParserManager:
           logger.debug('Looking for a match: %s', match["xpath"])
           value_tmp = data.xpath(match["xpath"])
           if value_tmp:
-         
-            try:
-              int(float(value_tmp))
-            except ValueError:
-              continue
             if 'variable-name' in match:
               key_name = match['variable-name']
             else: 
               key_name = self.cleanup_xpath(match['xpath'])
 
             if isinstance(value_tmp[0], str):
-              data_structure['fields'][key_name] = value_tmp[0].strip()
+              value_tmp = value_tmp[0].strip()
             else:
-              data_structure['fields'][key_name] = value_tmp[0].text.strip()
+              value_tmp = value_tmp[0].text.strip()
+            if not self.is_valid_field(value_tmp):
+              continue
+            data_structure['fields'][key_name] = value_tmp
 
           else:
             logger.debug('No match found: %s', match["xpath"])
             if 'default-if-missing' in match:
               logger.debug('Inserting default-if-missing value: %s', match["default-if-missing"])
               value_tmp = match["default-if-missing"]
-              try:
-                int(float(value_tmp))
-              except ValueError:
+              if not self.is_valid_field(value_tmp):
                 continue
 
               if 'variable-name' in match:
@@ -332,9 +328,7 @@ class ParserManager:
                           # Begin function  (pero pendiente de ver si variable-type existe y su valor)
                           if "variable-type" in sub_match["variables"][i]:
                             value = self.eval_variable_value(value, type=sub_match["variables"][i]["variable-type"])
-                            try:
-                              int(float(value))
-                            except ValueError:
+                            if not self.is_valid_field(value):
                               continue
                           data_structure['fields'][variable_name] = value
                       else:
@@ -374,9 +368,7 @@ class ParserManager:
                         value_tmp = 0
 
                     if value_tmp and key_tmp not in data_structure['fields']:
-                      try:
-                        int(float(value_tmp))
-                      except ValueError:
+                      if not self.is_valid_field(value_tmp):
                         continue
                       data_structure['fields'][key_tmp] = value_tmp
 
@@ -390,9 +382,7 @@ class ParserManager:
                     else: 
                       key_tmp = self.cleanup_xpath(sub_match['xpath'])
                    
-                    try:
-                      int(float(value_tmp))
-                    except ValueError:
+                    if not self.is_valid_field(value_tmp):
                       continue
                     data_structure['fields'][key_tmp] = value_tmp
 
@@ -452,9 +442,7 @@ class ParserManager:
         else:
           value = row[idx]
 
-        try:
-          int(float(value))
-        except ValueError:
+        if not self.is_valid_field(value):
           continue
         data_structure['fields'][field_name] = str(value)
         
@@ -565,10 +553,6 @@ class ParserManager:
     # parse the match fields
     key = match['variable-name']
     value = jmespath.search(match['jmespath'], json_data)
-    try:
-      int(float(value))
-    except ValueError:
-      return data
     if value is None:
       return data
     if 'enumerate' in match:
@@ -576,6 +560,8 @@ class ParserManager:
         if value == enum_key:
           value = enum_value
           break
+    if not self.is_valid_field(value):
+      return data
     data['fields'][key] = value
     return data
 
@@ -611,9 +597,7 @@ class ParserManager:
             if value == enum_key:
               value = enum_value
               break
-        try:
-          int(float(value))
-        except ValueError:
+        if not self.is_valid_field(value):
           continue
         data['fields'][key] = value
       
@@ -736,6 +720,15 @@ class ParserManager:
       return int(value)
     except:
       return None
+
+  @staticmethod
+  def is_valid_field(field):
+    """ Make sure a field value is always a number """
+    try:
+      int(float(field))
+    except ValueError:
+      return False
+    return True
 
 
 
