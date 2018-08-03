@@ -6,6 +6,7 @@ import pprint
 import json
 from os import path
 from metric_collector import parser_manager
+from lxml import etree
 
 here = path.abspath(path.dirname(__file__))
 
@@ -86,6 +87,7 @@ class Test_Validate_Main_Block(unittest.TestCase):
 
     ## Read XML content
     xml_data = open( test_dir + "/rpc-reply/show_route_summary/command.xml").read()
+    xml_etree = etree.fromstring(xml_data)
 
     expected_dict_0 = {
         'fields': {   'active-route-count': '16',
@@ -106,7 +108,7 @@ class Test_Validate_Main_Block(unittest.TestCase):
         'tags': {   'key': 'inet6.0'}
     }
 
-    data = list(pm.parse( input="show-route-summary.parser.yaml", data=xml_data.encode()))
+    data = list(pm.parse( input="show-route-summary.parser.yaml", data=xml_etree))
 
     self.assertDictEqual( expected_dict_0, data[0] )
     self.assertDictEqual( expected_dict_1, data[1] )
