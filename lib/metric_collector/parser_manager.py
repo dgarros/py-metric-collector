@@ -249,10 +249,6 @@ class ParserManager:
         return
     logger.debug("will parse %s with xml" % parser['command'])
 
-    clean_data = re.sub(r"\sxmlns\=\".*\"", '', data.decode(), re.M)
-    clean_data = re.sub(r"\sjunos\:", ' ', clean_data, re.M)
-    xml_data = etree.fromstring(clean_data, parser=etree.XMLParser(collect_ids=False))
-
     for match in parser["data"]["parser"]["matches"]:
         ## Empty structure that needs to be filled and return for each input
         data_structure = {
@@ -264,7 +260,7 @@ class ParserManager:
         if match["type"] == "single-value":
           
           logger.debug('Looking for a match: %s', match["xpath"])
-          value_tmp = xml_data.xpath(match["xpath"])
+          value_tmp = data.xpath(match["xpath"])
           if value_tmp:
           
             if 'variable-name' in match:
@@ -294,7 +290,7 @@ class ParserManager:
 
         elif match["type"] == "multi-value":
 
-          nodes = xml_data.xpath(match["xpath"])
+          nodes = data.xpath(match["xpath"])
           for node in nodes:
 
             ## Assign measurement name if defined 

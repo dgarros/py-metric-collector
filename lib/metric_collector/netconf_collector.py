@@ -132,21 +132,23 @@ class NetconfCollector():
 
     try:
       logger.debug('[%s]: execute : %s', self.hostname, command)
-      # Remember... all rpc must have format=xml at execution time,
+      # the data returned is already in etree format
       command_result = self.pyez.rpc.cli(command, format="xml")
     except RpcError as err:
       rpc_error = err.__repr__()
       logger.error("Error found on <%s> executing command: %s, error: %s:", self.hostname, command ,rpc_error)
       return False
 
-    return etree.tostring(command_result)
+    return command_result
 
   def collect( self, command=None ):
 
     # find the command to execute from the parser directly
     parser = self.parsers.get_parser_for(command)
-    raw_data = self.execute_command(parser['data']['parser']['command'])
-    datapoints = self.parsers.parse(input=command, data=raw_data)
+    data = self.execute_command(parser['data']['parser']['command'])
+    if parser['data']['parser']['type'] == 'textfsm':
+        data = etree.tostring(data)
+    datapoints = self.parsers.parse(input=command, data=data)
     
     if datapoints is not None:
 
