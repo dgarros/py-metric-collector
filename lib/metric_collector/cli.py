@@ -96,7 +96,7 @@ def main():
     full_parser.add_argument("--logdir", default="logs", help="Directory where to store logs")
     
     full_parser.add_argument("--sharding",  help="Define if the script is part of a shard need to include the place in the shard and the size of the shard [0/3]")
-    full_parser.add_argument("--sharding-offset", default=False, help="Define an offset needs to be applied to the shard_id")
+    full_parser.add_argument("--sharding-offset", default=True, help="Define an offset needs to be applied to the shard_id")
 
     full_parser.add_argument("--parserdir", default="parsers", help="Directory where to find parsers")
     full_parser.add_argument("--timeout", default=600, help="Default Timeout for Netconf session")
