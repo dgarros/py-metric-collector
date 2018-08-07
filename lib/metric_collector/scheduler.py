@@ -164,7 +164,7 @@ class Worker(threading.Thread):
             if os.environ.get('NOMAD_JOB_NAME'):
                 worker_datapoint[0]['tags']['nomad_job_name'] = os.environ['NOMAD_JOB_NAME']
             if os.environ.get('NOMAD_ALLOC_INDEX'):
-                worker_datapoint[0]['tags']['nomad_alloc_index'] = os.environ['NOMAD_ALLOC_INDEX']1
+                worker_datapoint[0]['tags']['nomad_alloc_index'] = os.environ['NOMAD_ALLOC_INDEX']
 
 
             ### Send results to the right output
