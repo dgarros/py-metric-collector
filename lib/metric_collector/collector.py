@@ -85,8 +85,8 @@ class Collector:
                 time_end = time.time()
                 time_execution = time_end - time_start
 
-            exec_time_datapoint = [{
-                'measurement': global_measurement_prefix + '_collector_stats',
+            host_time_datapoint = [{
+                'measurement': global_measurement_prefix + '_host_collector_stats',
                 'tags': {
                     'device': dev.hostname,
                     'worker_name': worker_name
@@ -100,8 +100,13 @@ class Collector:
                     'unreacheable': int(not host_reachable)
                 }
             }]
+            if os.environ.get('NOMAD_JOB_NAME'):
+                host_time_datapoint[0]['tags']['nomad_job_name'] = os.environ['NOMAD_JOB_NAME']
+            if os.environ.get('NOMAD_ALLOC_INDEX'):
+                host_time_datapoint[0]['tags']['nomad_alloc_index'] = os.environ['NOMAD_ALLOC_INDEX']
 
-            values.append((n for n in exec_time_datapoint))
+
+            values.append((n for n in host_time_datapoint))
             values = itertools.chain(*values)
 
             ### Send results to the right output

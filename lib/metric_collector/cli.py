@@ -300,7 +300,7 @@ def main():
 
     if dynamic_args.get('use_scheduler', False):
         device_scheduler = scheduler.Scheduler(
-            shard_id, hosts_manager, parsers_manager,
+            hosts_manager, parsers_manager,
             dynamic_args['output_type'], dynamic_args['output_addr'],
             max_worker_threads=max_worker_threads,
             use_threads=use_threads, num_threads_per_worker=max_collector_threads

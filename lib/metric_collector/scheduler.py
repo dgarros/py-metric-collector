@@ -2,6 +2,7 @@ import logging
 import queue
 import threading
 import time
+import os
 from itertools import cycle
 from metric_collector import collector, utils
 
@@ -9,9 +10,8 @@ logger = logging.getLogger('scheduler')
 
 class Scheduler:
 
-    def __init__(self, shard_id, host_mgr, parser_mgr, output_type, output_addr,
+    def __init__(self, host_mgr, parser_mgr, output_type, output_addr,
                  max_worker_threads=1, use_threads=True, num_threads_per_worker=10):
-        self.shard_id = shard_id
         self.workers = {}
         self.working = set()
         self.collector = collector.Collector(host_mgr, parser_mgr, output_type, output_addr)
@@ -25,7 +25,7 @@ class Scheduler:
         self.default_worker = Worker(
             120, self.collector, self.output_type, self.output_addr,
             self.use_threads, self.num_threads_per_worker)
-        self.default_worker.set_name('Default-120sec', shard_id)
+        self.default_worker.set_name('Default-120sec')
 
     def _get_workers(self, interval):
         ''' Spin off worker threads for each type of command based on interval '''
@@ -37,7 +37,7 @@ class Scheduler:
                 for _ in range(self.max_worker_threads)
             ]
             for i, w in enumerate(workers, 1):
-                w.set_name('Worker-{}sec-{}'.format(interval, i), self.shard_id)
+                w.set_name('Worker-{}sec-{}'.format(interval, i))
             interval_workers = cycle(workers)
             self.workers[interval] = interval_workers
         return interval_workers
@@ -101,9 +101,8 @@ class Worker(threading.Thread):
         self.hostcmds = {}
         self._run = True
 
-    def set_name(self, name, shard_id):
+    def set_name(self, name):
         self.name = name
-        self.shard_id = shard_id
 
     def stop(self):
         self._run = False
@@ -151,7 +150,7 @@ class Worker(threading.Thread):
 
             time_end = time.time()
             time_execution = time_end - time_start
-            global_datapoint = [
+            worker_datapoint = [
                 {
                     'measurement': collector.global_measurement_prefix + '_worker_stats',
                     'tags': {'worker_name': self.name},
@@ -162,18 +161,20 @@ class Worker(threading.Thread):
                     }
                 }
             ]
-            if self.shard_id is not None:
-                global_datapoint[0]['tags']['shard_id'] = self.shard_id
-            if self.use_threads:
-                global_datapoint[0]['fields']['nbr_threads'] = self.num_collector_threads
+            if os.environ.get('NOMAD_JOB_NAME'):
+                worker_datapoint[0]['tags']['nomad_job_name'] = os.environ['NOMAD_JOB_NAME']
+            if os.environ.get('NOMAD_ALLOC_INDEX'):
+                worker_datapoint[0]['tags']['nomad_alloc_index'] = os.environ['NOMAD_ALLOC_INDEX']1
+
 
             ### Send results to the right output
             if self.output_type == 'stdout':
-                utils.print_format_influxdb(global_datapoint)
+                utils.print_format_influxdb(worker_datapoint)
             elif self.output_type == 'http':
-                utils.post_format_influxdb(global_datapoint, self.output_addr)
+                utils.post_format_influxdb(worker_datapoint, self.output_addr)
             else:
                 logger.warn('{}: Output format unknown: {}'.format(self.name, self.output_type))
 
+            logger.info('Worker {} took {} seconds to run'.format(self.name, time_execution))
             # sleep until next interval
             time.sleep(self.interval)
