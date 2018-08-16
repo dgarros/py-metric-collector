@@ -7,18 +7,15 @@ class HostManager(object):
     Manage the list of hosts
     Help identify what credential & commands needs to be used for each device
     """
-    def __init__(self, inventory, credentials, commands, log='info'):
+    def __init__(self, credentials, commands, log='info'):
 
-        self.hosts = {}
         self.commands = {}
         self.credentials = {}
 
         ### -------------------------------------------------------------
         ### Check data format
         ### -------------------------------------------------------------
-        if not isinstance(inventory, dict):
-            raise Exception("inventory must be a dictionnary of host")
-        elif not isinstance(credentials, dict):
+        if not isinstance(credentials, dict):
             raise Exception("credential must be a dictionnary")
         elif not isinstance(commands, dict):
             raise Exception("commands must be a dictionnary")
@@ -36,37 +33,6 @@ class HostManager(object):
             self.log.setLevel(logging.ERROR)
         else:
             self.log.setLevel(logging.INFO)
-
-        ### -------------------------------------------------------------    
-        ### Check list of hosts provided
-        ### -------------------------------------------------------------
-        for host in inventory.keys():
-            if isinstance(inventory[host], dict):
-
-                ## TODO check if the dictionnary contain at least tags and address
-                if 'tags' not in inventory[host]:
-                    self.log.warn('host: tags are missing for %s, not supported, skipping' % host)
-                    continue
-                elif 'address' not in inventory[host]:
-                    self.log.warn('host: address is missing for %s, not supported, skipping' % host)
-                    continue
-
-                self.hosts[host] = inventory[host]
-
-                if 'context' not in self.hosts[host]: 
-                    self.hosts[host]['context'] = []
-                
-            elif isinstance(inventory[host], str):
-
-                tags = inventory[host].split()
-                self.hosts[host] = {
-                    'tags': tags,
-                    'address': host,
-                    'context': []
-                }
-
-            else:
-                self.log.warn('host: format for %s not spported, skipping' % host)
 
         ### -------------------------------------------------------------    
         ### Check commands provided
@@ -184,8 +150,43 @@ class HostManager(object):
                 credential['port'] = credentials[credential_grp]['port']
 
             self.credentials[credential_grp] = credential
-                   
-                    
+
+
+    def update_hosts(self, inventory):
+        self.hosts = {}
+        if not isinstance(inventory, dict):
+            raise Exception("inventory must be a dictionnary of host")
+        ### -------------------------------------------------------------
+        ### Check list of hosts provided
+        ### -------------------------------------------------------------
+        for host in inventory.keys():
+            if isinstance(inventory[host], dict):
+
+                ## TODO check if the dictionnary contain at least tags and address
+                if 'tags' not in inventory[host]:
+                    self.log.warn('host: tags are missing for %s, not supported, skipping' % host)
+                    continue
+                elif 'address' not in inventory[host]:
+                    self.log.warn('host: address is missing for %s, not supported, skipping' % host)
+                    continue
+
+                self.hosts[host] = inventory[host]
+
+                if 'context' not in self.hosts[host]:
+                    self.hosts[host]['context'] = []
+
+            elif isinstance(inventory[host], str):
+
+                tags = inventory[host].split()
+                self.hosts[host] = {
+                    'tags': tags,
+                    'address': host,
+                    'context': []
+                }
+
+            else:
+                self.log.warn('host: format for %s not spported, skipping' % host)
+
 
     def get_target_hosts(self, tags=[]):
         """

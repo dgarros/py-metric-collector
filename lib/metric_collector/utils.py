@@ -55,9 +55,9 @@ def format_datapoints_inlineprotocol(datapoints):
             fields = fields + '{0}={1}'.format(tag,value)
 
         if datapoint['tags']:
-          formatted_data = "{0},{1} {2}".format(datapoint['measurement'], tags, fields)
+          formatted_data = "{0},{1} {2} {3}".format(datapoint['measurement'], tags, fields, datapoint['timestamp'])
         else:
-          formatted_data = "{0} {1}".format(datapoint['measurement'], fields)
+          formatted_data = "{0} {1} {2}".format(datapoint['measurement'], fields, datapoint['timestamp'])
         yield formatted_data
 
 

@@ -35,9 +35,6 @@ logger = logging.getLogger("main")
 
 global_measurement_prefix = 'metric_collector'
 
-### ------------------------------------------------------------------------------
-### Defining the classes and procedures used later on the script
-### ------------------------------------------------------------------------------
 
 def shard_host_list(shard_id, shard_size, hosts): 
     """
@@ -61,6 +58,65 @@ def shard_host_list(shard_id, shard_size, hosts):
 
     logger.info('Got {} hosts in this shard'.format(len(hosts)))
     return hosts
+
+
+def select_hosts(hosts_file, tag_list, sharding, sharding_offset, scheduler=None, refresh_interval=None):
+    """
+    Parse a host file or pull hosts from dynamic inventory , and add it to the scheduler periodically
+    """
+    hosts = {}
+    if not os.path.isfile(hosts_file):
+        hosts_file = BASE_DIR + "/"+ hosts_file
+
+    logger.info('Importing host file: %s', hosts_file)
+
+    is_yaml = False
+    is_exec = False
+    try:
+        with open(hosts_file) as f:
+            hosts = yaml.load(f)
+        is_yaml = True
+    except Exception as e:
+        logger.debug('Error importing host file in yaml: %s > %s' % (hosts_file, e))
+
+    if not is_yaml:
+        try:
+            output_str = run(["python", hosts_file], stdout=subprocess.PIPE)
+            hosts = json.loads(output_str.stdout)
+            is_exec = True
+        except Exception as e:
+            logger.debug('Error importing executing host file: %s > %s' % (hosts_file, e))
+
+    if not is_yaml and not is_exec:
+        logger.error('Unable to import the hosts file (%s), either in Yaml or from a dynamic inventory',hosts_file)
+        sys.exit(0)
+
+    if sharding:
+        sharding_param = sharding.split('/')
+
+        if len(sharding_param) != 2:
+            logger.error('Sharding Parameters not valid %s' % sharding)
+            sys.exit(0)
+
+        shard_id = int(sharding_param[0])
+        shard_size = int(sharding_param[1])
+
+        if sharding_offset:
+            shard_id += 1
+
+        hosts = shard_host_list(shard_id, shard_size, hosts)
+
+    if scheduler:
+        scheduler.add_hosts(hosts, host_tags=tag_list)
+        t = threading.Timer(
+            refresh_interval, select_hosts,
+            args=(hosts_file, tag_list, sharding, sharding_offset),
+            kwargs={'scheduler': scheduler, 'refresh_interval': refresh_interval},
+        )
+        t.setDaemon(True)
+        t.start()
+    else:
+        return hosts
 
 
 ### ------------------------------------------------------------------------------
@@ -118,6 +174,7 @@ def main():
     full_parser.add_argument("--nbr-collector-threads", type=int, default=10, help="Maximum number of collector thread to spawn (default 10)")
     full_parser.add_argument("--max-worker-threads", type=int, default=1, help="Maximum number of worker threads per interval for scheduler")
     full_parser.add_argument("--use-scheduler", action='store_true', help="Use scheduler")
+    full_parser.add_argument("--hosts_refresh_interval", type=int, default=3*60*60, help="Interval to periodically refresh dynamic host inventory")
 
     dynamic_args = vars(full_parser.parse_args())
 
@@ -199,58 +256,6 @@ def main():
         sys.exit(0)
 
     ### ------------------------------------------------------------------------------
-    ###  LOAD all hosts     
-    ###    Host list can come from a yaml file or from a dynamic inventory script
-    ###    Try to load as Yaml First, than try to execute the script an import JSON
-    ### ------------------------------------------------------------------------------
-    
-    hosts = {}
-
-    if os.path.isfile(dynamic_args['hosts']):
-        hosts_file = dynamic_args['hosts']
-    else:
-        hosts_file = BASE_DIR + "/"+ dynamic_args['hosts']
-
-    logger.info('Importing host file: %s ',hosts_file)
-
-    is_yaml = False
-    is_exec = False
-    try:
-        with open(hosts_file) as f:
-            hosts = yaml.load(f)
-        is_yaml = True
-    except Exception as e:
-        logger.debug('Error importing host file in yaml: %s > %s' % (hosts_file, e))
-
-    if not is_yaml:
-        try:
-            output_str = run(["python", hosts_file], stdout=subprocess.PIPE)
-            hosts = json.loads(output_str.stdout)
-            is_exec = True
-        except Exception as e:
-            logger.debug('Error importing executing host file: %s > %s' % (hosts_file, e))
-
-    if not is_yaml and not is_exec:
-        logger.error('Unable to import the hosts file (%s), either in Yaml or from a dynamic inventory',hosts_file)
-        sys.exit(0)
-
-    if 'sharding' in dynamic_args and dynamic_args['sharding'] != None:
-
-        sharding_param = dynamic_args['sharding'].split('/')
-
-        if len(sharding_param) != 2:
-            logger.error('Sharding Parameters not valid %s' % dynamic_args['sharding'])
-            sys.exit(0)
-
-        shard_id = int(sharding_param[0])
-        shard_size = int(sharding_param[1])
-
-        if dynamic_args['sharding_offset']:
-            shard_id += 1
-
-        hosts = shard_host_list(shard_id, shard_size, hosts)
-
-    ### ------------------------------------------------------------------------------
     ### LOAD all commands with their tags in a dict           
     ### ------------------------------------------------------------------------------
     commands_yaml_file = ''
@@ -272,21 +277,6 @@ def main():
 
     general_commands = commands[0]
 
-    ### ------------------------------------------------------------------------------
-    ### LOAD all parsers                                      
-    ### ------------------------------------------------------------------------------
-    parsers_manager = parser_manager.ParserManager( parser_dirs = dynamic_args['parserdir'] )
-    hosts_manager = host_manager.HostManager(
-        inventory=hosts, 
-        credentials=credentials,
-        commands=general_commands
-    )
-
-    logger.debug('Getting hosts that matches the specified tags')
-    #  Get all hosts that matches with the tags
-    target_hosts = hosts_manager.get_target_hosts(tags=tag_list)
-    logger.debug('The following hosts are being selected: %s', target_hosts)
-
     use_threads = not(dynamic_args['no_collector_threads'])
     
     if dynamic_args['cmd_tag']: 
@@ -294,23 +284,39 @@ def main():
     else:
         command_tags = ['.*']
 
-    shard_id = dynamic_args.get('sharding')
+    sharding = dynamic_args.get('sharding')
+    sharding_offset = dynamic_args.get('sharding_offset')
     max_worker_threads = dynamic_args.get('max_worker_threads', 1)
     max_collector_threads = dynamic_args.get('nbr_collector_threads')
 
     if dynamic_args.get('use_scheduler', False):
         device_scheduler = scheduler.Scheduler(
-            hosts_manager, parsers_manager,
+            credentials, general_commands,  dynamic_args['parserdir'],
             dynamic_args['output_type'], dynamic_args['output_addr'],
             max_worker_threads=max_worker_threads,
             use_threads=use_threads, num_threads_per_worker=max_collector_threads
         )
-        device_scheduler.add_hosts(target_hosts)
+        hri = dynamic_args.get('hosts_refresh_interval', 6 * 60 * 60)
+        select_hosts(
+            dynamic_args['hosts'], tag_list, sharding, sharding_offset,
+            scheduler=device_scheduler,
+            refresh_interval=float(hri),
+        )
         device_scheduler.start()  # blocking call
         return
 
-    coll = collector.Collector(hosts_manager, parsers_manager,
-        dynamic_args['output_type'], dynamic_args['output_addr'])
+    ### ------------------------------------------------------------------------------
+    ### LOAD all parsers
+    ### ------------------------------------------------------------------------------
+    parsers_manager = parser_manager.ParserManager( parser_dirs = dynamic_args['parserdir'] )
+    hosts_conf = select_hosts(dynamic_args['hosts'], tag_list, sharding, sharding_offset)
+    hosts_manager = host_manager.HostManager(
+        credentials=credentials,
+        commands=general_commands
+    )
+    hosts_manager.update_hosts(hosts_conf)
+    coll = collector.Collector(hosts_manager, parsers_manager, dynamic_args['output_type'], dynamic_args['output_addr'])
+    target_hosts = hosts_manager.get_target_hosts(tags=tag_list)
 
     if use_threads:
         target_hosts_lists = [target_hosts[x:x+int(len(target_hosts)/max_collector_threads+1)] for x in range(0, len(target_hosts), int(len(target_hosts)/max_collector_threads+1))]

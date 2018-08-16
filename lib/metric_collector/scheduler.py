@@ -4,18 +4,19 @@ import threading
 import time
 import os
 from itertools import cycle
-from metric_collector import collector, utils
+from metric_collector import host_manager, parser_manager, collector, utils
 
 logger = logging.getLogger('scheduler')
 
 class Scheduler:
 
-    def __init__(self, host_mgr, parser_mgr, output_type, output_addr,
+    def __init__(self, creds_conf, cmds_conf, parsers_dir, output_type, output_addr,
                  max_worker_threads=1, use_threads=True, num_threads_per_worker=10):
         self.workers = {}
         self.working = set()
-        self.collector = collector.Collector(host_mgr, parser_mgr, output_type, output_addr)
-        self.host_mgr = host_mgr
+        self.host_mgr = host_manager.HostManager(credentials=creds_conf, commands=cmds_conf)
+        self.parser_mgr = parser_manager.ParserManager(parser_dirs=parsers_dir)
+        self.collector = collector.Collector(self.host_mgr, self.parser_mgr, output_type, output_addr)
         self.max_worker_threads = max_worker_threads
         self.output_type = output_type
         self.output_addr = output_addr
@@ -52,8 +53,17 @@ class Scheduler:
                 cmds_per_interval += cmd['commands']
         return hostcmds
 
-    def add_hosts(self, hosts, cmd_tags=None):
+    def init_workers(self):
+        for worker in self.working:
+            worker.init()
+
+    def add_hosts(self, hosts_conf, host_tags=None, cmd_tags=None):
         '''  Create worker threads per interval and round-robin the hosts amongst them '''
+        self.init_workers()
+        # update host manager
+        self.host_mgr.update_hosts(hosts_conf)
+        hosts = self.host_mgr.get_target_hosts(tags=host_tags or ['.*'])
+        logger.debug('The following hosts are being selected: %s', hosts)
         if not hosts:
             logger.error('Scheduler: No hosts')
             return
@@ -70,7 +80,7 @@ class Scheduler:
                 self.working.add(next_worker)
             
     def start(self):
-        ''' Start all worker threads and block until stopped '''
+        ''' Start all worker threads and block until done '''
         if len(self.working) == 0:
             self.working.add(self.default_worker)
         for worker in self.working:
@@ -80,8 +90,12 @@ class Scheduler:
 
     def stop(self):
         ''' Stop all running worker threads '''
+        logging.info("Scheduler: Stopping all running workers")
+        self.workers = {}
+        self.working = set()
         for worker in self.working:
             worker.stop()
+            worker.join()
 
 
 class Worker(threading.Thread):
@@ -100,6 +114,7 @@ class Worker(threading.Thread):
         self.use_threads = use_threads
         self.hostcmds = {}
         self._run = True
+        self._lock = threading.Lock()
 
     def set_name(self, name):
         self.name = name
@@ -108,8 +123,13 @@ class Worker(threading.Thread):
         self._run = False
 
     def add_host(self, host, cmds):
-        commands = self.hostcmds.setdefault(host, [])
-        commands += cmds
+        with self._lock:
+            commands = self.hostcmds.setdefault(host, [])
+            commands += cmds
+
+    def init(self):
+        with self._lock:
+            self.hostcmds = {}
 
     def run(self):
         ''' Main run loop '''
@@ -118,6 +138,7 @@ class Worker(threading.Thread):
                 return
             logger.info('{}: Starting collection for {} hosts'.format(
                 self.name, len(self.hostcmds)))
+            self._lock.acquire()
             hosts = list(self.hostcmds.keys())
             time_start = time.time()
             if self.use_threads:
@@ -158,7 +179,9 @@ class Worker(threading.Thread):
                         'execution_time_sec': "%.4f" % time_execution,
                         'nbr_devices': len(self.hostcmds),
                         'nbr_threads': self.num_collector_threads
-                    }
+                    },
+                    'timestamp': time.time_ns(),
+
                 }
             ]
             if os.environ.get('NOMAD_JOB_NAME'):
@@ -176,5 +199,6 @@ class Worker(threading.Thread):
                 logger.warn('{}: Output format unknown: {}'.format(self.name, self.output_type))
 
             logger.info('Worker {} took {} seconds to run'.format(self.name, time_execution))
+            self._lock.release()
             # sleep until next interval
             time.sleep(self.interval)

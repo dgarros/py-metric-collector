@@ -99,7 +99,8 @@ class Collector:
                     'nbr_error_commands':  cmd_error,
                     'reacheable': int(host_reachable),
                     'unreacheable': int(not host_reachable)
-                }
+                },
+                'timestamp': time.time_ns(),
             }]
             if os.environ.get('NOMAD_JOB_NAME'):
                 host_time_datapoint[0]['tags']['nomad_job_name'] = os.environ['NOMAD_JOB_NAME']
