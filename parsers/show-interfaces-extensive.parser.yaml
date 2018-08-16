@@ -53,7 +53,7 @@ parser:
         measurement: jnpr_interface_queue_stat
         xpath: //interface-information/physical-interface/queue-counters/queue
         loop:
-            interface: ./name
+            interface: ./../../name
             admin-status: ./../../admin-status
             queue-number: ./queue-number
             forwardding-class: ./forwarding-class-name
