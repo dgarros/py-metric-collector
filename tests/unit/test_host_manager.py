@@ -70,18 +70,17 @@ class Test_Validate_Main_Block(unittest.TestCase):
  
   def test_import_host_manager(self):
 
-    hm = HostManager( inventory=inventory_2,
-                      credentials=cred_pwd_01,
+    hm = HostManager( credentials=cred_pwd_01,
                       commands=commands_1 )
-
+    hm.update_hosts(inventory_2)
     self.assertTrue(1)
 
 
   def test_get_target_hosts_new_format(self):
 
-    hm = HostManager( inventory=inventory_2,
-                      credentials=cred_pwd_01,
+    hm = HostManager( credentials=cred_pwd_01,
                       commands=commands_1 )
+    hm.update_hosts(inventory_2)
 
     self.assertEqual(hm.get_target_hosts(), [])
     self.assertEqual(hm.get_target_hosts([".*"]), ['router1', 'switch1' ])
@@ -89,9 +88,9 @@ class Test_Validate_Main_Block(unittest.TestCase):
   
   def test_get_target_hosts_old_format(self):
 
-    hm = HostManager( inventory=inventory_1,
-                      credentials=cred_pwd_01,
+    hm = HostManager( credentials=cred_pwd_01,
                       commands=commands_1 )
+    hm.update_hosts(inventory_1)
 
     self.assertEqual(hm.get_target_hosts(), [])
     self.assertEqual(hm.get_target_hosts([".*"]), ['10.10.0.1', '20.20.0.20' ])
@@ -100,9 +99,9 @@ class Test_Validate_Main_Block(unittest.TestCase):
 
   def test_get_target_commands_new_format(self):
 
-    hm = HostManager( inventory=inventory_2,
-                      credentials=cred_pwd_01,
+    hm = HostManager( credentials=cred_pwd_01,
                       commands=commands_1 )
+    hm.update_hosts(inventory_2)
 
     cmds = hm.get_target_commands('router1')
     all_cmds = [c for cmd in cmds for c in cmd['commands']]
@@ -116,9 +115,9 @@ class Test_Validate_Main_Block(unittest.TestCase):
   
   def test_get_target_commands_command_tag(self):
 
-      hm = HostManager( inventory=inventory_2,
-                        credentials=cred_pwd_01,
+      hm = HostManager( credentials=cred_pwd_01,
                         commands=commands_1 )
+      hm.update_hosts(inventory_2)
       cmds = hm.get_target_commands('switch1',tags=['1m'])
       self.assertEqual(cmds[0]['commands'], 
                       ['show test2'])
@@ -129,9 +128,9 @@ class Test_Validate_Main_Block(unittest.TestCase):
 
   def test_get_credentials_default_port(self):
 
-      hm = HostManager( inventory=inventory_2,
-                        credentials=cred_pwd_01,
+      hm = HostManager( credentials=cred_pwd_01,
                         commands=commands_1 )
+      hm.update_hosts(inventory_2)
 
       self.assertEqual(hm.get_credentials('router1'), { 'key_file': None, 
                                                         'method': 'password', 
@@ -142,10 +141,9 @@ class Test_Validate_Main_Block(unittest.TestCase):
 
   def test_get_credentials_not_default_port(self):
 
-      hm = HostManager( inventory=inventory_2,
-                        credentials=cred_pwd_02,
+      hm = HostManager( credentials=cred_pwd_02,
                         commands=commands_1 )
-
+      hm.update_hosts(inventory_2)
       self.assertEqual(hm.get_credentials('router1'), { 'key_file': None, 
                                                         'method': 'password', 
                                                         'password': 'pwd1',
@@ -155,10 +153,9 @@ class Test_Validate_Main_Block(unittest.TestCase):
         
   def test_get_context(self):
 
-      hm = HostManager( inventory=inventory_2,
-                        credentials=cred_pwd_02,
+      hm = HostManager( credentials=cred_pwd_02,
                         commands=commands_1 )
-
+      hm.update_hosts(inventory_2)
       expected_list = [
         { 'site': 'site1' },
         { 'role': 'router' }
