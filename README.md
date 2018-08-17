@@ -3,7 +3,7 @@
 > **Development in progress**
 
 The **Netconf Collector** is a tool to collect information in Junos devices over Netconf.  
-This tool was initially part of OpenNTI, this goal of this project is to create a standalone version.
+This tool was initially part of OpenNTI, the goal of this project is to create a standalone version.
 
 
 # How to give it a try
