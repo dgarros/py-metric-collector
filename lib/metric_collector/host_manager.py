@@ -7,18 +7,15 @@ class HostManager(object):
     Manage the list of hosts
     Help identify what credential & commands needs to be used for each device
     """
-    def __init__(self, inventory, credentials, commands, log='debug'):
+    def __init__(self, credentials, commands, log='info'):
 
-        self.hosts = {}
         self.commands = {}
         self.credentials = {}
 
         ### -------------------------------------------------------------
         ### Check data format
         ### -------------------------------------------------------------
-        if not isinstance(inventory, dict):
-            raise Exception("inventory must be a dictionnary of host")
-        elif not isinstance(credentials, dict):
+        if not isinstance(credentials, dict):
             raise Exception("credential must be a dictionnary")
         elif not isinstance(commands, dict):
             raise Exception("commands must be a dictionnary")
@@ -36,37 +33,6 @@ class HostManager(object):
             self.log.setLevel(logging.ERROR)
         else:
             self.log.setLevel(logging.INFO)
-
-        ### -------------------------------------------------------------    
-        ### Check list of hosts provided
-        ### -------------------------------------------------------------
-        for host in inventory.keys():
-            if isinstance(inventory[host], dict):
-
-                ## TODO check if the dictionnary contain at least tags and address
-                if 'tags' not in inventory[host]:
-                    self.log.warn('host: tags are missing for %s, not supported, skipping' % host)
-                    continue
-                elif 'address' not in inventory[host]:
-                    self.log.warn('host: address is missing for %s, not supported, skipping' % host)
-                    continue
-
-                self.hosts[host] = inventory[host]
-
-                if 'context' not in self.hosts[host]: 
-                    self.hosts[host]['context'] = []
-                
-            elif isinstance(inventory[host], str):
-
-                tags = inventory[host].split()
-                self.hosts[host] = {
-                    'tags': tags,
-                    'address': host,
-                    'context': []
-                }
-
-            else:
-                self.log.warn('host: format for %s not spported, skipping' % host)
 
         ### -------------------------------------------------------------    
         ### Check commands provided
@@ -109,9 +75,16 @@ class HostManager(object):
                 elif isinstance(command_set['commands'], str):
                     command_list = command_list + command_set["commands"].strip().split("\n")
 
+            if 'interval' in command_set:
+                interval = int(command_set['interval'])
+            else:
+                # default = 2 min
+                interval = 120
+
             self.commands[command_grp] = {
                 'tags': tags,
-                'commands': command_list
+                'commands': command_list,
+                'interval_secs': interval
             }
 
         ### -------------------------------------------------------------    
@@ -177,8 +150,43 @@ class HostManager(object):
                 credential['port'] = credentials[credential_grp]['port']
 
             self.credentials[credential_grp] = credential
-                   
-                    
+
+
+    def update_hosts(self, inventory):
+        self.hosts = {}
+        if not isinstance(inventory, dict):
+            raise Exception("inventory must be a dictionnary of host")
+        ### -------------------------------------------------------------
+        ### Check list of hosts provided
+        ### -------------------------------------------------------------
+        for host in inventory.keys():
+            if isinstance(inventory[host], dict):
+
+                ## TODO check if the dictionnary contain at least tags and address
+                if 'tags' not in inventory[host]:
+                    self.log.warn('host: tags are missing for %s, not supported, skipping' % host)
+                    continue
+                elif 'address' not in inventory[host]:
+                    self.log.warn('host: address is missing for %s, not supported, skipping' % host)
+                    continue
+
+                self.hosts[host] = inventory[host]
+
+                if 'context' not in self.hosts[host]:
+                    self.hosts[host]['context'] = []
+
+            elif isinstance(inventory[host], str):
+
+                tags = inventory[host].split()
+                self.hosts[host] = {
+                    'tags': tags,
+                    'address': host,
+                    'context': []
+                }
+
+            else:
+                self.log.warn('host: format for %s not spported, skipping' % host)
+
 
     def get_target_hosts(self, tags=[]):
         """
@@ -211,26 +219,25 @@ class HostManager(object):
             return None
 
         host_tags = self.hosts[host]['tags']
-        target_commands = {}
 
         groups_matched = []
 
         ## First do a pass based on host tag and identify all group_command that matches
-        for group_command in sorted(self.commands.keys()):
+        for group_command, command in self.commands.items():
             for host_tag in host_tags:
-                for command_tag in self.commands[group_command]['tags']:
+                for command_tag in command['tags']:
                     if re.search(host_tag, command_tag, re.IGNORECASE):
                         groups_matched.append(group_command)
 
         ## Second do a pass on command tag on the list of group_command that passed the previous check
+        final = set()
         for group_command in groups_matched:
             for tag in tags:
                 for command_tag in self.commands[group_command]['tags']:
                     if re.search(tag, command_tag, re.IGNORECASE):
-                        for cmd in self.commands[group_command]["commands"]:
-                            target_commands[cmd] = 1
-                                
-        return sorted(target_commands.keys())
+                        final.add(group_command)
+
+        return [self.commands[group] for group in final]
 
 
     def get_credentials(self, host):

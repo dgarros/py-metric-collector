@@ -9,7 +9,8 @@ logger = logging.getLogger('f5_rest_collector')
 
 class F5Collector(object):
 
-    def __init__(self, host, address, credential, port=443, timeout=30, retry=3, parsers=None):
+    def __init__(self, host, address, credential, port=443, timeout=30, retry=3, parsers=None,
+                 context=None):
         self.hostname = host
         self.host = address
         self.credential = credential
@@ -18,6 +19,10 @@ class F5Collector(object):
         self.__retry = retry
         self.__is_connected = False
         self.parsers = parsers
+        if context:
+            self.context = {k: v for i in context for k, v in i.items()}
+        else:
+            self.context = None
         self.facts = {}
 
     def connect(self):
@@ -80,17 +85,23 @@ class F5Collector(object):
 
         if datapoints is not None:
             measurement = self.parsers.get_measurement_name(input=command)
-            to_return = []
+            timestamp = time.time_ns()
             for datapoint in datapoints:
                 if datapoint['measurement'] is None:
                     datapoint['measurement'] = measurement
                 datapoint['tags'].update(self.facts)
-                to_return.append(datapoint)
+                if self.context:
+                    datapoint['tags'].update(self.context)
+                datapoint['timestamp'] = timestamp
+                yield datapoint
 
-            return to_return
         else:
             logger.warn('No parser found for command > %s', command)
             return None
 
     def is_connected(self):
         return self.__is_connected
+
+    def close(self):
+        # rest connection is not stateful so nothing to close
+        return

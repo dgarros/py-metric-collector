@@ -244,97 +244,72 @@ class ParserManager:
 
   def __parse_xml__(self, parser=None, data=None):
 
-    datas_to_return = []
-
+    if not data or not parser:
+        logger.debug('No data or parser found')
+        return
     logger.debug("will parse %s with xml" % parser['command'])
-    # logger.debug("data %s" % data)
-    ## Empty structure that needs to be filled and return for each input
-    data_structure = {
-        'measurement': None,
-        'tags': {},
-        'fields': {}
-    }
-
-    single_match = copy.deepcopy(data_structure)
-
-    clean_data = re.sub(r"\sxmlns\=\".*\"", '', data.decode(), re.M)
-    clean_data = re.sub(r"\sjunos\:", ' ', clean_data, re.M)
-    xml_data = etree.fromstring(clean_data)
-
-    ## NOTE, There is an assumption that all matches will be either
-    # - single-value
-    # - multi-value
-    ## it might not work as it, if we have a mix of both
 
     for match in parser["data"]["parser"]["matches"]:
+        ## Empty structure that needs to be filled and return for each input
 
         if match["type"] == "single-value":
+          data_structure = {
+            'measurement': None,
+            'tags': {},
+            'fields': {}
+          }
           
           logger.debug('Looking for a match: %s', match["xpath"])
-          value_tmp = xml_data.xpath(match["xpath"])
+          value_tmp = data.xpath(match["xpath"])
           if value_tmp:
-          
             if 'variable-name' in match:
               key_name = match['variable-name']
             else: 
               key_name = self.cleanup_xpath(match['xpath'])
 
             if isinstance(value_tmp[0], str):
-              single_match['fields'][key_name] = value_tmp[0].strip()
+              value_tmp = value_tmp[0].strip()
             else:
-              single_match['fields'][key_name] = value_tmp[0].text.strip()
+              value_tmp = value_tmp[0].text.strip()
+            if not self.is_valid_field(value_tmp):
+              continue
+            data_structure['fields'][key_name] = value_tmp
 
           else:
             logger.debug('No match found: %s', match["xpath"])
-            if 'default-if-missing' in match.keys():
+            if 'default-if-missing' in match:
               logger.debug('Inserting default-if-missing value: %s', match["default-if-missing"])
               value_tmp = match["default-if-missing"]
+              if not self.is_valid_field(value_tmp):
+                continue
 
-              if 'variable-name' in match.keys():
+              if 'variable-name' in match:
                 key_tmp = match['variable-name']
               else: 
                 key_tmp = self.cleanup_xpath(match['xpath'])
 
-              single_match['fields'][key_tmp] = value_tmp
+              data_structure['fields'][key_tmp] = value_tmp
+
+          yield data_structure
 
         elif match["type"] == "multi-value":
 
-          nodes = xml_data.xpath(match["xpath"])
+          nodes = data.xpath(match["xpath"])
           for node in nodes:
-            #Look for all posible keys or fields to extract and be used for variable-naming
-            #key = node.xpath(match["loop"]["key"])[0].text.replace(" ","_").strip()
-
-            keys = {}
-            tmp_data = copy.deepcopy(data_structure)
-            keys_tmp = copy.deepcopy(match["loop"])
+            data_structure = {
+              'measurement': None,
+              'tags': {},
+              'fields': {}
+            }
 
             ## Assign measurement name if defined 
             if 'measurement' in match:
-              tmp_data['measurement'] = match['measurement']
-
-            if 'sub-matches' in keys_tmp.keys():
-              del keys_tmp['sub-matches']
-
-            for key_tmp in keys_tmp.keys():
-              key_name = key_tmp
-
-              key_results = node.xpath(keys_tmp[key_tmp])
-
-              if len(key_results) == 0:
-                continue
-              
-              if isinstance(key_results[0], str):
-                tmp_data['tags'][key_name] = self.cleanup_tag(key_results[0].strip())
-              else:
-                tmp_data['tags'][key_name] = self.cleanup_tag(key_results[0].text.strip())
-
-              ## Cleanup string
-              tmp_data['tags'][key_name].replace(" ","_")
+              data_structure['measurement'] = match['measurement']
 
             for sub_match in match["loop"]["sub-matches"]:
 
               if node.xpath(sub_match["xpath"]):
-                if "regex" in sub_match.keys():
+                if "regex" in sub_match:
 
                     if isinstance(node.xpath(sub_match["xpath"])[0], str):
                       value_tmp = node.xpath(sub_match["xpath"])[0].strip()
@@ -353,80 +328,85 @@ class ParserManager:
                           # Begin function  (pero pendiente de ver si variable-type existe y su valor)
                           if "variable-type" in sub_match["variables"][i]:
                             value = self.eval_variable_value(value, type=sub_match["variables"][i]["variable-type"])
-                          tmp_data['fields'][variable_name] = value
+                            if not self.is_valid_field(value):
+                              continue
+                          data_structure['fields'][variable_name] = value
                       else:
                         logger.error('More matches found on regex %s for %s than variables specified on parser', regex, value_tmp)
                     else:
                       logger.debug('No matches found for regex: %s', regex)
 
                 else:
+                    value_tmp = None
                     if isinstance(node.xpath(sub_match["xpath"])[0], str):
                       value_tmp = node.xpath(sub_match["xpath"])[0].strip()
                     else:
                       value_tmp = node.xpath(sub_match["xpath"])[0].text.strip()
 
-                    if 'variable-name' in sub_match.keys():
+                    if 'variable-name' in sub_match:
                       key_tmp = sub_match['variable-name']
                     else: 
                       key_tmp = self.cleanup_xpath(sub_match['xpath'])
                     
-                    if 'transform' in sub_match.keys():
+                    if 'transform' in sub_match:
                       if sub_match['transform'] == 'str_2_int':
                         value_tmp = self.str_2_int(value_tmp)
 
-                    if 'variable-type' in sub_match.keys():
+                    if 'variable-type' in sub_match:
                       value_tmp = self.eval_variable_value(value_tmp, type=sub_match['variable-type'])
-                      tmp_data['fields'][key_tmp] = value_tmp
                     
-                    if 'enumerate' in sub_match.keys():
+                    if 'enumerate' in sub_match:
                       enum_match = False
                       for enum_item in sub_match['enumerate']:
                         if value_tmp == enum_item:
                           enum_match = True
-                          tmp_data['fields'][key_tmp] = sub_match['enumerate'][enum_item]
+                          value_tmp = sub_match['enumerate'][enum_item]
                         
-                      if not enum_match and 'default-if-missing' in sub_match.keys():
-                        tmp_data['fields'][key_tmp] = sub_match['default-if-missing']
+                      if not enum_match and 'default-if-missing' in sub_match:
+                        value_tmp = sub_match['default-if-missing']
                       elif not enum_match:
-                        tmp_data['fields'][key_tmp] = 0
+                        value_tmp = 0
 
-                    elif value_tmp and key_tmp not in tmp_data['fields']:
-                      tmp_data['fields'][key_tmp] = value_tmp
+                    if value_tmp and key_tmp not in data_structure['fields']:
+                      if not self.is_valid_field(value_tmp):
+                        continue
+                      data_structure['fields'][key_tmp] = value_tmp
 
               else:
                   logger.debug('No match found: %s', match["xpath"])
-                  if 'default-if-missing' in sub_match.keys():
+                  if 'default-if-missing' in sub_match:
                     logger.debug('Inserting default-if-missing value: %s', sub_match["default-if-missing"])
                     value_tmp = sub_match["default-if-missing"]
-                    if 'variable-name' in sub_match.keys():
+                    if 'variable-name' in sub_match:
                       key_tmp = sub_match['variable-name']
                     else: 
                       key_tmp = self.cleanup_xpath(sub_match['xpath'])
-                    
-                    tmp_data['fields'][key_tmp] = value_tmp
+                   
+                    if not self.is_valid_field(value_tmp):
+                      continue
+                    data_structure['fields'][key_tmp] = value_tmp
 
-            datas_to_return.append(tmp_data)
+           
+            # parse the tags
+            for key, value in match["loop"].items():
+              if key == 'sub-matches':
+                continue
+              key_results = node.xpath(value)
+              if len(key_results) == 0:
+                continue
 
-    # if it's not empty, add it to the list
-    if len(single_match['fields'].keys()) > 0:
-      datas_to_return.append(single_match)
+              if isinstance(key_results[0], str):
+                data_structure['tags'][key] = self.cleanup_tag(key_results[0].strip())
+              else:
+                data_structure['tags'][key] = self.cleanup_tag(key_results[0].text.strip())
 
-    return datas_to_return
+              ## Cleanup string
+              data_structure['tags'][key].replace(" ","_")
+
+            yield data_structure
 
 
   def __parse_textfsm__(self, parser=None, data=None):
-
-    datas_to_return = []
-
-    ## Empty structure that needs to be filled and return for each input
-    data_structure = {
-        'measurement': None,
-        'tags': {},
-        'fields': {}
-    }
-
-    if 'measurement' in parser:
-      data_structure['measurement'] = parser['measurement']
 
     ## TODO Check if template exist
     tpl_file = StringIO(parser['data']['parser']['template'])
@@ -438,7 +418,16 @@ class ParserManager:
     headers = list(res_table.header)
     ## Extract 
     for row in res_data:
-      tmp_data = copy.deepcopy(data_structure)
+
+      ## Empty structure that needs to be filled and return for each input
+      data_structure = {
+          'measurement': None,
+          'tags': {},
+          'fields': {}
+      }
+
+      if 'measurement' in parser:
+        data_structure['measurement'] = parser['measurement']
         
       for field in parser['data']['parser']['fields']:
         if field not in headers: 
@@ -453,7 +442,9 @@ class ParserManager:
         else:
           value = row[idx]
 
-        tmp_data['fields'][field_name] = str(value)
+        if not self.is_valid_field(value):
+          continue
+        data_structure['fields'][field_name] = str(value)
         
       for tag in parser['data']['parser']['tags']:
         if tag not in headers: 
@@ -461,13 +452,10 @@ class ParserManager:
         
         idx = headers.index(tag)
         tag_name = parser['data']['parser']['tags'][tag]
-        tmp_data['tags'][tag_name] = self.cleanup_tag(row[idx])
-         
-      datas_to_return.append(tmp_data)
+        data_structure['tags'][tag_name] = self.cleanup_tag(row[idx])
+      
+      yield data_structure
   
-    # pprint.pprint(datas_to_return)
-    return datas_to_return
-
 
   def __parse_regex__(self, parser=None, data=None):
 
@@ -572,6 +560,8 @@ class ParserManager:
         if value == enum_key:
           value = enum_value
           break
+    if not self.is_valid_field(value):
+      return data
     data['fields'][key] = value
     return data
 
@@ -607,6 +597,8 @@ class ParserManager:
             if value == enum_key:
               value = enum_value
               break
+        if not self.is_valid_field(value):
+          continue
         data['fields'][key] = value
       
       # parse the sub-match tags
@@ -728,6 +720,15 @@ class ParserManager:
       return int(value)
     except:
       return None
+
+  @staticmethod
+  def is_valid_field(field):
+    """ Make sure a field value is always a number """
+    try:
+      int(float(field))
+    except ValueError:
+      return False
+    return True
 
 
 
