@@ -174,7 +174,7 @@ def main():
     full_parser.add_argument("--nbr-collector-threads", type=int, default=10, help="Maximum number of collector thread to spawn (default 10)")
     full_parser.add_argument("--max-worker-threads", type=int, default=1, help="Maximum number of worker threads per interval for scheduler")
     full_parser.add_argument("--use-scheduler", action='store_true', help="Use scheduler")
-    full_parser.add_argument("--hosts_refresh_interval", type=int, default=3*60*60, help="Interval to periodically refresh dynamic host inventory")
+    full_parser.add_argument("--hosts-refresh-interval", type=int, default=3*60*60, help="Interval to periodically refresh dynamic host inventory")
 
     dynamic_args = vars(full_parser.parse_args())
 
@@ -296,7 +296,7 @@ def main():
             max_worker_threads=max_worker_threads,
             use_threads=use_threads, num_threads_per_worker=max_collector_threads
         )
-        hri = dynamic_args.get('hosts_refresh_interval', 6 * 60 * 60)
+        hri = dynamic_args.get('hosts-refresh-interval', 6 * 60 * 60)
         select_hosts(
             dynamic_args['hosts'], tag_list, sharding, sharding_offset,
             scheduler=device_scheduler,
