@@ -10,8 +10,6 @@ name = "pypi"
 cffi = "*"
 ncclient = "*"
 jxmlease = "*"
-pytest = "*"
-pytest-cov = "*"
 "jinja2" = "*"
 pyyaml = "*"
 requests = "*"
@@ -23,9 +21,9 @@ f5-sdk = "*"
 
 
 [dev-packages]
-
-
+pytest = "*"
+pytest-cov = "*"
 
 [requires]
 
-python_version = "3.6"
+python_version = "3.7"
