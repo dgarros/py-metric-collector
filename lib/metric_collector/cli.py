@@ -64,32 +64,7 @@ def select_hosts(hosts_file, tag_list, sharding, sharding_offset, scheduler=None
     """
     Parse a host file or pull hosts from dynamic inventory , and add it to the scheduler periodically
     """
-    hosts = {}
-    if not os.path.isfile(hosts_file):
-        hosts_file = BASE_DIR + "/"+ hosts_file
-
-    logger.info('Importing host file: %s', hosts_file)
-
-    is_yaml = False
-    is_exec = False
-    try:
-        with open(hosts_file) as f:
-            hosts = yaml.load(f)
-        is_yaml = True
-    except Exception as e:
-        logger.debug('Error importing host file in yaml: %s > %s' % (hosts_file, e))
-
-    if not is_yaml:
-        try:
-            output_str = run(["python", hosts_file], stdout=subprocess.PIPE)
-            hosts = json.loads(output_str.stdout)
-            is_exec = True
-        except Exception as e:
-            logger.debug('Error importing executing host file: %s > %s' % (hosts_file, e))
-
-    if not is_yaml and not is_exec:
-        logger.error('Unable to import the hosts file (%s), either in Yaml or from a dynamic inventory',hosts_file)
-        sys.exit(0)
+    hosts = import_inventory(hosts_file = hosts_file)
 
     if sharding:
         sharding_param = sharding.split('/')
@@ -117,6 +92,69 @@ def select_hosts(hosts_file, tag_list, sharding, sharding_offset, scheduler=None
         t.start()
     else:
         return hosts
+
+def import_inventory(hosts_file, retry=3, retry_internal=5): 
+    """
+    Import the inventory either from a yaml file or from a dynamic inventory script
+
+    Return a dict of hosts
+    """
+    hosts = {}
+
+    BASE_DIR = os.getcwd()
+
+    ### check if the file is present
+    if not os.path.isfile(hosts_file):
+        hosts_file_full = BASE_DIR + "/"+ hosts_file
+
+        if not os.path.isfile(hosts_file_full):
+            logger.warn('Unable to find the inventory file (neither %s or %s)' % (hosts_file, hosts_file_full))
+        else:
+            hosts_file = hosts_file_full
+
+    logger.info('Importing host file: %s', hosts_file)
+
+    ### Ensure that Retry has a valid value
+    ### Must be an integer equal or higher than 1 
+    if not isinstance(retry, int):
+        retry = 3
+    elif retry < 1:
+        retry = 3
+
+    for i in range(1, retry+1):
+        is_yaml = False
+        is_exec = False
+
+        try:
+            with open(hosts_file) as f:
+                hosts = yaml.load(f)
+            is_yaml = True
+        except Exception as e:
+            logger.debug('Error importing host file in yaml: %s > %s [%s/%s]' % (hosts_file, e, i, retry ))
+
+        if not is_yaml:
+            try:
+                output_str = run(["python", hosts_file], stdout=subprocess.PIPE)
+                hosts = json.loads(output_str.stdout)
+                is_exec = True
+            except Exception as e:
+                logger.debug('Error importing executing host file: %s > %s [%s/%s]' % (hosts_file, e, i, retry))
+
+        if not is_yaml and not is_exec:
+            logger.warn('Unable to import the hosts file (%s), either in Yaml or from a dynamic inventory [%s/%s]' % (hosts_file, i, retry))
+  
+        ### ensure hosts is still a dict
+        if not isinstance(hosts, dict):
+            hosts = {}
+
+        if len(hosts.keys()) > 0:
+            return hosts
+        elif len(hosts.keys()) == 0 and i == retry:
+            logger.error('Unable to import the hosts file (%s), either in Yaml or from a dynamic inventory after all try, ABORDING [%s/%s]' % (hosts_file, i, retry))
+            sys.exit(0)
+        else:
+            logger.warn('Unable to import the hosts file (%s), either in Yaml or from a dynamic inventory [%s/%s]' % (hosts_file, i, retry))
+            time.sleep(retry_internal)
 
 
 ### ------------------------------------------------------------------------------
@@ -193,7 +231,7 @@ def main():
     db_schema = dynamic_args['dbschema']
     max_connection_retries = dynamic_args['retry']
     delay_between_commands = dynamic_args['delay']
-    logging_level = dynamic_args['loglvl']
+    logging_level = int(dynamic_args['loglvl'])
     default_junos_rpc_timeout = dynamic_args['timeout']
     use_hostname = dynamic_args['usehostname']
 
