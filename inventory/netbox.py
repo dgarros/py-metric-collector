@@ -8,6 +8,8 @@ import os
 import sys
 import yaml
 import argparse
+import logging
+logging.basicConfig(stream=sys.stderr, level=logging.INFO)
 
 try:
     import requests
@@ -57,6 +59,7 @@ def open_yaml_file(yaml_file):
             except yaml.YAMLError as yaml_error:
                 sys.exit(yaml_error)
     except IOError as io_error:
+        logging.error(io_error)
         sys.exit("Cannot open YAML file.\n%s" % io_error)
     return yaml_file_content
 
@@ -167,6 +170,7 @@ class NetboxAsInventory(object):
         if not self.api_url:
             sys.exit("Please check API URL in script configuration file.")
 
+        logging.info('Getting hosts list from netbox')
         api_url_params = ""
 
         # Add filters provided into the URL
@@ -207,6 +211,7 @@ class NetboxAsInventory(object):
                 global_hosts_list_json['results'] += grp_hosts_list_json['results']
                 global_hosts_list_json['count'] += grp_hosts_list_json['count']
 
+            logging.info('Got {} global hosts from netbox'.format(global_hosts_list_json['count']))
             return global_hosts_list_json
 
 
@@ -225,6 +230,7 @@ class NetboxAsInventory(object):
         ### Check if the primary IP address is defined
         ### Skip device if not defined
         if not isinstance(host_data['primary_ip'], dict):
+            logging.error('Primary IP not defined for {}, skipping host'.format(device_name))
             return False
 
         ip_address = host_data['primary_ip']['address'].split('/')[0]
@@ -350,7 +356,8 @@ class NetboxAsInventory(object):
         print(json.dumps(inventory_dict, sort_keys=True,indent=4,))
 
     def netbox_get_devices_list(self, params=''):
-        
+       
+        logging.info('Quering netbox for devices list with params: {}'.format(params))
         results = {
             'count': 0,
             'results': []
@@ -371,7 +378,8 @@ class NetboxAsInventory(object):
               
             hosts_list = self.req.get(self.api_url, 
                                     params=api_url_params, 
-                                    verify=self.verify_certs )
+                                    verify=self.verify_certs,
+                                    timeout=10.0)
 
             hosts_list.raise_for_status()
 
@@ -384,6 +392,9 @@ class NetboxAsInventory(object):
             if int(hosts_list_dict['count']) < offset:
                 keep_querying = False
 
+        if results['count'] == 0 or len(results['results']) == 0:
+            logging.error("Got 0 results from netbox !")
+            sys.exit("No results returned from netbox")
         return results
 
 

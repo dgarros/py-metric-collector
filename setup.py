@@ -14,8 +14,8 @@ __author__ = 'Damien Garros <dgarros@gmail.com>'
 requirements_data = parse_requirements('requirements.txt', session=uuid.uuid1())
 requirements = [str(package.req) for package in requirements_data]
 
-version = '0.0.1'
-long_description = "Python Collector for Metrics data over Netconf (junos)"
+version = '0.1.1'
+long_description = "Python Collector for Metrics Data, currently support Junos and F5"
 
 params = {
     'name': 'py-metric-collector',
@@ -29,7 +29,7 @@ params = {
     'license': 'Apache License, Version 2.0',
     'author': 'Damien Garros',
     'author_email': 'dgarros@gmail.com',
-    'description': 'Collect timeserie information over netconf',
+    'description': 'Collect timeserie information from various devices, currently support Junos and F5',
     'install_requires': requirements,
     'classifiers': [
         'Topic :: Utilities',
@@ -41,7 +41,7 @@ params = {
         'Operating System :: OS Independent',
         'Programming Language :: Python',
     ],
-    'keywords': 'netconf timeserie tsdb'
+    'keywords': 'netconf junos juniper timeserie tsdb f5 bigip'
 }
 
 setup(**params)
