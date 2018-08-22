@@ -338,7 +338,7 @@ def main():
             max_worker_threads=max_worker_threads,
             use_threads=use_threads, num_threads_per_worker=max_collector_threads
         )
-        hri = dynamic_args.get('hosts-refresh-interval', 6 * 60 * 60)
+        hri = dynamic_args.get('hosts_refresh_interval', 6 * 60 * 60)
         select_hosts(
             dynamic_args['hosts'], tag_list, sharding, sharding_offset,
             scheduler=device_scheduler,
