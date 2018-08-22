@@ -134,14 +134,18 @@ def import_inventory(hosts_file, retry=3, retry_internal=5):
 
         if not is_yaml:
             try:
-                output_str = run(["python", hosts_file], stdout=subprocess.PIPE)
+                output_str = run(["python", hosts_file], capture_output=True, check=True)
                 hosts = json.loads(output_str.stdout)
+                logger.debug('Script logs: \n{}\n'.format(output_str.stderr.decode()))
                 is_exec = True
+            except subprocess.CalledProcessError as ex:
+                logger.debug('Inventory script failed with exit code {}. Cmd: {} Output: {} Logs: {}'.format(
+                    ex.returncode, ex.cmd, ex.output, ex.stderr))
             except Exception as e:
                 logger.debug('Error importing executing host file: %s > %s [%s/%s]' % (hosts_file, e, i, retry))
 
-        if not is_yaml and not is_exec:
-            logger.warn('Unable to import the hosts file (%s), either in Yaml or from a dynamic inventory [%s/%s]' % (hosts_file, i, retry))
+        if not is_exec:
+            logger.warn('Unable to import the hosts file (%s) from a dynamic inventory [%s/%s]' % (hosts_file, i, retry))
   
         ### ensure hosts is still a dict
         if not isinstance(hosts, dict):
@@ -151,7 +155,7 @@ def import_inventory(hosts_file, retry=3, retry_internal=5):
             return hosts
         elif len(hosts.keys()) == 0 and i == retry:
             logger.error('Unable to import the hosts file (%s), either in Yaml or from a dynamic inventory after all try, ABORDING [%s/%s]' % (hosts_file, i, retry))
-            sys.exit(0)
+            return {}
         else:
             logger.warn('Unable to import the hosts file (%s), either in Yaml or from a dynamic inventory [%s/%s]' % (hosts_file, i, retry))
             time.sleep(retry_internal)

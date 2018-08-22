@@ -59,14 +59,14 @@ class Scheduler:
 
     def add_hosts(self, hosts_conf, host_tags=None, cmd_tags=None):
         '''  Create worker threads per interval and round-robin the hosts amongst them '''
+        if not hosts_conf:
+            logger.error('Scheduler: No hosts')
+            return
         self.init_workers()
         # update host manager
         self.host_mgr.update_hosts(hosts_conf)
         hosts = self.host_mgr.get_target_hosts(tags=host_tags or ['.*'])
         logger.debug('The following hosts are being selected: %s', hosts)
-        if not hosts:
-            logger.error('Scheduler: No hosts')
-            return
         tags = cmd_tags or ['.*']
         hostcmds = self._get_hostcmds(hosts, tags)
         if not hostcmds:
