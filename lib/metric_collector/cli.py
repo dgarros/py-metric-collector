@@ -399,7 +399,8 @@ def main():
             'fields': {
                 'execution_time_sec': "%.4f" % time_execution,
                 'nbr_devices': len(target_hosts)
-            }
+            },
+            'timestamp': time.time_ns(),
         }]
 
     if 'sharding' in dynamic_args and dynamic_args['sharding'] != None:
