@@ -1,10 +1,13 @@
-![status experimental](https://img.shields.io/badge/status-experimental-yellow.svg)  
+![status stable](https://img.shields.io/badge/status-stable-green.svg)  
 
-> **Development in progress**
+> Stable Release : v0.1.3
 
 The **Netconf Collector** is a tool to collect information in Junos devices over Netconf.  
 This tool was initially part of OpenNTI, the goal of this project is to create a standalone version.
 
+> Features:
+-  Supports Junos via Netconf and F5 Devices via iControl REST API
+-  Scheduler support: Periodic data collection and dumping to influxdb via telegraf
 
 # How to give it a try
 
