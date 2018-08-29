@@ -87,6 +87,8 @@ class F5Collector(object):
             measurement = self.parsers.get_measurement_name(input=command)
             timestamp = time.time_ns()
             for datapoint in datapoints:
+                if not datapoint['fields']:
+                    continue
                 if datapoint['measurement'] is None:
                     datapoint['measurement'] = measurement
                 datapoint['tags'].update(self.facts)
