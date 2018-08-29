@@ -156,6 +156,8 @@ class NetconfCollector():
 
       timestamp = time.time_ns()
       for datapoint in datapoints:
+        if not datapoint['fields']:
+            continue
         if datapoint['measurement'] == None:
           datapoint['measurement'] = measurement
         datapoint['tags'].update(self.facts)
