@@ -5,12 +5,9 @@ generic_commands:
       show chassis routing-engine
       show system processes extensive
       show route summary
-   tags: generic
-
-lab_commands:
-   commands:
-      - show route summary
-   tags: test
+      show interfaces extensive
+      show interfaces diagnostics optics
+   tags: junos
 
 # Do not remove this three dashes (“---”) they are used to separate documents
 ---

@@ -31,4 +31,3 @@ parser:
             sub-matches:
             -   xpath: ./module-temperature/@celsius
                 variable-name: temperature 
-          

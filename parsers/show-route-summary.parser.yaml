@@ -1,5 +1,6 @@
 parser:
     command: show route summary
+    measurement: jnpr_route_summary
     type: xml
     matches:
     -
