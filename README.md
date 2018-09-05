@@ -10,20 +10,64 @@ This tool was initially part of OpenNTI, the goal of this project is to create a
 -  Scheduler support: Periodic data collection and dumping to influxdb via telegraf
 
 # How to give it a try
+You will need a running docker host and docker-compose to launch the test stack.
 
 ## 1- Define your devices parameters
+Initialize `lab-xxx-hosts.yaml` & `lab-xxx-credentials.yaml` with the information corresponding to your device
+Credentials and hosts file must be in "quickstart" folder. File starting with "lab" are .gitignored to prevent you from leaking sensible topology or security informations.
 
-Update `dev-01.yaml`, `dev-02.yaml` & `credentials.yaml` with the information corresponding to your device
+### Hosts files
+File format will be :
+```
+device1:
+  tags: [ junos, router ]
+  address: 192.168.0.1
+  context:
+    - site: sitea
+    - role: router
 
-## 2- Create container
+device2:
+  tags: [ junos, switch ]
+  address: 192.168.0.2
+  context:
+    - site: siteb
+    - role: switch
+
+device3:
+  tags: [ junos ]
+  address: 192.168.0.3
+```
+
+Keep in mind that `tags` are going to make the glue between hosts files, credentials and commands files.
+
+### Credentials files
+If you use ssh key based authentication, use this format :
+```
+lab_credentials:
+    username: root
+    method: key
+    key_file: keys/private-key
+    tags: juniper
+```
+
+If you use user and password, use this format :
+```
+lab_credentials:
+    username: root
+    password: <password>
+    method: password
+    key_file:
+    tags: juniper
+```
+
+## 2- Launch the docker-compose stack
+
+Pass the hosts, and credentials through ENV variables at the runtime so they keep safe
 
 ```
-make build
+% CREDENTIALS=lab0-credentials.yaml HOSTS=lab0-hosts.yaml docker-compose up
 ```
 
-## 3- Start Containers
+## 3- Open Grafana  
 
-```
-make telegraf
-```
-> for now, it assumes that an influxdb server is running on 172.17.0.2
+Open a browser and go to http://0.0.0.0:3000, use "admin / admin " as login / password and you can start building nice dashboards.
