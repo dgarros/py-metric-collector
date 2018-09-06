@@ -66,6 +66,21 @@ commands_1 = {
   },
 }
 
+commands_2 = {
+  'test1_commands': {
+    'netconf':[ 'show version' ],
+    'tags': ['lab']
+  },
+  'test2_commands': {
+    'netconf':[ 'show test3' ],
+    'tags': ['lab-cmd']
+  },
+  'test4_commands': {
+    'netconf':[ 'show test4' ],
+    'tags': ['LAB-CMD']
+  }
+}
+
 class Test_Validate_Main_Block(unittest.TestCase):
  
   def test_import_host_manager(self):
@@ -125,6 +140,16 @@ class Test_Validate_Main_Block(unittest.TestCase):
       cmds = hm.get_target_commands('switch1',tags=['5m'])
       self.assertEqual(cmds[0]['commands'], 
                       ['show test3'])
+
+      ### Test with dash in tags
+      hm_b = HostManager( credentials=cred_pwd_01,
+                        commands=commands_2 )
+      hm_b.update_hosts(inventory_2)
+    
+      cmds_b = hm_b.get_target_commands('router1',tags=['lab'])
+      self.assertEqual(cmds_b[0]['commands'], 
+                      ['show version'])
+
 
   def test_get_credentials_default_port(self):
 

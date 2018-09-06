@@ -226,7 +226,7 @@ class HostManager(object):
         for group_command, command in self.commands.items():
             for host_tag in host_tags:
                 for command_tag in command['tags']:
-                    if re.search(host_tag, command_tag, re.IGNORECASE):
+                    if re.search( r'^{tag}$'.format(tag=host_tag), command_tag, re.IGNORECASE):
                         groups_matched.append(group_command)
 
         ## Second do a pass on command tag on the list of group_command that passed the previous check
@@ -234,7 +234,7 @@ class HostManager(object):
         for group_command in groups_matched:
             for tag in tags:
                 for command_tag in self.commands[group_command]['tags']:
-                    if re.search(tag, command_tag, re.IGNORECASE):
+                    if re.search( r'^{tag}$'.format(tag=tag), command_tag, re.IGNORECASE):
                         final.add(group_command)
 
         return [self.commands[group] for group in final]
