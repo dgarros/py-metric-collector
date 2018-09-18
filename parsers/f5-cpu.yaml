@@ -12,3 +12,5 @@ parser:
             sub-matches:
                 - jmespath: entries.usageRatio.value
                   variable-name: cpu_usage
+                - jmespath: entries.fiveSecAvgRatio.value
+                  variable-name: cpu_usage_fiveSec
