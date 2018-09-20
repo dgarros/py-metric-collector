@@ -410,12 +410,15 @@ def main():
         global_datapoint[0]['fields']['nbr_threads'] = dynamic_args['nbr_collector_threads']
 
     ### Send results to the right output
-    if dynamic_args['output_type'] == 'stdout':
-        utils.print_format_influxdb(global_datapoint)
-    elif dynamic_args['output_type'] == 'http':
-        utils.post_format_influxdb(global_datapoint, dynamic_args['output_addr'],)
-    else:
-        logger.warn('Output format unknown: %s', dynamic_args['output_type'])
+    try:
+        if dynamic_args['output_type'] == 'stdout':
+            utils.print_format_influxdb(global_datapoint)
+        elif dynamic_args['output_type'] == 'http':
+            utils.post_format_influxdb(global_datapoint, dynamic_args['output_addr'],)
+        else:
+            logger.warn('Output format unknown: %s', dynamic_args['output_type'])
+    except Exception as ex:
+        logger.warn("Hit error trying to post to influx: ", str(ex))
     
 
 if __name__ == "__main__":

@@ -191,12 +191,15 @@ class Worker(threading.Thread):
 
 
             ### Send results to the right output
-            if self.output_type == 'stdout':
-                utils.print_format_influxdb(worker_datapoint)
-            elif self.output_type == 'http':
-                utils.post_format_influxdb(worker_datapoint, self.output_addr)
-            else:
-                logger.warn('{}: Output format unknown: {}'.format(self.name, self.output_type))
+            try:
+                if self.output_type == 'stdout':
+                    utils.print_format_influxdb(worker_datapoint)
+                elif self.output_type == 'http':
+                    utils.post_format_influxdb(worker_datapoint, self.output_addr)
+                else:
+                    logger.warn('{}: Output format unknown: {}'.format(self.name, self.output_type))
+            except Exception as ex:
+                logger.exception("Hit exception trying to post to influx")
 
             logger.info('Worker {} took {} seconds to run'.format(self.name, time_execution))
             self._lock.release()

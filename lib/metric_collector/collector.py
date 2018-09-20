@@ -112,12 +112,17 @@ class Collector:
             values = itertools.chain(*values)
 
             ### Send results to the right output
-            if self.output_type == 'stdout':
-                utils.print_format_influxdb(values)
-            elif self.output_type == 'http':
-                utils.post_format_influxdb(values, self.output_addr)
-            else:
-                logger.warn('Collector: Output format unknown: {}'.format(self.output_type))
+            try:
+                if dev.hostname == 'br1-iad1':
+                    raise Exception("bleh")
+                if self.output_type == 'stdout':
+                    utils.print_format_influxdb(values)
+                elif self.output_type == 'http':
+                    utils.post_format_influxdb(values, self.output_addr)
+                else:
+                    logger.warn('Collector: Output format unknown: {}'.format(self.output_type))
+            except Exception as ex:
+                logger.exception("Hit exception trying to post to influx")
 
             if host_reachable:
                 dev.close()
