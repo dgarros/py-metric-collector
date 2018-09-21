@@ -81,6 +81,8 @@ class F5Collector(object):
         # find the command/query to execute
         parser = self.parsers.get_parser_for(command)
         raw_data = self.execute_query(parser['data']['parser']['query'])
+        if not raw_data:
+            return None
         datapoints = self.parsers.parse(command, raw_data)
 
         if datapoints is not None:
