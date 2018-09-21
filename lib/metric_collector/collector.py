@@ -113,8 +113,6 @@ class Collector:
 
             ### Send results to the right output
             try:
-                if dev.hostname == 'br1-iad1':
-                    raise Exception("bleh")
                 if self.output_type == 'stdout':
                     utils.print_format_influxdb(values)
                 elif self.output_type == 'http':
