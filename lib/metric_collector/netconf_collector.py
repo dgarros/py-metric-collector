@@ -146,7 +146,8 @@ class NetconfCollector():
     # find the command to execute from the parser directly
     parser = self.parsers.get_parser_for(command)
     data = self.execute_command(parser['data']['parser']['command'])
-    if not data:
+    
+    if data is None:
         return None
     if parser['data']['parser']['type'] == 'textfsm':
         data = etree.tostring(data)
