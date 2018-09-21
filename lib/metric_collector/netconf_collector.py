@@ -137,7 +137,7 @@ class NetconfCollector():
     except RpcError as err:
       rpc_error = err.__repr__()
       logger.error("Error found on <%s> executing command: %s, error: %s:", self.hostname, command ,rpc_error)
-      return False
+      return None
 
     return command_result
 
@@ -146,6 +146,8 @@ class NetconfCollector():
     # find the command to execute from the parser directly
     parser = self.parsers.get_parser_for(command)
     data = self.execute_command(parser['data']['parser']['command'])
+    if not data:
+        return None
     if parser['data']['parser']['type'] == 'textfsm':
         data = etree.tostring(data)
     datapoints = self.parsers.parse(input=command, data=data)
