@@ -1,0 +1,55 @@
+parser:
+    measurement: jnpr_krt_state     
+    command: show krt state             
+    type: xml
+    matches:
+    -   type: single-value
+        method: xpath
+        xpath: //krt-state-information/krt-queue-state/krtq-operations-queued
+        variable-name: krtq-operations-queued
+
+    -   type: single-value
+        method: xpath
+        xpath: //krt-state-information/krt-queue-state/krtq-rt-table-adds
+        variable-name: krtq-rt-table-adds
+
+    -   type: single-value
+        method: xpath
+        xpath: //krt-state-information/krt-queue-state/krtq-high-mpls-adds
+        variable-name: krtq-high-mpls-adds
+    -
+        type: single-value
+        method: xpath
+        xpath: //krt-state-information/krt-queue-state/krtq-high-mpls-changes
+        variable-name: krtq-high-mpls-changes
+    -
+        type: single-value
+        method: xpath
+        xpath: //krt-state-information/krt-queue-state/krtq-high-priority-adds
+        variable-name:  krtq-high-priority-adds
+    -
+        type: single-value
+        method: xpath
+        xpath: //krt-state-information/krt-queue-state/krtq-normal-priority-adds
+        variable-name:  krtq-normal-priority-adds
+    -
+        type: single-value
+        method: xpath
+        xpath: //krt-state-information/krt-queue-state/krtq-high-priority-changes
+        variable-name:  krtq-high-priority-changes
+    -
+        type: single-value
+        method: xpath
+        xpath: //krt-state-information/krt-queue-state/krtq-high-priority-deletes
+        variable-name:  krtq-high-priority-deletes
+    -
+        type: single-value
+        method: xpath
+        xpath: //krt-state-information/krt-queue-state/krtq-normal-priority-deletes
+        variable-name:  krtq-normal-priority-deletes
+    -
+        type: single-value
+        method: xpath
+        xpath: //krt-state-information/krt-queue-state/krtq-normal-priority-changes
+        variable-name:  krtq-normal-priority-changes
+
