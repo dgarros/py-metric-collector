@@ -1,0 +1,305 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_INFLUXDB",
+      "label": "influxdb",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "influxdb",
+      "pluginName": "InfluxDB"
+    }
+  ],
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "5.2.4"
+    },
+    {
+      "type": "panel",
+      "id": "graph",
+      "name": "Graph",
+      "version": "5.0.0"
+    },
+    {
+      "type": "datasource",
+      "id": "influxdb",
+      "name": "InfluxDB",
+      "version": "5.0.0"
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      },
+      {
+        "datasource": "${DS_INFLUXDB}",
+        "enable": true,
+        "hide": true,
+        "iconColor": "#fce2de",
+        "limit": 100,
+        "name": "COMMIT",
+        "query": "SELECT * FROM \"juniper\".\"7days\".\"syslog_events\" WHERE  \"message\"='UI_COMMIT_COMPLETED' AND $timeFilter",
+        "showIn": 0,
+        "tags": [],
+        "tagsColumn": "host",
+        "textColumn": "message",
+        "type": "tags"
+      },
+      {
+        "datasource": "${DS_INFLUXDB}",
+        "enable": true,
+        "hide": true,
+        "iconColor": "#eab839",
+        "limit": 100,
+        "name": "BGP",
+        "query": "SELECT * FROM \"juniper\".\"7days\".\"syslog_events\" WHERE  \"message\" =~ /RPD_BGP_NEIGHBOR_STATE_CHANGED/ AND $timeFilter",
+        "showIn": 0,
+        "tags": [],
+        "tagsColumn": "host",
+        "textColumn": "message",
+        "type": "tags"
+      },
+      {
+        "datasource": "${DS_INFLUXDB}",
+        "enable": true,
+        "hide": true,
+        "iconColor": "#58140c",
+        "limit": 100,
+        "name": "OSPF",
+        "query": "SELECT * FROM \"juniper\".\"7days\".\"syslog_events\" WHERE  \"message\" =~ /RPD_OSPF_NBR/ AND $timeFilter",
+        "showIn": 0,
+        "tags": [],
+        "tagsColumn": "host",
+        "textColumn": "message",
+        "type": "tags"
+      },
+      {
+        "datasource": "${DS_INFLUXDB}",
+        "enable": true,
+        "hide": true,
+        "iconColor": "#0a437c",
+        "limit": 100,
+        "name": "INTERFACE",
+        "query": "SELECT * FROM \"juniper\".\"7days\".\"syslog_events\" WHERE  \"message\" =~ /SNMP_TRAP_LINK_/ AND $timeFilter",
+        "showIn": 0,
+        "tags": [],
+        "tagsColumn": "host",
+        "textColumn": "message",
+        "type": "tags"
+      }
+    ]
+  },
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": null,
+  "iteration": 1537644636576,
+  "links": [],
+  "panels": [
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "${DS_INFLUXDB}",
+      "fill": 1,
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 2,
+      "legend": {
+        "alignAsTable": true,
+        "avg": false,
+        "current": true,
+        "hideEmpty": true,
+        "hideZero": true,
+        "max": true,
+        "min": false,
+        "rightSide": true,
+        "show": true,
+        "sort": "current",
+        "sortDesc": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "repeat": "device",
+      "repeatDirection": "v",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "[[device]] [[tag_filter-name]] [[tag_counter-name]]",
+          "groupBy": [
+            {
+              "params": [
+                "filter-name"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "counter-name"
+              ],
+              "type": "tag"
+            }
+          ],
+          "measurement": "jnpr_firewall_counters",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "byte-count"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [
+                  "1s"
+                ],
+                "type": "non_negative_derivative"
+              },
+              {
+                "params": [
+                  "*8"
+                ],
+                "type": "math"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "device",
+              "operator": "=~",
+              "value": "/^$device$/"
+            }
+          ]
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "$device Firewall counter for traffic",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "bps",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    }
+  ],
+  "schemaVersion": 16,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "allValue": null,
+        "current": {},
+        "datasource": "${DS_INFLUXDB}",
+        "hide": 0,
+        "includeAll": true,
+        "label": null,
+        "multi": true,
+        "name": "device",
+        "options": [],
+        "query": "SHOW TAG VALUES  WITH KEY = \"device\" ",
+        "refresh": 1,
+        "regex": "",
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ],
+    "time_options": [
+      "5m",
+      "15m",
+      "1h",
+      "6h",
+      "12h",
+      "24h",
+      "2d",
+      "7d",
+      "30d"
+    ]
+  },
+  "timezone": "",
+  "title": "Firewall Stats",
+  "uid": "V9sdT9omz",
+  "version": 6
+}
