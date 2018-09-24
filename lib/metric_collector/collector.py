@@ -102,11 +102,13 @@ class Collector:
                 },
                 'timestamp': time.time_ns(),
             }]
+
+            host_time_datapoint[0]['tags'].update(dev.context)
+            
             if os.environ.get('NOMAD_JOB_NAME'):
                 host_time_datapoint[0]['tags']['nomad_job_name'] = os.environ['NOMAD_JOB_NAME']
             if os.environ.get('NOMAD_ALLOC_INDEX'):
                 host_time_datapoint[0]['tags']['nomad_alloc_index'] = os.environ['NOMAD_ALLOC_INDEX']
-
 
             values.append((n for n in host_time_datapoint))
             values = itertools.chain(*values)
