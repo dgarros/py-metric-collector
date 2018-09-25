@@ -85,6 +85,8 @@ parser:
             -   { xpath: ./input-error-list/input-l2-mismatch-timeouts, variable-name: input-l2-mismatch-timeouts }
             -   { xpath: ./input-error-list/input-fifo-errors,          variable-name: input-fifo-errors }
             -   { xpath: ./input-error-list/input-resource-errors,      variable-name: input-resource-errors }
+            -   { xpath: ./ethernet-mac-statistics/input-crc-errors,    variable-name: input-crc-errors }
+            -   { xpath: ./ethernet-mac-statistics/input-mac-pause-frames,    variable-name: input-mac-pause-frames }
 
             ### Output Errors 
             -   { xpath: ./output-error-list/carrier-transitions,       variable-name: carrier-transitions }
@@ -97,3 +99,42 @@ parser:
             -   { xpath: ./output-error-list/output-fifo-errors,        variable-name: output-fifo-errors }
             -   { xpath: ./output-error-list/output-resource-errors,    variable-name: output-resource-errors }
 
+### ----------------------------------------------------------------
+### Logical Interface traffic statistics
+### ----------------------------------------------------------------
+    -   type: multi-value
+        method: xpath
+        measurement: jnpr_interface_stat
+        xpath: //interface-information/physical-interface/logical-interface
+        loop:
+            interface: ./name
+            description: ./description
+            sub-matches:
+            -   { xpath: ./traffic-statistics/input-bytes,          variable-name: input-bytes }
+            -   { xpath: ./traffic-statistics/output-bytes,         variable-name: output-bytes }
+            -   { xpath: ./traffic-statistics/input-packets,        variable-name: input-packets }
+            -   { xpath: ./traffic-statistics/output-packets,       variable-name: output-packets }
+            -   { xpath: ./traffic-statistics/ipv6-transit-statistics/input-bytes,          variable-name: ipv6-input-bytes }
+            -   { xpath: ./traffic-statistics/ipv6-transit-statistics/output-bytes,         variable-name: ipv6-output-bytes }
+            -   { xpath: ./traffic-statistics/ipv6-transit-statistics/input-packets,        variable-name: ipv6-input-packets }
+            -   { xpath: ./traffic-statistics/ipv6-transit-statistics/output-packets,       variable-name: ipv6-output-packets }
+
+### ----------------------------------------------------------------
+### LAG Logical Interface traffic statistics
+### ----------------------------------------------------------------
+    -   type: multi-value
+        method: xpath
+        measurement: jnpr_interface_stat
+        xpath: //interface-information/physical-interface/logical-interface
+        loop:
+            interface: ./name
+            description: ./description
+            sub-matches:
+            -   { xpath: ./lag-traffic-statistics/lag-bundle/input-bytes,          variable-name: input-bytes }
+            -   { xpath: ./lag-traffic-statistics/lag-bundle/output-bytes,         variable-name: output-bytes }
+            -   { xpath: ./lag-traffic-statistics/lag-bundle/input-packets,        variable-name: input-packets }
+            -   { xpath: ./lag-traffic-statistics/lag-bundle/output-packets,       variable-name: output-packets }
+            -   { xpath: ./lag-traffic-statistics/ipv6-transit-statistics/input-bytes,          variable-name: ipv6-input-bytes }
+            -   { xpath: ./lag-traffic-statistics/ipv6-transit-statistics/output-bytes,         variable-name: ipv6-output-bytes }
+            -   { xpath: ./lag-traffic-statistics/ipv6-transit-statistics/input-packets,        variable-name: ipv6-input-packets }
+            -   { xpath: ./lag-traffic-statistics/ipv6-transit-statistics/output-packets,       variable-name: ipv6-output-packets }
