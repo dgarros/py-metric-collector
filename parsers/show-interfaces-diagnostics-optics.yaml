@@ -8,6 +8,7 @@ parser:
 ### -----------------------------------------------------------------------------
     -   type: multi-value
         method: xpath
+        jnpr_interface_optics_multi_lane
         xpath: "//interface-information/physical-interface/optics-diagnostics/optics-diagnostics-lane-values[not(laser-rx-optical-power<0.025)]"
         loop:
             interface: ./../../name
@@ -19,8 +20,31 @@ parser:
                 variable-name: rx-optical-power-dbm
             -   xpath: ./laser-output-power
                 variable-name: output-power
+
 ### -----------------------------------------------------------------------------
-### Optic Temperature
+### Optic for single lane and Temperature
+### -----------------------------------------------------------------------------
+    -   type: multi-value
+        method: xpath
+        measurement: jnpr_interface_optics_single_lane
+        xpath: "//interface-information/physical-interface/optics-diagnostics"
+        loop:
+            interface: ./../name
+            sub-matches:
+            -   xpath: ./rx-signal-avg-optical-power
+                variable-name: rx-signal-avg-optical-power
+
+            -   xpath: ./rx-signal-avg-optical-power-dbm
+                variable-name: rx-signal-avg-optical-power-dbm
+
+            -   xpath: ./laser-output-power
+                variable-name: laser-output-power
+
+            -   xpath: ./laser-output-power-dbm
+                variable-name: laser-output-power
+
+### -----------------------------------------------------------------------------
+### Optic for single lane and Temperature
 ### -----------------------------------------------------------------------------
     -   type: multi-value
         method: xpath
@@ -30,4 +54,4 @@ parser:
             interface: ./../name
             sub-matches:
             -   xpath: ./module-temperature/@celsius
-                variable-name: temperature 
+                variable-name: temperature
