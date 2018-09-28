@@ -1,0 +1,20 @@
+parser:
+    command: show security nat resource-usage source-pool all
+    measurement: jnpr_snat_pool_usage
+    type: xml
+    matches:
+    -   type: multi-value
+        method: xpath
+        xpath: //source-resource-usage-pool-information/resource-usage-entry
+        loop:
+            pool_name: ./resource-usage-pool-name
+            fpc-id: ./slot
+            sub-matches:
+            -   xpath: ./resource-usage-total-used
+                variable-name: used
+            -   xpath: ./resource-usage-total-total
+                variable-name: total
+            -   xpath: ./resource-usage-total-avail
+                variable-name: available
+            -   xpath: ./resource-usage-total-address
+                variable-name: ip_address
