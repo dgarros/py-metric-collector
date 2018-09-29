@@ -33,3 +33,8 @@ parser:
                   variable-name: total_conns
                 - jmespath: entries.totRequests.value
                   variable-name: total_requests
+                - jmespath: entries."status.availabilityState".description
+                  variable-name: state
+                  enumerate:
+                      available: 0
+                      offline: 1
