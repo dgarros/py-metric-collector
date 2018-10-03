@@ -1,154 +1,40 @@
 parser:
     command: show route summary
-    measurement: jnpr_route_summary
     type: xml
     matches:
-    -
-        type: multi-value
+### ----------------------------------------------------------------
+### Per Routing Table Stats
+### ----------------------------------------------------------------
+    -   type: multi-value
         method: xpath
-        xpath: //route-table[table-name='inet.0']
+        measurement: jnpr_route_summary
+        xpath: //route-table
         loop:
-            key: ./table-name
+            table_name: ./table-name
             sub-matches:
-            -
-                xpath: ./destination-count
+            -   xpath: ./destination-count
                 variable-name:  destinations
-                tags:
-                -
-                    table: $key
-                    test: delete_me
-            -
-                xpath: ./total-route-count
+            -   xpath: ./total-route-count
                 variable-name:  routes
-                tags:
-                -
-                    table: $key
-            -
-                xpath: ./active-route-count
+            -   xpath: ./active-route-count
                 variable-name:  actives
-                tags:
-                -
-                    table: $key
-            -
-                xpath: ./holddown-route-count
+            -   xpath: ./holddown-route-count
                 variable-name:  holddown
-                tags:
-                -
-                    table: $key
-            -
-                xpath: ./hidden-route-count
+            -   xpath: ./hidden-route-count
                 variable-name:  hidden
-                tags:
-                -
-                    table: $key
-    -
-        type: multi-value
+
+### ----------------------------------------------------------------
+### Per Protocol and Routing table Stats
+### ----------------------------------------------------------------
+    -   type: multi-value
         method: xpath
-        xpath: //route-table[table-name='inet.3']
+        measurement: jnpr_route_summary_protocol
+        xpath: //route-table/protocols
         loop:
-            key: ./table-name
+            table_name: ./../table-name
+            protocol_name: ./protocol-name
             sub-matches:
-            -
-                xpath: ./destination-count
-                variable-name:  destinations
-                tags:
-                -
-                    table: $key
-            -
-                xpath: ./total-route-count
-                variable-name:  routes
-                tags:
-                -
-                    table: $key
-            -
-                xpath: ./active-route-count
-                variable-name:  actives
-                tags:
-                -
-                    table: $key
-            -
-                xpath: ./holddown-route-count
-                variable-name:  holddown
-                tags:
-                -
-                    table: $key
-            -
-                xpath: ./hidden-route-count
-                variable-name:  hidden
-                tags:
-                -
-                    table: $key
-    -
-        type: multi-value
-        method: xpath
-        xpath: //route-table[table-name='inet6.0']
-        loop:
-            key: ./table-name
-            sub-matches:
-            -
-                xpath: ./destination-count
-                variable-name:  destinations
-                tags:
-                -
-                    table: $key
-            -
-                xpath: ./total-route-count
-                variable-name:  routes
-                tags:
-                -
-                    table: $key
-            -
-                xpath: ./active-route-count
-                variable-name:  actives
-                tags:
-                -
-                    table: $key
-            -
-                xpath: ./holddown-route-count
-                variable-name:  holddown
-                tags:
-                -
-                    table: $key
-            -
-                xpath: ./hidden-route-count
-                variable-name:  hidden
-                tags:
-                -
-                    table: $key
-    -
-        type: multi-value
-        method: xpath
-        xpath: //route-table[table-name='bgp.l3vpn.0']
-        loop:
-            key: ./table-name
-            sub-matches:
-            -
-                xpath: ./destination-count
-                variable-name:  destinations
-                tags:
-                -
-                    table: $key
-            -
-                xpath: ./total-route-count
-                variable-name:  routes
-                tags:
-                -
-                    table: $key
-            -
-                xpath: ./active-route-count
-                variable-name:  actives
-                tags:
-                -
-                    table: $key
-            -
-                xpath: ./holddown-route-count
-                variable-name:  holddown
-                tags:
-                -
-                    table: $key
-            -
-                xpath: ./hidden-route-count
-                variable-name:  hidden
-                tags:
-                -
-                    table: $key
+            -   xpath: ./protocol-route-count
+                variable-name:  route-total
+            -   xpath: ./active-route-count
+                variable-name:  route-active
