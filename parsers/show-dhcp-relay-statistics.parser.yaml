@@ -1,0 +1,37 @@
+parser:
+    command: show dhcp relay statistics
+    measurement: jnpr_dhcp_relay_msg_stats
+    type: xml
+    matches:
+### ----------------------------------------------------------------
+### Stats per message Type
+### ----------------------------------------------------------------
+    -   type: multi-value
+        method: xpath
+        measurement: jnpr_dhcp_relay_msg_stats
+        xpath: //dhcp-relay-statistics-information/message-table/message
+        loop:
+            dhcp-msg-type: ./message-name
+            direction: ../message-direction
+            sub-matches:
+            - xpath: ./message-count
+              variable-name: count
+
+### ----------------------------------------------------------------
+### Global stats 
+### ----------------------------------------------------------------
+    -   type: multi-value
+        method: xpath
+        measurement: jnpr_dhcp_relay_global_stats
+        xpath: //dhcp-relay-statistics-information
+        loop:
+            sub-matches:
+            - xpath: ./forwarded-packets-total
+              variable-name: packet-forwarded-total
+            - xpath: ./forwarded-bootreply-packets
+              variable-name: bootreply-forwarded-total
+            - xpath: ./forwarded-bootrequest-packets
+              variable-name: bootrequest-forwarded-total
+            - xpath: ./dropped-packet-total
+              variable-name: packet-dropped-total
+              
