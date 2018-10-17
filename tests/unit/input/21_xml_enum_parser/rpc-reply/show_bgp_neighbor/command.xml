@@ -1,0 +1,173 @@
+<rpc-reply >
+    <bgp-information >
+        <bgp-peer >
+            <peer-address>10.20.192.0+179</peer-address>
+            <peer-as>65003</peer-as>
+            <local-address>10.20.192.1+53908</local-address>
+            <local-as>65002</local-as>
+            <peer-type>External</peer-type>
+            <peer-state>Established</peer-state>
+            <peer-flags>Sync RSync</peer-flags>
+            <last-state>EstabSync</last-state>
+            <last-event>RecvKeepAlive</last-event>
+            <last-error>Cease</last-error>
+            <bgp-option-information >
+                <export-policy>
+                    POLICY-OUT
+                </export-policy>
+                <bgp-options>Preference LocalAddress PeerAS Multipath LocalAS Refresh</bgp-options>
+                <bgp-options2>MultipathAs BfdEnabled</bgp-options2>
+                <bgp-options-extended></bgp-options-extended>
+                <local-address>10.20.192.1</local-address>
+                <holdtime>90</holdtime>
+                <preference>170</preference>
+                <local-as>65002</local-as>
+                <local-system-as>0</local-system-as>
+            </bgp-option-information>
+            <flap-count>13</flap-count>
+            <last-flap-event>Stop</last-flap-event>
+            <bgp-error>
+                <name>Cease</name>
+                <send-count>2</send-count>
+                <receive-count>2</receive-count>
+            </bgp-error>
+            <peer-id>10.20.250.251</peer-id>
+            <local-id>10.20.250.1</local-id>
+            <active-holdtime>90</active-holdtime>
+            <keepalive-interval>30</keepalive-interval>
+            <group-index>0</group-index>
+            <peer-index>0</peer-index>
+            <bgp-bfd>
+                <bfd-configuration-state>enabled</bfd-configuration-state>
+                <bfd-operational-state>up</bfd-operational-state>
+            </bgp-bfd>
+            <local-interface-name>et-0/0/52.0</local-interface-name>
+            <local-interface-index>613</local-interface-index>
+            <peer-restart-nlri-configured>inet-unicast</peer-restart-nlri-configured>
+            <nlri-type-peer>inet-unicast</nlri-type-peer>
+            <nlri-type-session>inet-unicast</nlri-type-session>
+            <peer-refresh-capability>2</peer-refresh-capability>
+            <peer-stale-route-time-configured>300</peer-stale-route-time-configured>
+            <peer-no-restart/>
+            <peer-restart-nlri-negotiated>inet-unicast</peer-restart-nlri-negotiated>
+            <peer-end-of-rib-received>inet-unicast</peer-end-of-rib-received>
+            <peer-end-of-rib-sent>inet-unicast</peer-end-of-rib-sent>
+            <peer-end-of-rib-scheduled></peer-end-of-rib-scheduled>
+            <peer-4byte-as-capability-advertised>65003</peer-4byte-as-capability-advertised>
+            <peer-addpath-not-supported/>
+            <bgp-rib >
+                <name>inet.0</name>
+                <rib-bit>10000</rib-bit>
+                <bgp-rib-state>BGP restart is complete</bgp-rib-state>
+                <vpn-rib-state>VPN restart is complete</vpn-rib-state>
+                <send-state>in sync</send-state>
+                <active-prefix-count>582</active-prefix-count>
+                <received-prefix-count>586</received-prefix-count>
+                <accepted-prefix-count>586</accepted-prefix-count>
+                <suppressed-prefix-count>0</suppressed-prefix-count>
+                <advertised-prefix-count>3</advertised-prefix-count>
+            </bgp-rib>
+            <last-received>18</last-received>
+            <last-sent>13</last-sent>
+            <last-checked>42</last-checked>
+            <input-messages>516107</input-messages>
+            <input-updates>181226</input-updates>
+            <input-refreshes>0</input-refreshes>
+            <input-octets>15406361</input-octets>
+            <output-messages>355874</output-messages>
+            <output-updates>1</output-updates>
+            <output-refreshes>0</output-refreshes>
+            <output-octets>6761700</output-octets>
+            <bgp-output-queue>
+                <number>0</number>
+                <count>0</count>
+            </bgp-output-queue>
+        </bgp-peer>
+        <bgp-peer >
+            <peer-address>10.20.193.0+179</peer-address>
+            <peer-as>65001</peer-as>
+            <local-address>10.20.193.1+64961</local-address>
+            <local-as>65002</local-as>
+            <peer-type>External</peer-type>
+            <peer-state>Idle</peer-state>
+            <peer-flags>Sync RSync</peer-flags>
+            <last-state>EstabSync</last-state>
+            <last-event>RecvKeepAlive</last-event>
+            <last-error>Cease</last-error>
+            <bgp-option-information >
+                <export-policy>
+                    POLICY-OUT
+                </export-policy>
+                <bgp-options>Preference LocalAddress PeerAS Multipath LocalAS Refresh</bgp-options>
+                <bgp-options2>MultipathAs BfdEnabled</bgp-options2>
+                <bgp-options-extended></bgp-options-extended>
+                <local-address>10.20.193.1</local-address>
+                <holdtime>90</holdtime>
+                <preference>170</preference>
+                <local-as>65002</local-as>
+                <local-system-as>0</local-system-as>
+            </bgp-option-information>
+            <flap-count>4</flap-count>
+            <last-flap-event>Stop</last-flap-event>
+            <bgp-error>
+                <name>Cease</name>
+                <send-count>3</send-count>
+                <receive-count>1</receive-count>
+            </bgp-error>
+            <peer-id>10.20.250.252</peer-id>
+            <local-id>10.20.250.1</local-id>
+            <active-holdtime>90</active-holdtime>
+            <keepalive-interval>30</keepalive-interval>
+            <group-index>0</group-index>
+            <peer-index>1</peer-index>
+            <bgp-bfd>
+                <bfd-configuration-state>enabled</bfd-configuration-state>
+                <bfd-operational-state>up</bfd-operational-state>
+            </bgp-bfd>
+            <local-interface-name>et-0/0/52.0</local-interface-name>
+            <local-interface-index>819</local-interface-index>
+            <peer-restart-nlri-configured>inet-unicast</peer-restart-nlri-configured>
+            <nlri-type-peer>inet-unicast</nlri-type-peer>
+            <nlri-type-session>inet-unicast</nlri-type-session>
+            <peer-refresh-capability>2</peer-refresh-capability>
+            <peer-stale-route-time-configured>300</peer-stale-route-time-configured>
+            <peer-no-restart/>
+            <peer-restart-nlri-negotiated>inet-unicast</peer-restart-nlri-negotiated>
+            <peer-end-of-rib-received>inet-unicast</peer-end-of-rib-received>
+            <peer-end-of-rib-sent>inet-unicast</peer-end-of-rib-sent>
+            <peer-end-of-rib-scheduled></peer-end-of-rib-scheduled>
+            <peer-4byte-as-capability-advertised>65001</peer-4byte-as-capability-advertised>
+            <peer-addpath-not-supported/>
+            <bgp-rib >
+                <name>inet.0</name>
+                <rib-bit>10000</rib-bit>
+                <bgp-rib-state>BGP restart is complete</bgp-rib-state>
+                <vpn-rib-state>VPN restart is complete</vpn-rib-state>
+                <send-state>in sync</send-state>
+                <active-prefix-count>581</active-prefix-count>
+                <received-prefix-count>586</received-prefix-count>
+                <accepted-prefix-count>586</accepted-prefix-count>
+                <suppressed-prefix-count>0</suppressed-prefix-count>
+                <advertised-prefix-count>3</advertised-prefix-count>
+            </bgp-rib>
+            <last-received>10</last-received>
+            <last-sent>18</last-sent>
+            <last-checked>63</last-checked>
+            <input-messages>513605</input-messages>
+            <input-updates>178730</input-updates>
+            <input-refreshes>0</input-refreshes>
+            <input-octets>15520812</input-octets>
+            <output-messages>355861</output-messages>
+            <output-updates>1</output-updates>
+            <output-refreshes>0</output-refreshes>
+            <output-octets>6761453</output-octets>
+            <bgp-output-queue>
+                <number>0</number>
+                <count>0</count>
+            </bgp-output-queue>
+        </bgp-peer>
+    </bgp-information>
+    <cli>
+        <banner>{master:0}</banner>
+    </cli>
+</rpc-reply>
