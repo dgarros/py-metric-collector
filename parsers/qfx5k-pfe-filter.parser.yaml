@@ -1,0 +1,36 @@
+
+### ------------------------------ 
+### Designed for QFX5k
+### Tested on QFX5100 -  17.3R2.10
+### ------------------------------
+parser:
+    command: show pfe filter hw summary
+    type: textfsm
+    tags: 
+        GROUP_NAME: group
+    fields:
+        ALLOCATED: allocated
+        USED: used
+        FREE: free
+    measurement: jnpr_pfe_hw_filter
+    template: |
+        Value GROUP_NAME ([\w\s]+\w)
+        Value GROUP_ID ([0-9]+)
+        Value ALLOCATED ([0-9]+)
+        Value USED ([0-9]+)
+        Value FREE ([0-9]+)
+
+        Start
+          ^\s+${GROUP_NAME}\s+${GROUP_ID}\s+${ALLOCATED}\s+${USED}\s+${FREE} -> Record
+
+        EOF
+
+# Slot 0
+
+# Group                    Group-ID       Allocated      Used           Free
+# ---------------------------------------------------------------------------
+# > Ingress filter groups:
+#   iRACL group            33             1024           798            226
+# > Egress filter groups:
+
+
