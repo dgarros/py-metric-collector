@@ -1,0 +1,27 @@
+parser:
+    command: show dhcp relay binding summary
+    type: xml
+    matches:
+    -   type: multi-value
+        method: xpath
+        measurement: jnpr_dhcp_relay_binding_stats
+        xpath: //binding-summary
+        loop:
+            sub-matches:
+            - xpath: ./binding-count
+              variable-name: binding-count
+            - xpath: ./init-count
+              variable-name: init-count
+            - xpath: ./bound-count
+              variable-name: bound-count
+            - xpath: ./selecting-count
+              variable-name: selecting-count
+            - xpath: ./requesting-count
+              variable-name: requesting-count
+            - xpath: ./renewing-count
+              variable-name: renewing-count
+            - xpath: ./rebinding-count
+              variable-name: rebinding-count
+            - xpath: ./releasing-count
+              variable-name: releasing-count
+
