@@ -115,6 +115,33 @@ class Test_Validate_Main_Block(unittest.TestCase):
 
     self.assertTrue( len(data) == 2 )
 
+  def test_parse_valid_xml_enum(self):
+    test_dir = here+'/input/21_xml_enum_parser'
+
+    pm = parser_manager.ParserManager( parser_dirs=[test_dir + "/parsers"], default_parser_dir=False )
+
+    ## Read XML content
+    xml_data = open( test_dir + "/rpc-reply/show_bgp_neighbor/command.xml").read()
+    xml_etree = etree.fromstring(xml_data)
+
+    expected_dict_0 = {
+        'fields': {'flap-count': '13', 'status': 0},
+        'measurement': None,
+        'tags': {'peer-id': '10.20.250.251', 'peer-as': '65003', 'peer-state': 'Established'}, 
+    }
+    expected_dict_1 = {
+        'fields': {'flap-count': '4', 'status': 2},
+        'measurement': None,
+        'tags': {'peer-id': '10.20.250.252', 'peer-as': '65001', 'peer-state': 'Idle'}
+    }
+  
+    data = list(pm.parse( input="show-bgp-neighbor.parser.yaml", data=xml_etree))
+
+    self.assertDictEqual( expected_dict_0, data[0] )
+    self.assertDictEqual( expected_dict_1, data[1] )
+
+    self.assertTrue( len(data) == 2 )
+
   # def test_parse_valid_regex(self):
   #   test_dir = here+'/input/21_regex_parser'
 
