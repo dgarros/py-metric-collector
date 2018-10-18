@@ -73,9 +73,8 @@ class NetboxAsInventory(object):
         script_config_data: Content of its config which comes from YAML file.
     """
 
-    def __init__(self, script_args, script_config_data):
+    def __init__(self, script_config_data):
         # Script arguments.
-        self.config_file = script_args.config_file
 
         self.inventory_dict = dict()
 
@@ -95,7 +94,7 @@ class NetboxAsInventory(object):
         self.key_map = {
             "default": "name",
             "general": "name",
-            "custom": "value",
+            "custom": None,
             "status": "label",
             "device_type": "model",
             "ip": "address"
@@ -122,14 +121,16 @@ class NetboxAsInventory(object):
             # Reduce key path, where it get value from nested dict.
             # a replacement for buildin reduce function.
             for key in key_path:
+                
                 if isinstance(source_dict.get(key), dict) and len(key_path) > 1:
                     source_dict = source_dict.get(key)
                     key_path = key_path[1:]
+
                     self._get_value_by_path(source_dict, key_path,
                                             ignore_key_error=ignore_key_error, default=default)
                 else:
                     key_value = source_dict[key]
-
+                
         # How to set the key value, if the key was not found.
         except KeyError as key_name:
             if default:
@@ -138,7 +139,7 @@ class NetboxAsInventory(object):
                 key_value = None
             elif not key_value and not ignore_key_error:
                 sys.exit("The key %s is not found. Please remember, Python is case sensitive." % key_name)
-        return key_value
+        return key_value 
 
     def _config(self, key_path, default=""):
         """Get value from config var.
@@ -261,11 +262,17 @@ class NetboxAsInventory(object):
 
                 # The groups that will be used to group hosts in the inventory.
                 for tag in self.tags[category]:
+
+                    key_path = [ tag ]
+                    if key_name != None:
+                        key_path.append(key_name)
+
                     # Try to get group value. If the section not found in netbox, this also will print error message.
-                    tag_value = self._get_value_by_path(data_dict, [tag, key_name])
+                    tag_value = self._get_value_by_path(data_dict, key_path, ignore_key_error=True)
 
                     ## Add value
-                    self.inventory_dict[device_name]['tags'].append(tag_value)
+                    if tag_value != None:
+                        self.inventory_dict[device_name]['tags'].append(tag_value)
         
         return True
 
@@ -405,7 +412,7 @@ def main():
     config_data = open_yaml_file(args.config_file)
 
     # Netbox vars.
-    netbox = NetboxAsInventory(args, config_data)
+    netbox = NetboxAsInventory(config_data)
     ansible_inventory = netbox.generate_inventory()
     netbox.print_inventory_json(ansible_inventory)
 

@@ -1,0 +1,141 @@
+
+{ 
+    "params": "site=aa&site=bb&site=cc&manufacturer=juniper&&offset=0&limit=1000",
+    "response": {
+        "count": 2,
+        "next": null,
+        "previous": null,
+        "results": [
+            {
+                "id": 30,
+                "name": "device1",
+                "display_name": "device1",
+                "device_type": {
+                    "id": 100,
+                    "manufacturer": {
+                        "id": 5,
+                        "name": "Juniper",
+                        "slug": "juniper"
+                    },
+                    "model": "qfx5555",
+                    "slug": "qfx5555"
+                },
+                "device_role": {
+                    "id": 10,
+                    "name": "top-of-rack",
+                    "slug": "top-of-rack"
+                },
+                "tenant": null,
+                "platform": {
+                    "id": 3,
+                    "name": "Junos",
+                    "slug": "junos"
+                },
+                "serial": "",
+                "asset_tag": null,
+                "site": {
+                    "id": 4,
+                    "name": "aa",
+                    "slug": "aa"
+                },
+                "rack": {
+                    "id": 10,
+                    "name": "abc01",
+                    "display_name": "abc01"
+                },
+                "position": 37,
+                "face": {
+                    "value": 0,
+                    "label": "Front"
+                },
+                "parent_device": null,
+                "status": {
+                    "value": 0,
+                    "label": "Active"
+                },
+                "primary_ip": {
+                    "id": 1234,
+                    "family": 4,
+                    "address": "1.2.3.4/32"
+                },
+                "primary_ip4": {
+                    "id": 1234,
+                    "family": 4,
+                    "address": "1.2.3.4/32"
+                },
+                "primary_ip6": null,
+                "cluster": null,
+                "comments": "",
+                "custom_fields": {
+                    "custom_a": "mycustom-field-a1",
+                    "custom_b": "mycustom-field-b1"
+                }
+            },
+            {
+                "id": 31,
+                "name": "device2",
+                "display_name": "device2",
+                "device_type": {
+                    "id": 100,
+                    "manufacturer": {
+                        "id": 5,
+                        "name": "Juniper",
+                        "slug": "juniper"
+                    },
+                    "model": "qfx5555",
+                    "slug": "qfx5555"
+                },
+                "device_role": {
+                    "id": 10,
+                    "name": "top-of-rack",
+                    "slug": "top-of-rack"
+                },
+                "tenant": null,
+                "platform": {
+                    "id": 3,
+                    "name": "Junos",
+                    "slug": "junos"
+                },
+                "serial": "",
+                "asset_tag": null,
+                "site": {
+                    "id": 4,
+                    "name": "bb",
+                    "slug": "bb"
+                },
+                "rack": {
+                    "id": 10,
+                    "name": "abc01",
+                    "display_name": "abc01"
+                },
+                "position": 37,
+                "face": {
+                    "value": 0,
+                    "label": "Front"
+                },
+                "parent_device": null,
+                "status": {
+                    "value": 0,
+                    "label": "Active"
+                },
+                "primary_ip": {
+                    "id": 1234,
+                    "family": 4,
+                    "address": "4.3.2.1/32"
+                },
+                "primary_ip4": {
+                    "id": 1234,
+                    "family": 4,
+                    "address": "4.3.2.1/32"
+                },
+                "primary_ip6": null,
+                "cluster": null,
+                "comments": "",
+                "custom_fields": {
+                    "custom_a": "mycustom-field-a2",
+                    "custom_b": null
+                }
+            }
+        ]
+    }
+}

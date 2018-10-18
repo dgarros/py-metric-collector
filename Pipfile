@@ -1,12 +1,9 @@
 [[source]]
-
 url = "https://pypi.python.org/simple"
 verify_ssl = true
 name = "pypi"
 
-
 [packages]
-
 cffi = "*"
 ncclient = "*"
 jxmlease = "*"
@@ -18,12 +15,11 @@ ipaddress = "*"
 textfsm = "*"
 jmespath = "*"
 f5-sdk = "*"
-
+requests-mock = "*"
 
 [dev-packages]
 pytest = "*"
 pytest-cov = "*"
 
 [requires]
-
 python_version = "3.7"
