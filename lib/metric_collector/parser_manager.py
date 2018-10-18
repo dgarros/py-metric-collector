@@ -367,7 +367,7 @@ class ParserManager:
                       elif not enum_match:
                         value_tmp = 0
 
-                    if key_tmp not in data_structure['fields']:
+                    if value_tmp != None and key_tmp not in data_structure['fields']:
                       if not self.is_valid_field(value_tmp):
                         continue
                       data_structure['fields'][key_tmp] = value_tmp
