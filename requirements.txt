@@ -12,3 +12,4 @@ ipaddress
 textfsm
 f5-sdk
 jmespath
+requests_mock
