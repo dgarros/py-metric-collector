@@ -1,7 +1,5 @@
 ![status stable](https://img.shields.io/badge/status-stable-green.svg)  
 
-> Stable Release : v0.1.3
-
 The **Netconf Collector** is a tool to collect information in Junos devices over Netconf.  
 This tool was initially part of OpenNTI, the goal of this project is to create a standalone version.
 
