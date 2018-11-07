@@ -9,7 +9,7 @@ logger = logging.getLogger('f5_rest_collector')
 
 class F5Collector(object):
 
-    def __init__(self, host, address, credential, port=443, timeout=30, retry=3, parsers=None,
+    def __init__(self, host, address, credential, port=443, timeout=15, retry=3, parsers=None,
                  context=None):
         self.hostname = host
         self.host = address

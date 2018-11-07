@@ -31,7 +31,7 @@ logging.getLogger("ncclient").setLevel(logging.WARNING) # In order to remove htt
 logging.getLogger("requests").setLevel(logging.INFO)
 logging.getLogger("urllib3").setLevel(logging.WARNING)  # In order to remove http request from InfluxDBClient
 
-logger = logging.getLogger("main")
+logger = logging.getLogger('main')
 
 global_measurement_prefix = 'metric_collector'
 
@@ -144,7 +144,7 @@ def import_inventory(hosts_file, retry=3, retry_internal=5):
             except Exception as e:
                 logger.debug('Error importing executing host file: %s > %s [%s/%s]' % (hosts_file, e, i, retry))
 
-        if not is_exec:
+        if not is_exec and not is_yaml:
             logger.warn('Unable to import the hosts file (%s) from a dynamic inventory [%s/%s]' % (hosts_file, i, retry))
   
         ### ensure hosts is still a dict
@@ -184,14 +184,13 @@ def main():
     full_parser.add_argument("--tag", nargs='+', help="Collect data from hosts that matches the tag")
     full_parser.add_argument("--cmd-tag", nargs='+', help="Collect data from command that matches the tag")
     
-    full_parser.add_argument("-c", "--console", action='store_true', help="Console logs enabled")
     full_parser.add_argument( "--test", action='store_true', help="Use emulated Junos device")
     full_parser.add_argument("-s", "--start", action='store_true', help="Start collecting (default 'no')")
     full_parser.add_argument("-i", "--input", default=BASE_DIR, help="Directory where to find input files")
 
     full_parser.add_argument("--loglvl", default=20, help="Logs verbosity, 10-debug, 50 Critical")
 
-    full_parser.add_argument("--logdir", default="logs", help="Directory where to store logs")
+    full_parser.add_argument("--logdir", default="", help="Directory where to store logs")
     
     full_parser.add_argument("--sharding",  help="Define if the script is part of a shard need to include the place in the shard and the size of the shard [0/3]")
     full_parser.add_argument("--sharding-offset", default=True, help="Define an offset needs to be applied to the shard_id")
@@ -258,25 +257,21 @@ def main():
     ### ------------------------------------------------------------------------------
     ### Logging
     ### ------------------------------------------------------------------------------
-    timestamp = time.strftime("%Y-%m-%d", time.localtime(time.time()))
-    log_dir = BASE_DIR + "/" + dynamic_args['logdir']
-    logger = logging.getLogger("main")
+    formatter = logging.Formatter('%(asctime)s %(name)s: %(levelname)s:  %(message)s')
+    sh = logging.StreamHandler()
+    sh.setFormatter(formatter)
+    handlers = [sh]
+    if dynamic_args['logdir']:
+        log_dir = BASE_DIR + "/" + dynamic_args['logdir']
+        ## Check that logs directory exist, create it if needed
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
+        filename = log_dir + "/" + 'metric_collector.log',
+        fh = logging.handlers.RotatingFileHandler(filename, maxSize=10*1024*1024, backupCount=5)
+        fh.setFormatter(formatter)
+        handlers.append(fh)
 
-    ## Check that logs directory exist, create it if needed
-    if not os.path.exists(log_dir):
-        os.makedirs(log_dir)
-
-    formatter = '%(asctime)s %(name)s %(levelname)s %(threadName)-10s:  %(message)s'
-    logging.basicConfig(filename=log_dir + "/"+ timestamp + '_py_netconf.log',
-                        level=logging_level,
-                        format=formatter,
-                        datefmt='%Y-%m-%d %H:%M:%S')
-
-    if dynamic_args['console']:
-        logger.info("Console logs enabled")
-        console = logging.StreamHandler()
-        console.setLevel(logging.DEBUG)
-        logging.getLogger('').addHandler(console)
+    logging.basicConfig(level=logging_level, handlers=handlers)
 
     ### ------------------------------------------------------------------------------
     ### LOAD all credentials in a dict

@@ -16,7 +16,9 @@ def print_format_influxdb(datapoints):
 def post_format_influxdb(datapoints, addr="http://localhost:8186/write"):
     with requests.session() as s:
         for chunk in chunks(format_datapoints_inlineprotocol(datapoints)):
-            s.post(addr, data='\n'.join(chunk))
+            resp = s.post(addr, data='\n'.join(chunk), timeout=5)
+            if resp.status_code not in [200, 201, 204]:
+                logger.warning('Failed to send datapoint to influx')
 
     logger.info('Sending Datapoint to: %s' % addr)
 

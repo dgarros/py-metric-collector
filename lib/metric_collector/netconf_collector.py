@@ -14,7 +14,7 @@ pp = pprint.PrettyPrinter(indent=4)
 
 class NetconfCollector():
 
-  def __init__(self, host=None, address=None, credential={}, test=False, timeout=60, retry=5, use_hostname=True, parsers=None, context=None):
+  def __init__(self, host=None, address=None, credential={}, test=False, timeout=15, retry=3, use_hostname=True, parsers=None, context=None):
     self.__is_connected = False
     self.__is_test = test
     self.__use_hostname = use_hostname
