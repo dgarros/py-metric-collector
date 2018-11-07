@@ -144,7 +144,7 @@ def import_inventory(hosts_file, retry=3, retry_internal=5):
             except Exception as e:
                 logger.debug('Error importing executing host file: %s > %s [%s/%s]' % (hosts_file, e, i, retry))
 
-        if not is_exec:
+        if not is_exec and not is_yaml:
             logger.warn('Unable to import the hosts file (%s) from a dynamic inventory [%s/%s]' % (hosts_file, i, retry))
   
         ### ensure hosts is still a dict
