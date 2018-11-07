@@ -16,7 +16,7 @@ def print_format_influxdb(datapoints):
 def post_format_influxdb(datapoints, addr="http://localhost:8186/write"):
     with requests.session() as s:
         for chunk in chunks(format_datapoints_inlineprotocol(datapoints)):
-            s.post(addr, data='\n'.join(chunk))
+            s.post(addr, data='\n'.join(chunk), timeout=5)
 
     logger.info('Sending Datapoint to: %s' % addr)
 
