@@ -8,6 +8,7 @@ parser:
         xpath: //bgp-information/bgp-peer
         loop:
             peer-id: ./peer-id
+            peer-address: /peer-address
             peer-as: ./peer-as
             peer-state: ./peer-state
             peer-group: ./peer-group
