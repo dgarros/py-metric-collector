@@ -60,7 +60,7 @@ def shard_host_list(shard_id, shard_size, hosts):
     return hosts
 
 
-def select_hosts(hosts_file, tag_list, sharding, sharding_offset, scheduler=None, refresh_interval=None):
+def select_hosts(hosts_file, tag_list, sharding, sharding_offset, scheduler=None, refresh_interval=None, refresh=False):
     """
     Parse a host file or pull hosts from dynamic inventory , and add it to the scheduler periodically
     """
@@ -82,11 +82,11 @@ def select_hosts(hosts_file, tag_list, sharding, sharding_offset, scheduler=None
         hosts = shard_host_list(shard_id, shard_size, hosts)
 
     if scheduler:
-        scheduler.add_hosts(hosts, host_tags=tag_list)
+        scheduler.add_hosts(hosts, host_tags=tag_list, refresh=refresh)
         t = threading.Timer(
             refresh_interval, select_hosts,
             args=(hosts_file, tag_list, sharding, sharding_offset),
-            kwargs={'scheduler': scheduler, 'refresh_interval': refresh_interval},
+            kwargs={'scheduler': scheduler, 'refresh_interval': refresh_interval, 'refresh': True},
         )
         t.setDaemon(True)
         t.start()
