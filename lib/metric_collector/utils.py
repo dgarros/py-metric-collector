@@ -1,6 +1,6 @@
 import logging
 import requests
-from itertools import chain, islice
+from itertools import chain, islice, cycle
 
 logger = logging.getLogger('collector')
 
@@ -68,3 +68,12 @@ def chunks(iterable, size=1000):
     iterator = iter(iterable)
     for first in iterator:
         yield chain([first], islice(iterator, size - 1))
+
+
+class Cycle(cycle):
+    """ wraps itertools.cycle """
+    def __init__(self, iterable):
+        self.len = len(iterable)
+        cycle.__init__(iterable)
+    def __len__(self):
+        return self.len

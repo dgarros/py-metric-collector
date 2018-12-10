@@ -3,7 +3,6 @@ import queue
 import threading
 import time
 import os
-from itertools import cycle
 from metric_collector import host_manager, parser_manager, collector, utils
 
 logger = logging.getLogger('scheduler')
@@ -28,20 +27,24 @@ class Scheduler:
             self.use_threads, self.num_threads_per_worker)
         self.default_worker.set_name('Default-120sec')
 
-    def _get_workers(self, interval):
-        ''' Spin off worker threads for each type of command based on interval '''
-        interval_workers = self.workers.get(interval)
-        if not interval_workers:
-            workers = [
-                Worker(interval, self.collector, self.output_type, self.output_addr, 
-                       self.use_threads, self.num_threads_per_worker)
-                for _ in range(self.max_worker_threads)
-            ]
-            for i, w in enumerate(workers, 1):
-                w.set_name('Worker-{}sec-{}'.format(interval, i))
-            interval_workers = cycle(workers)
-            self.workers[interval] = interval_workers
-        return interval_workers
+    def _get_worker(self, interval, refresh=False):
+        ''' Returns a worker thread for a given interval. If max_worker_threads is
+            reached, then it cycles through the existing workers
+        '''
+        interval_workers = self.workers.get(interval, [])
+        if refresh and interval_workers:
+            return next(interval_workers)
+        if len(interval_workers) == self.max_worker_threads:
+            if isinstance(interval_workers, list):
+                interval_workers = utils.Cycle(interval_workers)
+                self.workers[interval] = interval_workers
+            return next(interval_workers)
+        new_worker = Worker(interval, self.collector, self.output_type, self.output_addr,
+                            self.use_threads, self.num_threads_per_worker)
+        new_worker.set_name('Worker-{}sec-{}'.format(interval, len(interval_workers) + 1))
+        interval_workers.append(new_worker)
+        self.workers[interval] = interval_workers
+        return new_worker
 
     def _get_hostcmds(self, hosts, cmd_tags):
         ''' Group all the hosts by the intervals/commands to be run on them '''
@@ -57,7 +60,7 @@ class Scheduler:
         for worker in self.working:
             worker.init()
 
-    def add_hosts(self, hosts_conf, host_tags=None, cmd_tags=None):
+    def add_hosts(self, hosts_conf, host_tags=None, cmd_tags=None, refresh=False):
         '''  Create worker threads per interval and round-robin the hosts amongst them '''
         if not hosts_conf:
             logger.error('Scheduler: No hosts')
@@ -74,28 +77,29 @@ class Scheduler:
             return
         for host, interval_cmds in hostcmds.items():
             for interval, cmds in interval_cmds.items():
-                workers = self._get_workers(interval)
-                next_worker = next(workers)
+                next_worker = self._get_worker(interval, refresh=refresh)
                 next_worker.add_host(host, cmds)
                 self.working.add(next_worker)
-            
+
     def start(self):
         ''' Start all worker threads and block until done '''
         if len(self.working) == 0:
             self.working.add(self.default_worker)
         for worker in self.working:
             worker.start()
+        for interval, workers in self.workers.items():
+            if isinstance(workers, list):
+                self.workers[interval] = utils.Cycle(workers)
         for worker in self.working:
             worker.join()
 
     def stop(self):
         ''' Stop all running worker threads '''
         logging.info("Scheduler: Stopping all running workers")
+        for w in self.working:
+            w.stop()
         self.workers = {}
         self.working = set()
-        for worker in self.working:
-            worker.stop()
-            worker.join()
 
 
 class Worker(threading.Thread):
@@ -136,9 +140,9 @@ class Worker(threading.Thread):
         while True:
             if not self._run:
                 return
+            self._lock.acquire()
             logger.info('{}: Starting collection for {} hosts'.format(
                 self.name, len(self.hostcmds)))
-            self._lock.acquire()
             hosts = list(self.hostcmds.keys())
             time_start = time.time()
             if self.use_threads:
