@@ -5,7 +5,7 @@ jxmlease
 pytest
 pytest-cov
 jinja2
-PyYAML
+pyyaml = ">=4.2b1"
 requests
 junos-eznc
 ipaddress
