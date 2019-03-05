@@ -1,0 +1,16 @@
+parser:
+    measurement: jnpr_chassis_environment
+    command: show chassis environment
+    type: xml
+    matches:
+    -   type: multi-value
+        method: xpath
+        xpath: //environment-information/environment-item[temperature]
+        loop:
+            type: ./class
+            item: ./name
+            sub-matches:
+            -   xpath: ./temperature/@celsius
+                variable-name: temperature
+           
+        
