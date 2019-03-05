@@ -2,7 +2,7 @@ cffi
 # enum
 ncclient
 jxmlease
-pytest
+pytest>=3.3.0
 pytest-cov
 jinja2
 pyyaml>=4.2b1
