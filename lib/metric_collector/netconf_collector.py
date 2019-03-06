@@ -14,12 +14,24 @@ pp = pprint.PrettyPrinter(indent=4)
 
 class NetconfCollector():
 
-  def __init__(self, host=None, address=None, credential={}, test=False, timeout=15, retry=3, use_hostname=True, parsers=None, context=None):
+  def __init__(self, 
+        host=None, 
+        address=None, 
+        credential={}, 
+        test=False, 
+        timeout=15, 
+        retry=3, 
+        use_hostname=True, 
+        parsers=None, 
+        context=None,
+        collect_facts=True):
+
     self.__is_connected = False
     self.__is_test = test
     self.__use_hostname = use_hostname
     self.__timeout = timeout
     self.__retry = retry
+    self.__collect_facts = collect_facts
 
     self.host = address
     self.hostname = host
@@ -106,26 +118,29 @@ class NetconfCollector():
     if not self.__is_connected:
       return
 
-    # Collect Facts about the device
-    logger.info('[%s]: Collection Facts on device', self.hostname)
-    self.pyez.facts_refresh()
+    # Collect Facts about the device (if enabled)
+    if self.__collect_facts:
+      logger.info('[%s]: Collection Facts on device', self.hostname)
+      self.pyez.facts_refresh()
 
-    if self.pyez.facts['version']:
-      self.facts['version'] = self.pyez.facts['version']
-    else:
-      self.facts['version'] = 'unknown'
+      if self.pyez.facts['version']:
+        self.facts['version'] = self.pyez.facts['version']
+      else:
+        self.facts['version'] = 'unknown'
 
-    self.facts['product-model'] = self.pyez.facts['model']
+      self.facts['product-model'] = self.pyez.facts['model']
 
-    ## Based on parameter defined in config file
-    if self.__use_hostname and self.pyez.facts['hostname'] != self.hostname:
-      hostname = self.pyez.facts['hostname']
-      logger.info('[%s]: Host will now be referenced as : %s', self.hostname, hostname)
-      self.hostname = hostname
-    else:
-      logger.info('[%s]: Host will be referenced as : %s', self.hostname, self.hostname)
+      ## Based on parameter defined in config file
+      if self.__use_hostname and self.pyez.facts['hostname'] != self.hostname:
+        hostname = self.pyez.facts['hostname']
+        logger.info('[%s]: Host will now be referenced as : %s', self.hostname, hostname)
+        self.hostname = hostname
+      else:
+        logger.info('[%s]: Host will be referenced as : %s', self.hostname, self.hostname)
+
 
     self.facts['device']=self.hostname
+
     return True
 
   def execute_command(self,command=None):

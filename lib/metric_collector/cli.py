@@ -207,6 +207,8 @@ def main():
     full_parser.add_argument("--commands", default="commands.yaml", help="Commands file in Yaml")
     full_parser.add_argument("--credentials", default="credentials.yaml", help="Credentials file in Yaml")
 
+    full_parser.add_argument("--no-facts", action='store_false', help="Disable facts collection on device (remove version and product name in results)")
+    
     full_parser.add_argument("--output-format", default="influxdb", help="Format of the output")
     full_parser.add_argument("--output-type", default="stdout", choices=['stdout', 'http'], help="Type of output")
     full_parser.add_argument("--output-addr", default="http://localhost:8186/write", help="Addr information for output action")
@@ -352,7 +354,12 @@ def main():
         commands=general_commands
     )
     hosts_manager.update_hosts(hosts_conf)
-    coll = collector.Collector(hosts_manager, parsers_manager, dynamic_args['output_type'], dynamic_args['output_addr'])
+    coll = collector.Collector(
+            hosts_manager=hosts_manager, 
+            parser_manager=parsers_manager, 
+            output_type=dynamic_args['output_type'], 
+            output_addr=dynamic_args['output_addr'],
+            collect_facts=dynamic_args.get('no_facts', True))
     target_hosts = hosts_manager.get_target_hosts(tags=tag_list)
 
     if use_threads:
