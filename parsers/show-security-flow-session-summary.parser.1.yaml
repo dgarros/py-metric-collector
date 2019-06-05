@@ -1,0 +1,40 @@
+parser:
+    command: show security flow session summary
+    measurement: jnpr_flow_session_summary
+    type: xml
+    matches:
+    -   type: multi-value
+        method: xpath
+        xpath: //flow-session-summary-information
+        loop:
+            pool_name: ./resource-usage-pool-name
+            fpc-id: ./slot
+            sub-matches:
+            -   xpath: ./active-unicast-sessions
+                variable-name: active_unicast_sessions
+
+            -   xpath: ./active-multicast-sessions
+                variable-name: active_multicast_sessions
+
+            -   xpath: ./failed-sessions
+                variable-name: failed_sessions
+
+            -   xpath: ./active-sessions
+                variable-name: active_sessions
+
+            -   xpath: ./active-session-valid
+                variable-name: active_session_valid
+
+            -   xpath: ./active-session-pending
+                variable-name: active_session_pending
+
+            -   xpath: ./active-session-invalidated
+                variable-name: active_session_invalidated
+
+            -   xpath: ./active-session-other
+                variable-name: active_session_other
+
+            -   xpath: ./max-sessions
+                variable-name: max_sessions
+
+

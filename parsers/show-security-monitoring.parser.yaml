@@ -1,0 +1,29 @@
+parser:
+    command: show security monitoring
+    measurement: jnpr_security_monitoring
+    type: xml
+    matches:
+    -   type: multi-value
+        method: xpath
+        xpath: //performance-summary-information/performance-summary-statistics
+        loop:
+            fpc-id: ./fpc-number
+            pic-id: ./pic-number
+            sub-matches:
+            -   xpath: ./spu-cpu-utilization
+                variable-name: cpu_utilization
+
+            -   xpath: ./spu-memory-utilization
+                variable-name: memory_utilization
+
+            -   xpath: ./spu-current-flow-session
+                variable-name: flow_current_session
+
+            -   xpath: ./spu-max-flow-session
+                variable-name: flow_maximum_session
+
+            -   xpath: ./spu-current-cp-session
+                variable-name: cp_current_session
+
+            -   xpath: ./spu-max-cp-session
+                variable-name: cp_maximum_session

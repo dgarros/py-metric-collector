@@ -1,0 +1,16 @@
+parser:
+    command: show security policies hit-count
+    measurement: jnpr_security_policy_hit_count
+    type: xml
+    matches:
+    -   type: multi-value
+        method: xpath
+        xpath: //policy-hit-count/policy-hit-count-entry
+        loop:
+            system: ./../logical-system-name
+            zone_from: ./policy-hit-count-from-zone
+            zone_to: ./policy-hit-count-to-zone
+            policy: ./policy-hit-count-policy-name
+            sub-matches:
+            -   xpath: ./policy-hit-count-count
+                variable-name: value
