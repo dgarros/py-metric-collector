@@ -127,7 +127,7 @@ def import_inventory(hosts_file, retry=3, retry_internal=5):
 
         try:
             with open(hosts_file) as f:
-                hosts = yaml.load(f)
+                hosts = yaml.full_load(f)
             is_yaml = True
         except Exception as e:
             logger.debug('Error importing host file in yaml: %s > %s [%s/%s]' % (hosts_file, e, i, retry ))
@@ -289,7 +289,7 @@ def main():
     logger.info('Importing credentials file: %s ',credentials_yaml_file)
     try:
         with open(credentials_yaml_file) as f:
-            credentials = yaml.load(f)
+            credentials = yaml.full_load(f)
     except Exception as e:
         logger.error('Error importing credentials file: %s', credentials_yaml_file)
         sys.exit(0)
@@ -308,7 +308,7 @@ def main():
     logger.info('Importing commands file: %s ',commands_yaml_file)
     with open(commands_yaml_file) as f:
         try:
-            for document in yaml.load_all(f):
+            for document in yaml.load_all(f, yaml.FullLoader):
                 commands.append(document)
         except Exception as e:
             logger.error('Error importing commands file: %s, %s', commands_yaml_file, str(e))

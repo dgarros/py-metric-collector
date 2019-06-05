@@ -66,7 +66,7 @@ class ParserManager:
 
         try:
           with open(full_junos_parsers_file) as f:
-            parser["data"] = yaml.load(f)
+            parser["data"] = yaml.full_load(f)
         except Exception as e:
           logger.error('Error importing junos parser, yaml non valid: %s. %s', junos_parsers_file, str(e))
           continue
