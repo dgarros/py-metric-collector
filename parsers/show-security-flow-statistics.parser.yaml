@@ -1,0 +1,29 @@
+parser:
+    command: show security flow statistics
+    measurement: jnpr_flow_statistics
+    type: xml
+    matches:
+    -   type: multi-value
+        method: xpath
+        xpath: //flow-statistics-all
+        loop:
+            sub-matches:
+            -   xpath: ./flow-session-count-valid
+                variable-name: current_session_total
+
+            -   xpath: ./flow-pkt-count-fwd
+                variable-name: packet_forwarded_total
+
+            -   xpath: ./flow-pkt-count-drop
+                variable-name: packet_drop_total
+
+            -   xpath: ./flow-frag-count-fwd
+                variable-name: packet_fragment_total
+
+            -   xpath: ./tunnel-frag-gen-pre
+                variable-name: packet_pre_fragment_total
+
+            -   xpath: ./tunnel-frag-gen-post
+                variable-name: packet_post_fragment_total
+
+
