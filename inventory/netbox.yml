@@ -2,17 +2,29 @@ netbox:
     main:
         api_url: 'http://<netbox_addr>/api/dcim/devices/'
         
-    # Value to use as the device_type, default to (device_type/manufacturer/slug)
-    # device_type: platform
-
+    # What devices to query
+    # it's possible to provide of one or multiple filters to define 
+    # the list of devices that will compose the inventory
+    # A filter will need to be defined as a list of dictionary. Each dict can be either a string or a list
+    # a filter is directly translated into a netbox query
+    # the following example will generate these queries:
+    #  1 - /api/dcim/devices/?manufacturer=juniper&role=spine&role=leif&offset=0&limit=1000
+    #  2 - /api/dcim/devices/?manufacturer=arista&role=leaf&offset=0&limit=1000
+    #  3 - /api/dcim/devices/?site=ra&role=leaf&offset=0&limit=1000
+    # All filter starting with "exclude_" will be excluded from the results of the other filters 
     filters:
       juniper:
-        - site: [aa, bb, cc]
         - manufacturer: juniper
+        - role: [ spine, leaf ]
+      arista:
+        - manufacturer: arista
+        - role: spine
+      exclude_spine_aa:
+        - site: [ aa ]    
+        - role: spine
 
     # What tags will be applied
     tags:
-        # Default section in Netbox.
         default:
             - device_role
             - site
