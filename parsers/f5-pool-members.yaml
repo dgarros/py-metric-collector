@@ -12,7 +12,6 @@ parser:
             nodename: entries.nodeName.description
             monitor_status: entries.monitorStatus.description
             port: entries.port.value
-            state: entries.status.availabilityState.description
             vip-address: entries.addr.description
             sub-matches:
                 - jmespath: entries.curSessions.value 

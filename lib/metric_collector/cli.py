@@ -291,7 +291,7 @@ def main():
         with open(credentials_yaml_file) as f:
             credentials = yaml.full_load(f)
     except Exception as e:
-        logger.error('Error importing credentials file: %s', credentials_yaml_file)
+        logger.error('Error importing credentials file: %s: %s', credentials_yaml_file, str(e))
         sys.exit(0)
 
     ### ------------------------------------------------------------------------------
