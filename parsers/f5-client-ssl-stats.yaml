@@ -1,0 +1,78 @@
+parser:
+    measurement: f5_client_ssl_stats
+    command: f5-client-ssl-stats
+    query: mgmt/tm/ltm/profile/client-ssl/stats
+    type: json
+    matches:
+    -   type: multi-value
+        method: jmespath
+        jmespath: entries.*.nestedStats #| [0].entries.*.nestedStats | [0].entries.*.nestedStats
+        loop:
+            profile-name: entries.tmName.description
+            sub-matches:
+                - jmespath: entries."common.cipherUses.ecdheRsaKeyxchg".value
+                  variable-name: cipherUsesecdheRsaKeyxchg
+                - jmespath: entries."common.cipherUses.shaDigest".value
+                  variable-name: cipherUsesshaDigest
+                - jmespath: entries."common.decryptedBytesIn".value
+                  variable-name: decryptedBytesIn
+                - jmespath: entries."decryptedBytesOut".value
+                  variable-name: decryptedBytesOut
+                - jmespath: entries."common.encryptedBytesIn".value
+                  variable-name: encryptedBytesIn
+                - jmespath: entries."common.encryptedBytesOut".value
+                  variable-name: encryptedBytesOut
+                - jmespath: entries."common.extendedMasterSecrets".value
+                  variable-name: extendedMasterSecrets                                                                         
+                - jmespath: entries."common.fatalAlerts".value
+                  variable-name: fatalAlerts
+                - jmespath: entries."common.handshakeFailures".value
+                  variable-name: handshakeFailures
+                - jmespath: entries."common.insecureHandshakeAccepts".value
+                  variable-name: insecureHandshakeAccepts  
+                - jmespath: entries."common.insecureHandshakeRejects".value
+                  variable-name: insecureHandshakeRejects                                     
+                - jmespath: entries."common.maxConns".value
+                  variable-name: maxConns
+                - jmespath: entries."common.maxCompatConns".value
+                  variable-name: maxCompatConns
+                - jmespath: entries."common.maxNativeConns".value
+                  variable-name: maxComaxNativeConnsnns                                    
+                - jmespath: entries."common.partiallyHwAcceleratedConns".value
+                  variable-name: partiallyHwAcceleratedConns
+                - jmespath: entries."common.protocolUses.dtlsv1".value
+                  variable-name: protocolUses_dtlsv1   
+                - jmespath: entries."common.protocolUses.sslv2".value
+                  variable-name: protocolUses_sslv2
+                - jmespath: entries."common.protocolUses.sslv3".value
+                  variable-name: protocolUses_sslv3
+                - jmespath: entries."common.protocolUses.tlsv1".value
+                  variable-name: protocolUses_tlsv1
+                - jmespath: entries."common.protocolUses.tlsv1_1".value
+                  variable-name: protocolUses_tlsv1_1
+                - jmespath: entries."common.protocolUses.tlsv1_2".value
+                  variable-name: protocolUses_tlsv1_2
+                - jmespath: entries."common.recordsIn".value
+                  variable-name: recordsIn    
+                - jmespath: entries."common.recordsOut".value
+                  variable-name: recordsOut
+                - jmespath: entries."common.secureHandshakes".value
+                  variable-name: secureHandshakes
+                - jmespath: entries."common.sessCacheHits".value
+                  variable-name: sessCacheHits
+                - jmespath: entries."common.sessCacheInvalidations".value
+                  variable-name: sessCacheInvalidations
+                - jmespath: entries."common.sessCacheLookups".value
+                  variable-name: sessCacheLookups 
+                - jmespath: entries."common.sessCacheOverflows".value
+                  variable-name: sessCacheOverflows
+                - jmespath: entries."sessCacheCurEntries".value
+                  variable-name: sessCacheCurEntries                   
+                - jmespath: entries.total.value
+                  variable-name: total  
+                - jmespath: entries.sniRejects.value
+                  variable-name: sniRejects                    
+                - jmespath: entries.totCompatConns.value
+                  variable-name: totCompatConns                                       
+                - jmespath: entries.totNativeConns.value
+                  variable-name: totNativeConns                                                                      
