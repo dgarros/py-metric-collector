@@ -1,0 +1,20 @@
+parser:
+    measurement: f5_one_connect_stats
+    command: f5-one-connect-stats
+    query: mgmt/tm/ltm/profile/one-connect/stats
+    type: json
+    matches:
+    -   type: multi-value
+        method: jmespath
+        jmespath: entries.*.nestedStats #| [0].entries.*.nestedStats | [0].entries.*.nestedStats
+        loop:
+            f5_one_connect_profile: entries.tmName.description
+            sub-matches:
+                - jmespath: entries.connects.value
+                  variable-name: connections
+                - jmespath: entries.curSize.value
+                  variable-name: currentsize            
+                - jmespath: entries.maxSize.value
+                  variable-name: maxsize                  
+                - jmespath: entries.reuses.value
+                  variable-name: reuses                 

@@ -511,6 +511,7 @@ class ParserManager:
 
 
     logger.debug('REGEX returned: %s', datas_to_return)
+    logger.debug('Returning {} values.'.format(len(datas_to_return)))
     return datas_to_return
 
 
@@ -524,7 +525,7 @@ class ParserManager:
         try:
             json_data = json.loads(data)
         except json.JSONDecodeError as ex:
-            logger.error('Unable to decode data into json: ', str(ex))
+            logger.error('Unable to decode data into json: %s', str(ex))
             return datas_to_return
     elif not isinstance(data, dict):
         logger.error('Data must be either a json string or a dict')
@@ -537,6 +538,7 @@ class ParserManager:
         datas_to_return.append(self._parse_json_single_value(match, json_data))
       elif match['type'] == 'multi-value':
         datas_to_return += self._parse_json_multi_value(match, json_data)
+    logger.debug('Returning {} values.'.format(len(datas_to_return)))
     return datas_to_return
 
   
@@ -551,7 +553,11 @@ class ParserManager:
     if 'measurement' in match:
       data['measurement'] = match['measurement']
     # parse the match fields
-    key = match['variable-name']
+    try:
+      key = match['variable-name']
+    except KeyError as e:
+      logger.error('Invalid key error. {}'.format(e))
+      return data
     value = jmespath.search(match['jmespath'], json_data)
     if value is None:
       return data
@@ -567,7 +573,6 @@ class ParserManager:
 
     
   def _parse_json_multi_value(self, match, json_data):
-
     datas_to_return = []
     nodes = jmespath.search(match['jmespath'], json_data)
     loop = match['loop']
@@ -581,11 +586,18 @@ class ParserManager:
       ## Assign measurement name if defined
       if 'measurement' in match:
         data['measurement'] = match['measurement'] 
+      else:
+        logger.debug('No meagsurement defined.')
 
       # parse the sub-match fields
       for sm in loop['sub-matches']:
-        key = sm['variable-name']
+        try:
+          key = sm['variable-name']
+        except KeyError as e:
+          logger.error('KeyError accessing sub-match value: {}'.format(e))
+          continue
         value = jmespath.search(sm['jmespath'], node)
+        
         if value is None:
           logger.debug('SubMatch %s not found in node', sm['jmespath'])
           continue
@@ -600,6 +612,7 @@ class ParserManager:
         if not self.is_valid_field(value):
           continue
         data['fields'][key] = value
+        logger.debug('Setting {} to {}'.format(key, value))
       
       # parse the sub-match tags
       for tag_name, tag_jmespath in loop.items():
@@ -612,7 +625,7 @@ class ParserManager:
         data['tags'][tag_name] = self.cleanup_tag(str(tag_value))
 
       datas_to_return.append(data)
-
+    logger.debug('Returning {} values.'.format(len(datas_to_return)))
     return datas_to_return
      
 

@@ -79,8 +79,13 @@ class F5Collector(object):
     def collect(self, command):
 
         # find the command/query to execute
+        logger.debug('[%s]: parsing : %s', self.hostname, command)
         parser = self.parsers.get_parser_for(command)
-        raw_data = self.execute_query(parser['data']['parser']['query'])
+        try:
+            raw_data = self.execute_query(parser['data']['parser']['query'])
+        except TypeError as e:
+            logger.error('Parser returned no data. Message: {}'.format(e))
+            raw_data = None
         if not raw_data:
             return None
         datapoints = self.parsers.parse(command, raw_data)

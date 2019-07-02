@@ -1,0 +1,32 @@
+parser:
+    measurement: f5_virtual_stats
+    command: f5-virtual-stats
+    query: mgmt/tm/ltm/virtual/stats
+    type: json
+    matches:
+    -   type: multi-value
+        method: jmespath
+        jmespath: entries.*.nestedStats
+        loop:
+            virtual_name: entries.tmName.description
+            state: entries.status.enabledState.description
+            sub-matches:
+                - jmespath: entries."clientside.bitsIn".value
+                  variable-name: clientside_bitsIn
+                - jmespath: entries."clientside.bitsOut".value
+                  variable-name: clientside_bitsOut
+                - jmespath: entries."clientside.curConns".value
+                  variable-name: clientside_curConns
+                - jmespath: entries."clientside.pktsIn".value
+                  variable-name: clientside_pktsIn
+                - jmespath: entries."clientside.pktsOut".value
+                  variable-name: clientside_pktsOut
+                - jmespath: entries.csMeanConnDur.value
+                  variable-name: csMeanConnDur
+                - jmespath: entries.totRequests.value
+                  variable-name: total_requests
+                - jmespath: entries."status.availabilityState".description
+                  variable-name: state
+                  enumerate:
+                      available: 0
+                      offline: 1
