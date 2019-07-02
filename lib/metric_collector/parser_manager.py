@@ -557,6 +557,7 @@ class ParserManager:
       key = match['variable-name']
     except KeyError as e:
       logger.error('Invalid key error. {}'.format(e))
+      return data
     value = jmespath.search(match['jmespath'], json_data)
     if value is None:
       return data
@@ -594,6 +595,7 @@ class ParserManager:
           key = sm['variable-name']
         except KeyError as e:
           logger.error('KeyError accessing sub-match value: {}'.format(e))
+          continue
         value = jmespath.search(sm['jmespath'], node)
         
         if value is None:
