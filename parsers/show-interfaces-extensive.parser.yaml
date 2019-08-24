@@ -75,16 +75,18 @@ parser:
             parent: ./logical-interface/address-family/ae-bundle-name
             sub-matches:
             ### Input Errors
-            -   { xpath: ./input-error-list/input-errors,               variable-name: input-errors }
-            -   { xpath: ./input-error-list/input-drops,                variable-name: input-drops }
-            -   { xpath: ./input-error-list/framing-errors,             variable-name: input-framing-errors }
-            -   { xpath: ./input-error-list/input-runts,                variable-name: input-runts }
-            -   { xpath: ./input-error-list/input-discards,             variable-name: input-discards }
-            -   { xpath: ./input-error-list/input-l3-incompletes,       variable-name: input-l3-incompletes }
-            -   { xpath: ./input-error-list/input-l2-channel-errors,    variable-name: input-l2-channel-errors }
-            -   { xpath: ./input-error-list/input-l2-mismatch-timeouts, variable-name: input-l2-mismatch-timeouts }
-            -   { xpath: ./input-error-list/input-fifo-errors,          variable-name: input-fifo-errors }
-            -   { xpath: ./input-error-list/input-resource-errors,      variable-name: input-resource-errors }
+            -   { xpath: ./input-error-list/input-errors,                  variable-name: input-errors }
+            -   { xpath: ./input-error-list/input-drops,                   variable-name: input-drops }
+            -   { xpath: ./input-error-list/framing-errors,                variable-name: input-framing-errors }
+            -   { xpath: ./input-error-list/input-runts,                   variable-name: input-runts }
+            -   { xpath: ./input-error-list/input-discards,                variable-name: input-discards }
+            -   { xpath: ./input-error-list/input-l3-incompletes,          variable-name: input-l3-incompletes }
+            -   { xpath: ./input-error-list/input-l2-channel-errors,       variable-name: input-l2-channel-errors }
+            -   { xpath: ./input-error-list/input-l2-mismatch-timeouts,    variable-name: input-l2-mismatch-timeouts }
+            -   { xpath: ./input-error-list/input-fifo-errors,             variable-name: input-fifo-errors }
+            -   { xpath: ./input-error-list/input-resource-errors,         variable-name: input-resource-errors }
+            -   { xpath: ./ethernet-mac-statistics/input-oversized-frames, variable-name: input-giants }
+            -   { xpath: ./ethernet-mac-statistics/input-crc-errors,       variable-name: input-crc-errors }
 
             ### Output Errors 
             -   { xpath: ./output-error-list/carrier-transitions,       variable-name: carrier-transitions }
@@ -96,4 +98,5 @@ parser:
             -   { xpath: ./output-error-list/hs-link-crc-errors,        variable-name: hs-link-crc-errors }
             -   { xpath: ./output-error-list/output-fifo-errors,        variable-name: output-fifo-errors }
             -   { xpath: ./output-error-list/output-resource-errors,    variable-name: output-resource-errors }
+            -   { xpath: ./ethernet-mac-statistics/output-crc-errors,   variable-name: output-crc-errors }
 
