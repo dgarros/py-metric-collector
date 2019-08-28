@@ -1,13 +1,13 @@
 import logging
 import time
-# need to monkey patch this as this prevents the code from running in threads
-import f5.bigip as bigip
-bigip.HAS_SIGNAL = False
+import requests
+import warnings
+warnings.filterwarnings('ignore')
 
-logger = logging.getLogger('f5_rest_collector')
+logger = logging.getLogger('json_collector')
 
 
-class F5Collector(object):
+class JsonCollector(object):
 
     def __init__(self, host, address, credential, port=443, timeout=15, retry=3, parsers=None,
                  context=None):
@@ -38,43 +38,34 @@ class F5Collector(object):
         if not user or not passwd:
             logger.error('Invalid or no credentials specified')
             return
-        for retry in range(self.__retry):
-            try:
-                self.mgmt = bigip.ManagementRoot(
-                    self.host, user, passwd,
-                    port=self.__port, timeout=self.__timeout, token=use_token)
-                self.__is_connected = True
-                break
-            except Exception as ex:
-                logger.debug('Failed to connect on %d: %s,  retrying', retry, str(ex))
-                time.sleep(2)
-                continue
-        if not self.is_connected():
-            logger.error('Failed to connect to %s at %s', self.hostname, self.host)
-            return
+        self.session = requests.Session()
+        self.session.auth = (user, passwd)
+        self.session.verify = False
+        self.__is_connected = True
 
     def collect_facts(self):
         logger.info('[%s]: Collecting Facts on device', self.hostname)
 
-        self.facts['tmos_version'] = self.mgmt.tmos_version
         if self.hostname:
             self.facts['device'] = self.hostname
-        else:
-            self.facts['device'] = self.mgmt.hostname
 
         # TODO(Mayuresh) Collect any other relevant facts here
 
     def execute_query(self, query):
 
         base_url = 'https://{}/'.format(self.host)
-        try:
-            query = base_url + query
-            logger.debug('[%s]: execute : %s', self.hostname, query)
-            result = self.mgmt.icrs.get(query)
-            return result.json()
-        except Exception as ex:
-            logger.error('Failed to execute query: %s on %s: %s', query, self.hostname, str(ex))
-            return
+        for retry in range(self.__retry):
+          try:
+              query = base_url + query
+              logger.debug('[%s]: execute : %s', self.hostname, query)
+              result = self.session.get(query, timeout=10.0)
+              result.raise_for_status()
+              return result.json()
+          except Exception as ex:
+              logger.error('Failed to execute query: %s on %s: %s, retrying #%d', query, self.hostname, str(ex), retry)
+              time.sleep(2)
+              continue
+        logger.error('Failed to connect to execute on  %s at %s after %d tries', self.hostname, self.host, self.__retry)
 
     def collect(self, command):
 

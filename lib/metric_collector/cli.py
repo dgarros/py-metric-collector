@@ -197,7 +197,7 @@ def main():
     full_parser.add_argument("--sharding",  help="Define if the script is part of a shard need to include the place in the shard and the size of the shard [0/3]")
     full_parser.add_argument("--sharding-offset", default=True, help="Define an offset needs to be applied to the shard_id")
 
-    full_parser.add_argument("--parserdir", default="parsers", help="Directory where to find parsers")
+    full_parser.add_argument("--parserdir", help="Directory where to find parsers")
     full_parser.add_argument("--timeout", default=600, help="Default Timeout for Netconf session")
     full_parser.add_argument("--delay", default=3, help="Delay Between Commands")
     full_parser.add_argument("--retry", default=5, help="Max retry")
@@ -349,7 +349,10 @@ def main():
     ### ------------------------------------------------------------------------------
     ### LOAD all parsers
     ### ------------------------------------------------------------------------------
-    parsers_manager = parser_manager.ParserManager( parser_dirs = dynamic_args['parserdir'] )
+    if dynamic_args.get('parserdir'):
+        parsers_manager = parser_manager.ParserManager(parser_dir=dynamic_args['parserdir'])
+    else:
+        parsers_manager = parser_manager.ParserManager()
     hosts_conf = select_hosts(dynamic_args['hosts'], tag_list, sharding, sharding_offset)
     hosts_manager = host_manager.HostManager(
         credentials=credentials,

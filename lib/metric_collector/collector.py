@@ -4,7 +4,7 @@ import requests
 import time
 import os
 from metric_collector import netconf_collector
-from metric_collector import f5_rest_collector
+from metric_collector import json_collector
 from metric_collector import utils
 
 logger = logging.getLogger('collector')
@@ -48,8 +48,8 @@ class Collector:
                 dev = netconf_collector.NetconfCollector(
                         host=host, address=host_address, credential=credential,
                         parsers=self.parser_manager, context=host_context, collect_facts=self.collect_facts)
-            elif device_type == 'f5':
-                dev = f5_rest_collector.F5Collector(
+            elif device_type in ['arista', 'f5']:
+                dev = json_collector.JsonCollector(
                     host=host, address=host_address, credential=credential,
                     parsers=self.parser_manager, context=host_context)
             dev.connect()

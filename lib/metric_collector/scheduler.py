@@ -14,7 +14,7 @@ class Scheduler:
         self.workers = {}
         self.working = set()
         self.host_mgr = host_manager.HostManager(credentials=creds_conf, commands=cmds_conf)
-        self.parser_mgr = parser_manager.ParserManager(parser_dirs=parsers_dir)
+        self.parser_mgr = parser_manager.ParserManager(parser_dir=parsers_dir)
         self.collector = collector.Collector(self.host_mgr, self.parser_mgr, output_type, output_addr)
         self.max_worker_threads = max_worker_threads
         self.output_type = output_type

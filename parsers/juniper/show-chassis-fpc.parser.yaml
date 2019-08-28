@@ -1,5 +1,5 @@
 parser:
-    measurement: jnpr_chassis_fpc
+    measurement: linecard-statistics
     command: show chassis fpc
     type: xml
     matches:
@@ -8,10 +8,10 @@ parser:
         xpath: //fpc-information/fpc[temperature]
         loop:
             state: ./state
-            fpc-id: ./slot
+            slot: ./slot
             sub-matches:
             -   xpath: ./memory-dram-size
-                variable-name:  memory
+                variable-name:  mem-total
             -   xpath: ./cpu-interrupt
                 variable-name: cpu-interrupt
             -   xpath: ./cpu-1min-avg
@@ -19,11 +19,9 @@ parser:
             -   xpath: ./cpu-5min-avg
                 variable-name: cpu-5min-avg
             -   xpath: ./cpu-15min-avg
-                variable-name: cpu-15min-avg
-            -   xpath: ./memory-dram-size
-                variable-name: memory-size            
+                variable-name: cpu-15min-avg          
             -   xpath: ./memory-buffer-utilization
-                variable-name: memory-buffer
+                variable-name: mem-used
             -   xpath: ./memory-heap-utilization
-                variable-name: memory-heap
+                variable-name: mem-heap
         

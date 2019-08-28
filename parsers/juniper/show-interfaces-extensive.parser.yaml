@@ -1,5 +1,5 @@
 parser:
-    measurement: jnpr_interface_stat
+    measurement: interface_stats
     command: show interfaces extensive
     type: xml
     matches:
@@ -8,7 +8,7 @@ parser:
 ### ----------------------------------------------------------------
     -   type: multi-value
         method: xpath
-        measurement: jnpr_interface_stat
+        measurement: interface_stats
         xpath: //interface-information/physical-interface[logical-interface]
         loop:
             interface: ./name
@@ -41,33 +41,17 @@ parser:
                   up: 0
                   down: 1
             -   xpath: ./admin-status
-                variable-name: admin-status
+                variable-name: admin-status-value
                 enumerate:
                   up: 0
                   down: 1
-### ----------------------------------------------------------------
-### Statistic per Queue
-### ----------------------------------------------------------------
-    -   type: multi-value
-        method: xpath
-        measurement: jnpr_interface_queue_stat
-        xpath: //interface-information/physical-interface/queue-counters/queue
-        loop:
-            interface: ./../../name
-            admin-status: ./../../admin-status
-            queue-number: ./queue-number
-            forwardding-class: ./forwarding-class-name
-            sub-matches:
-            -   { xpath: ./queue-counters-queued-packets,     variable-name: queue-packet-queued }
-            -   { xpath: ./queue-counters-trans-packets,      variable-name: queue-packet-transit }
-            -   { xpath: ./queue-counters-total-drop-packets, variable-name: queue-packet-drop }
       
 ### ----------------------------------------------------------------
 ### Interface errors
 ### ----------------------------------------------------------------
     -   type: multi-value
         method: xpath
-        measurement: jnpr_interface_error
+        measurement: interface_error_stats
         xpath: //interface-information/physical-interface[logical-interface]
         loop:
             interface: ./name
@@ -89,7 +73,7 @@ parser:
             -   { xpath: ./ethernet-mac-statistics/input-crc-errors,       variable-name: input-crc-errors }
 
             ### Output Errors 
-            -   { xpath: ./output-error-list/carrier-transitions,       variable-name: carrier-transitions }
+            -   { xpath: ./output-error-list/carrier-transitions,       variable-name: flaps }
             -   { xpath: ./output-error-list/output-errors,             variable-name: output-errors }
             -   { xpath: ./output-error-list/output-collisions,         variable-name: output-collisions }
             -   { xpath: ./output-error-list/output-drops,              variable-name: output-drops }

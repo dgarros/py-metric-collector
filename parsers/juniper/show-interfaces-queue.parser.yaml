@@ -1,0 +1,29 @@
+
+parser:
+    measurement: interface_queue_stats
+    command: show interfaces queue
+    type: xml
+    matches:
+### ----------------------------------------------------------------
+### Statistic per Queue
+### ----------------------------------------------------------------
+    -   type: multi-value
+        method: xpath
+        measurement: interface_queue_stats
+        xpath: //interface-information/physical-interface/queue-counters/queue
+        loop:
+            interface: ./../../name
+            admin-status: ./../../admin-status
+            queue-number: ./queue-number
+            forwarding-class: ./forwarding-class-name
+            sub-matches:
+            -   { xpath: ./queue-counters-queued-packets,            variable-name: queued-packets } 
+            -   { xpath: ./queue-counters-queued-bytes,              variable-name: queued-bytes }
+            -   { xpath: ./queue-counters-trans-packets,             variable-name: trans-packets }
+            -   { xpath: ./queue-counters-trans-bytes,               variable-name: trans-bytes }
+            -   { xpath: ./queue-counters-tail-drop-packets,         variable-name: tail-drop-packets }
+            -   { xpath: ./queue-counters-rate-limit-drop-packets,   variable-name: ratelimit-drop-packets }
+            -   { xpath: ./queue-counters-rate-limit-drop-bytes,     variable-name: ratelimit-drop-bytes }
+            -   { xpath: ./queue-counters-red-packets,               variable-name: red-drop-packets }
+            -   { xpath: ./queue-counters-red-bytes,                 variable-name: red-drop-bytes }
+

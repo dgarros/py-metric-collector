@@ -1,5 +1,5 @@
 parser:
-    measurement: jnpr_routing_engine
+    measurement: re-statistics
     command: show chassis routing-engine
     type: xml
     matches:
@@ -9,12 +9,12 @@ parser:
         xpath: //route-engine-information/route-engine
         loop:
             member: ./slot
-            mastership-state: ./mastership-state
+            state: ./mastership-state
             sub-matches:
             # -   xpath: ./mastership-state
             #     variable-name:  mastership-state
             -   xpath: ./memory-buffer-utilization
-                variable-name:  memory-buffer-utilization
+                variable-name:  mem-used
             # -   xpath: ./up-time/@seconds
             #     variable-name: up-time
             -   xpath: ./cpu-idle
@@ -29,9 +29,9 @@ parser:
                 variable-name: cpu-interrupt
 
             -   xpath: ./load-average-one
-                variable-name: load-average-one
+                variable-name: load-average-one-min
             -   xpath: ./load-average-five
-                variable-name: load-average-five
+                variable-name: load-average-five-min
             -   xpath: ./load-average-fifteen
-                variable-name: load-average-fifteen
+                variable-name: load-average-fifteen-min
 

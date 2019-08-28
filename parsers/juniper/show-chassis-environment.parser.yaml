@@ -1,5 +1,5 @@
 parser:
-    measurement: jnpr_chassis_environment
+    measurement: environment-statistics
     command: show chassis environment
     type: xml
     matches:
