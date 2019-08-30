@@ -1,6 +1,6 @@
 parser:
     command: show security monitoring
-    measurement: jnpr_security_monitoring
+    measurement: security_monitoring
     type: xml
     matches:
     -   type: multi-value

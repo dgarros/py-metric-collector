@@ -1,5 +1,5 @@
 parser:
-    measurement: jnpr_firewall_counters
+    measurement: firewall_counters
     command: show firewall
     type: xml
     matches:

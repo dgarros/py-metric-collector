@@ -1,5 +1,5 @@
 parser:
-    measurement: jnpr_interface_optics
+    measurement: interface_optics
     command: show interfaces diagnostics optics
     type: xml
     matches:
@@ -24,7 +24,7 @@ parser:
 ### -----------------------------------------------------------------------------
     -   type: multi-value
         method: xpath
-        measurement: jnpr_interface_optics_temp
+        measurement: interface_optics_temp
         xpath: "//interface-information/physical-interface/optics-diagnostics"
         loop:
             interface: ./../name

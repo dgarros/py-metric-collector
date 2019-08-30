@@ -1,6 +1,6 @@
 parser:
     command: show security policies hit-count
-    measurement: jnpr_security_policy_hit_count
+    measurement: security_policy_hit_count
     type: xml
     matches:
     -   type: multi-value

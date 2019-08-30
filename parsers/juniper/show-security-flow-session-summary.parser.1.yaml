@@ -1,6 +1,6 @@
 parser:
     command: show security flow session summary
-    measurement: jnpr_flow_session_summary
+    measurement: flow_session_summary
     type: xml
     matches:
     -   type: multi-value

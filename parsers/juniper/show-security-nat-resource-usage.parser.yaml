@@ -1,6 +1,6 @@
 parser:
     command: show security nat resource-usage source-pool all
-    measurement: jnpr_snat_pool_usage
+    measurement: snat_pool_usage
     type: xml
     matches:
     -   type: multi-value

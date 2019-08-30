@@ -4,7 +4,7 @@ parser:
     matches:
     -   type: multi-value
         method: xpath
-        measurement: jnpr_dhcp_relay_binding_stats
+        measurement: dhcp_relay_binding_stats
         xpath: //binding-summary
         loop:
             sub-matches:

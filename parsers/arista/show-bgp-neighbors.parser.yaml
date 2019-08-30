@@ -1,0 +1,30 @@
+parser:
+    measurement: bgp_neighbors
+    command: show ip bgp neighbors
+    type: json
+    matches:
+        - type: multi-value
+          method: jmespath
+          jmespath: vrfs.default.peerList
+          loop:
+              peer-address: peerAddress
+              peer-state: state
+              peer-as: asn
+              peer-id: routerId
+              description: description
+              peer-type: linkType
+              local-interface: ifName
+              peer-group: peerGroup
+              sub-matches:
+                - jmespath: prefixesReceived
+                  variable-name: received-prefix-count
+                - jmespath: prefixesSent
+                  variable-name: sent-prefix-count
+                - jmespath: state
+                  variable-name: peer-status
+                  enumerate:
+                      Established: 0
+                      Active: 1
+                      Idle: 2
+                      Connect: 3
+                 

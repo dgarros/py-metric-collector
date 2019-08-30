@@ -555,7 +555,7 @@ class ParserManager:
           break
     if not self.is_valid_field(value):
       return data
-    data['fields'][key] = value
+    data['fields'][key] = round(value, 3)
     return data
 
     
@@ -563,7 +563,12 @@ class ParserManager:
     datas_to_return = []
     nodes = jmespath.search(match['jmespath'], json_data)
     loop = match['loop']
-    for node in nodes:
+    is_dict = False
+    if isinstance(nodes, dict):
+        keys = list(nodes.keys())
+        nodes = list(nodes.values())
+        is_dict = True
+    for i, node in enumerate(nodes):
       ## Empty structure that needs to be filled and return for each input
       data = {
         'measurement': None,
@@ -598,8 +603,12 @@ class ParserManager:
               break
         if not self.is_valid_field(value):
           continue
-        data['fields'][key] = value
+        data['fields'][key] = round(value, 3)
         logger.debug('Setting {} to {}'.format(key, value))
+
+      loop_key = match.get('loop-key')
+      if is_dict and loop_key:
+        data['tags'][loop_key] = keys[i]
       
       # parse the sub-match tags
       for tag_name, tag_jmespath in loop.items():

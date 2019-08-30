@@ -1,0 +1,60 @@
+parser:
+    measurement: interface_stats
+    command: show interfaces
+    type: json
+    matches:
+        - type: multi-value
+          method: jmespath
+          measurement: interface_stats
+          jmespath: interfaces.*
+          loop:
+              interface: name
+              admin-status: interfaceStatus
+              description: description
+              sub-matches:
+                - { jmespath: bandwidth, variable-name: speed }
+                - { jmespath: mtu, variable-name: mtu }
+                - { jmespath: interfaceCounters.inOctets, variable-name: input-bytes }
+                - { jmespath: interfaceCounters.outOctets, variable-name: output-bytes }
+                - { jmespath: interfaceCounters.inTotalPkts, variable-name: input-packets }
+                - { jmespath: interfaceStatistics.inBitsRate, variable-name: input-bps }
+                - { jmespath: interfaceStatistics.outBitsRate, variable-name: output-bps }
+                - { jmespath: interfaceStatistics.inPktsRate, variable-name: input-pps }
+                - { jmespath: interfaceStatistics.outPktsRate, variable-name: output-pps }
+                - { jmespath: interfaceCounters.inUcastPkts, variable-name: input-unicasts }
+                - { jmespath: interfaceCounters.outUcastPkts, variable-name: output-unicasts }
+                - { jmespath: interfaceCounters.inBroadcastPkts, variable-name: input-broadcasts }
+                - { jmespath: interfaceCounters.inMulticastPkts, variable-name: input-multicasts }
+                - { jmespath: interfaceCounters.outBroadcastPkts, variable-name: output-broadcasts }
+                - { jmespath: interfaceCounters.outMulticastPkts, variable-name: output-multicasts }
+                - jmespath: lineProtocolStatus
+                  variable-name: oper-status
+                  enumerate:
+                    up: 0
+                    down: 1
+                - jmespath: interfaceStatus
+                  variable-name: admin-status-value
+                  enumerate:
+                    connected: 0
+                    notconnect: 1
+
+        - type: multi-value
+          method: jmespath
+          measurement: interface_error_stats
+          jmespath: interfaces.*
+          loop:
+              interface: name
+              admin-status: interfaceStatus
+              description: description
+              sub-matches:
+                - { jmespath: interfaceCounters.totalInErrors, variable-name: input-errors }
+                - { jmespath: interfaceCounters.totalOutErrors, variable-name: output-errors }
+                - { jmespath: interfaceCounters.inDiscards, variable-name: input-discards }
+                - { jmespath: interfaceCounters.outDiscards, variable-name: output-discards }
+                - { jmespath: interfaceCounters.inputErrorsDetail.alignmentErrors, variable-name: input-alignment-errors }
+                - { jmespath: interfaceCounters.inputErrorsDetail.fcsErrors, variable-name: input-framing-errors }
+                - { jmespath: interfaceCounters.inputErrorsDetail.giantFrames, variable-name: input-giants }
+                - { jmespath: interfaceCounters.inputErrorsDetail.runtFrames, variable-name: input-runts }
+                - { jmespath: interfaceCounters.outputErrorsDetail.collisions, variable-name: output-collisions }
+                - { jmespath: interfaceCounters.outputErrorsDetail.deferredTransmissions, variable-name: output-deferred-trans }
+              

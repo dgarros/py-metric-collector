@@ -1,5 +1,5 @@
 parser:
-    measurement: jnpr_rpm_results
+    measurement: rpm_results
     command: show services rpm probe-results
     type: xml
     matches:

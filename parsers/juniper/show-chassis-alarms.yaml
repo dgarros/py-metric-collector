@@ -1,6 +1,6 @@
 
 parser:
-    measurement: jnpr_chassis_alarm
+    measurement: chassis_alarm
     command: show chassis alarms
     type: xml
     matches:

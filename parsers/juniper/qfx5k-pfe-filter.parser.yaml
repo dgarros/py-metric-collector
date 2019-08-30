@@ -12,7 +12,7 @@ parser:
         ALLOCATED: allocated
         USED: used
         FREE: free
-    measurement: jnpr_pfe_hw_filter
+    measurement: pfe_hw_filter
     template: |
         Value GROUP_NAME ([\w\s]+\w)
         Value GROUP_ID ([0-9]+)

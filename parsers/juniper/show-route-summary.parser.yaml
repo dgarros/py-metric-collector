@@ -7,7 +7,7 @@ parser:
 ### ----------------------------------------------------------------
     -   type: multi-value
         method: xpath
-        measurement: jnpr_route_summary
+        measurement: route_summary
         xpath: //route-table
         loop:
             table_name: ./table-name
@@ -28,7 +28,7 @@ parser:
 ### ----------------------------------------------------------------
     -   type: multi-value
         method: xpath
-        measurement: jnpr_route_summary_protocol
+        measurement: route_summary_protocol
         xpath: //route-table/protocols
         loop:
             table_name: ./../table-name

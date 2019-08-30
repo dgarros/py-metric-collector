@@ -51,7 +51,7 @@ class Collector:
             elif device_type in ['arista', 'f5']:
                 dev = json_collector.JsonCollector(
                     host=host, address=host_address, credential=credential,
-                    parsers=self.parser_manager, context=host_context)
+                    parsers=self.parser_manager, context=host_context, device_type=device_type)
             dev.connect()
 
             if dev.is_connected():

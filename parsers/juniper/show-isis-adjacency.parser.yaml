@@ -1,5 +1,5 @@
 parser:
-    measurement: jnpr_isis_adj
+    measurement: isis_adj
     command: show isis adjacency
     type: xml
     matches:

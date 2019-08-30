@@ -6,7 +6,7 @@ parser:
     fields:
         CPU: cpu
         MEMORY: memory
-    measurement: jnpr_system_process
+    measurement: system_process
     template: |
         Value PROCESS (\w+)
         Value CPU (\d+\.\d+)

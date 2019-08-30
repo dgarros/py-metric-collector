@@ -1,5 +1,5 @@
 parser:
-    measurement: jnpr_krt_state     
+    measurement: krt_state     
     command: show krt state             
     type: xml
     matches:

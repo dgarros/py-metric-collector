@@ -1,0 +1,21 @@
+parser:
+    measurement: interface_optics
+    command: show interfaces transceiver
+    type: json
+    matches:
+        - type: multi-value
+          method: jmespath
+          jmespath: interfaces
+          loop-key: interface
+          loop:
+              serial_num: vendorSn
+              media_type: mediaType
+              sub-matches:
+                  - jmespath: txPower
+                    variable-name: output-power
+                  - jmespath: rxPower
+                    variable-name: rx-optical-power
+                  - jmespath: voltage
+                    variable-name: voltage
+                  - jmespath: temperature
+                    variable-name: temperature 

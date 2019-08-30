@@ -1,0 +1,30 @@
+parser:
+    measurement: hardware_drops
+    command: show hardware counter drop
+    type: json
+    matches:
+        - type: single-value
+          method: jmespath
+          jmespath: totalPacketProcessorDrops
+          variable-name: packet-processor-drops
+        - type: single-value
+          method: jmespath
+          jmespath: totalCongestionDrops
+          variable-name: congestion-drops
+        - type: single-value
+          method: jmespath
+          jmespath: totalAdverseDrops
+          variable-name: adverse-drops
+        - type: multi-value
+          method: jmespath
+          jmespath: dropEvents.* | [0].dropEvent
+          loop:
+              counter-name: counterName
+              counter-type: counterType
+              counter-id: counterId
+              sub-matches:
+                  - jmespath: dropCount
+                    variable-name: drop-count
+                  - jmespath: dropInLastMinute
+                    variable-name: drops-per-min
+          

@@ -1,5 +1,5 @@
 parser:
-    measurement: jnpr_ddos_protection_terse
+    measurement: ddos_protection_terse
     command: show ddos-protection protocols statistics terse
     type: xml
     matches:

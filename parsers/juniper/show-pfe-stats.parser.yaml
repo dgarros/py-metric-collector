@@ -1,5 +1,5 @@
 parser:
-    measurement: jnpr_pfe_statistics
+    measurement: pfe_statistics
     command: show pfe statistics traffic
     type: xml
     matches:

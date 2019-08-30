@@ -10,7 +10,7 @@ logger = logging.getLogger('json_collector')
 class JsonCollector(object):
 
     def __init__(self, host, address, credential, port=443, timeout=15, retry=3, parsers=None,
-                 context=None):
+                 context=None, device_type='f5'):
         self.hostname = host
         self.host = address
         self.credential = credential
@@ -24,6 +24,12 @@ class JsonCollector(object):
         else:
             self.context = None
         self.facts = {}
+        self.device_type = device_type
+        self.base_url = 'http://{}/'.format(self.host)
+        if port == 443:
+            self.base_url = 'https://{}/'.format(self.host)
+        elif port != 80:
+            self.base_url = 'https://{}:{}/'.format(self.host, port)
 
     def connect(self):
         logger.info('Connecting to host: %s at %s', self.hostname, self.host)
@@ -52,16 +58,34 @@ class JsonCollector(object):
         # TODO(Mayuresh) Collect any other relevant facts here
 
     def execute_query(self, query):
-
-        base_url = 'https://{}/'.format(self.host)
         for retry in range(self.__retry):
-          try:
-              query = base_url + query
-              logger.debug('[%s]: execute : %s', self.hostname, query)
-              result = self.session.get(query, timeout=10.0)
-              result.raise_for_status()
-              return result.json()
-          except Exception as ex:
+            logger.debug('[%s]: execute : %s', self.hostname, query)
+            try:
+                if self.device_type == 'f5':
+                    q = self.base_url + query
+                    result = self.session.get(q, timeout=10.0)
+                    result.raise_for_status()
+                    return result.json()
+                elif self.device_type == 'arista':
+                    q = self.base_url + 'command-api'
+                    body = {
+                        'jsonrpc': '2.0',
+                        'method': 'runCmds',
+                        'params': {
+                          'format': 'json',
+                          'timestamps': False,
+                          'autoComplete': False,
+                          'expandAliases': False,
+                          'cmds': [ query ],
+                          'version': 1
+                        },
+                        'id': 'MetricCollector-1'
+                    }
+                    result = self.session.post(q, timeout=10.0, json=body)
+                    result.raise_for_status()
+                    resp = result.json()
+                    return resp['result'][0]
+            except Exception as ex:
               logger.error('Failed to execute query: %s on %s: %s, retrying #%d', query, self.hostname, str(ex), retry)
               time.sleep(2)
               continue
@@ -73,7 +97,10 @@ class JsonCollector(object):
         logger.debug('[%s]: parsing : %s', self.hostname, command)
         parser = self.parsers.get_parser_for(command)
         try:
-            raw_data = self.execute_query(parser['data']['parser']['query'])
+            if self.device_type == 'f5':
+                raw_data = self.execute_query(parser['data']['parser']['query'])
+            elif self.device_type == 'arista':
+                raw_data = self.execute_query(parser['data']['parser']['command'])
         except TypeError as e:
             logger.error('Parser returned no data. Message: {}'.format(e))
             raw_data = None

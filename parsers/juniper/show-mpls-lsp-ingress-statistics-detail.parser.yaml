@@ -1,5 +1,5 @@
 parser:
-    measurement: jnpr_mpls_stats
+    measurement: mpls_stats
     command: show mpls lsp ingress statistics detail
     type: xml
     matches:

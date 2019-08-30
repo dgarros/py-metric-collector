@@ -1,6 +1,6 @@
 parser:
     command: show dhcp relay statistics
-    measurement: jnpr_dhcp_relay_msg_stats
+    measurement: dhcp_relay_msg_stats
     type: xml
     matches:
 ### ----------------------------------------------------------------
@@ -8,7 +8,7 @@ parser:
 ### ----------------------------------------------------------------
     -   type: multi-value
         method: xpath
-        measurement: jnpr_dhcp_relay_msg_stats
+        measurement: dhcp_relay_msg_stats
         xpath: //dhcp-relay-statistics-information/message-table/message
         loop:
             dhcp-msg-type: ./message-name
@@ -22,7 +22,7 @@ parser:
 ### ----------------------------------------------------------------
     -   type: multi-value
         method: xpath
-        measurement: jnpr_dhcp_relay_global_stats
+        measurement: dhcp_relay_global_stats
         xpath: //dhcp-relay-statistics-information
         loop:
             sub-matches:

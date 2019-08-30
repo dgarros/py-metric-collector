@@ -1,5 +1,5 @@
 parser:
-    measurement: jnpr_isis_stat
+    measurement: isis_stat
     command: show isis statistics
     type: xml
     matches:
@@ -52,7 +52,7 @@ parser:
 ### ----------------------------------------------------------------
     -   type: multi-value
         method: xpath
-        measurement: jnpr_isis_stat_pdu
+        measurement: isis_stat_pdu
         xpath: //isis-statistics/isis-pdu-statistics
         loop:
             pdu-type: ./isis-pdu-type

@@ -1,5 +1,5 @@
 parser:
-    measurement: jnpr_bgp_summary
+    measurement: bgp_summary
     command: show bgp summary
     type: xml
     matches:

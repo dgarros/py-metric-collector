@@ -1,6 +1,6 @@
 parser:
     command: show security flow statistics
-    measurement: jnpr_flow_statistics
+    measurement: flow_statistics
     type: xml
     matches:
     -   type: multi-value
