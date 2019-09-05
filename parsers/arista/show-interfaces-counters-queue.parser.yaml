@@ -1,0 +1,21 @@
+parser:
+    measurement: interface_queue_stats
+    command: show interfaces counters queue
+    type: json
+    transform: arista_interface_queues
+    matches:
+        - type: multi-value
+          method: jmespath
+          jmespath: ingressVoqCounters
+          loop:
+              interface: interface
+              forwarding-class-name: trafficClass
+              sub-matches:
+                  - jmespath: droppedBytes
+                    variable-name: red-drop-bytes             
+                  - jmespath: droppedPackets
+                    variable-name: red-drop-packets
+                  - jmespath: enqueuedBytes
+                    variable-name: trans-bytes
+                  - jmespath: enqueuedPackets
+                    variable-name: trans-packets

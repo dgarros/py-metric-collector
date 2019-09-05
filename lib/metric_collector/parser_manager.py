@@ -9,6 +9,7 @@ import textfsm
 from io import StringIO
 import jmespath
 import json
+from . import transforms
 
 logger = logging.getLogger('parser_manager' )
 
@@ -46,7 +47,8 @@ class ParserManager:
         "command": None,
         "data": None,
         "measurement": None,
-        "type": 'xml'
+        "type": 'xml',
+        "transform": None
       }
 
       try:
@@ -74,6 +76,9 @@ class ParserManager:
       else:
         logger.warn('Parser type %s is not supported, %s', parser['data']['parser']['type'], parser['name'])
         continue
+
+      if parser["data"]["parser"].get("transform"):
+        parser['transform'] =  parser["data"]["parser"]["transform"]
 
       ## Extract the command from the parser
       if "regex-command" in parser['data']['parser'].keys():
@@ -517,6 +522,11 @@ class ParserManager:
     elif not isinstance(data, dict):
         logger.error('Data must be either a json string or a dict')
         return datas_to_return
+    transform = parser.get('transform')
+    if transform:
+        func = getattr(transforms, transform)
+        if func:
+            json_data = func(json_data)
     for match in parser['data']['parser']['matches']:
       if match['method'] != 'jmespath':
         logger.error('Match type %s for json is not supported', match['method'])
@@ -563,12 +573,7 @@ class ParserManager:
     datas_to_return = []
     nodes = jmespath.search(match['jmespath'], json_data)
     loop = match['loop']
-    is_dict = False
-    if isinstance(nodes, dict):
-        keys = list(nodes.keys())
-        nodes = list(nodes.values())
-        is_dict = True
-    for i, node in enumerate(nodes):
+    for node in nodes:
       ## Empty structure that needs to be filled and return for each input
       data = {
         'measurement': None,
@@ -606,10 +611,6 @@ class ParserManager:
         data['fields'][key] = round(value, 3)
         logger.debug('Setting {} to {}'.format(key, value))
 
-      loop_key = match.get('loop-key')
-      if is_dict and loop_key:
-        data['tags'][loop_key] = keys[i]
-      
       # parse the sub-match tags
       for tag_name, tag_jmespath in loop.items():
         if tag_name == 'sub-matches':

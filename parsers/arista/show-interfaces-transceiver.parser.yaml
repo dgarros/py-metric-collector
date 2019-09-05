@@ -2,12 +2,13 @@ parser:
     measurement: interface_optics
     command: show interfaces transceiver
     type: json
+    transform: arista_interface_transceiver
     matches:
         - type: multi-value
           method: jmespath
           jmespath: interfaces
-          loop-key: interface
           loop:
+              interface: interface
               serial_num: vendorSn
               media_type: mediaType
               sub-matches:
