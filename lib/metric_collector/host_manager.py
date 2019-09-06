@@ -83,6 +83,7 @@ class HostManager(object):
 
             self.commands[command_grp] = {
                 'tags': tags,
+                'skip_tags': command_set.get('skip_tags', []),
                 'commands': command_list,
                 'interval_secs': interval
             }
@@ -224,6 +225,9 @@ class HostManager(object):
 
         ## First do a pass based on host tag and identify all group_command that matches
         for group_command, command in self.commands.items():
+            if any([ht in command['skip_tags'] for ht in host_tags]):
+                self.log.debug('Skipping command {} for host {}'.format(group_command, host))
+                continue
             for host_tag in host_tags:
                 for command_tag in command['tags']:
                     if re.search( r'^{tag}$'.format(tag=host_tag), command_tag, re.IGNORECASE):
