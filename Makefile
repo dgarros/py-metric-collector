@@ -1,5 +1,5 @@
 DOCKER_IMG = chi1-docker-registry.simulprod.com/roblox/neteng-collector
-DOCKER_TAG = 0.1.21-1.0.2
+DOCKER_TAG = 0.1.21-1.0.3
 
 PWD = $(shell pwd)
 
