@@ -6,6 +6,7 @@ from lxml import etree
 import copy
 import re
 import textfsm
+import math
 from io import StringIO
 import jmespath
 import json
@@ -565,7 +566,7 @@ class ParserManager:
           break
     if not self.is_valid_field(value):
       return data
-    data['fields'][key] = round(value, 3)
+    data['fields'][key] = math.ceil(value)
     return data
 
     
@@ -608,7 +609,7 @@ class ParserManager:
               break
         if not self.is_valid_field(value):
           continue
-        data['fields'][key] = round(value, 3)
+        data['fields'][key] = math.ceil(value)
         logger.debug('Setting {} to {}'.format(key, value))
 
       # parse the sub-match tags
@@ -673,7 +674,8 @@ class ParserManager:
     """
     Cleanup a string to make sure it doesn't contain space
     """
-
+    if str_in == '':
+        return 'None'
     tmp_str = str_in
     
     forbidden_chars = [" ", "=", ","]
