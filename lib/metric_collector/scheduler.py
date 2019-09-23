@@ -32,7 +32,7 @@ class Scheduler:
             reached, then it cycles through the existing workers
         '''
         interval_workers = self.workers.get(interval, [])
-        if refresh and interval_workers:
+        if refresh and interval_workers and not isinstance(interval_workers, list):
             return next(interval_workers)
         if len(interval_workers) == self.max_worker_threads:
             if isinstance(interval_workers, list):
@@ -192,6 +192,8 @@ class Worker(threading.Thread):
                 worker_datapoint[0]['tags']['nomad_job_name'] = os.environ['NOMAD_JOB_NAME']
             if os.environ.get('NOMAD_ALLOC_INDEX'):
                 worker_datapoint[0]['tags']['nomad_alloc_index'] = os.environ['NOMAD_ALLOC_INDEX']
+            if os.environ.get('NOMAD_ALLOC_ID'):
+                host_time_datapoint[0]['tags']['nomad_alloc_id'] = os.environ['NOMAD_ALLOC_ID']
 
 
             ### Send results to the right output
