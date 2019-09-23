@@ -139,10 +139,12 @@ def import_inventory(hosts_file, retry=3, retry_internal=5):
                 logger.debug('Script logs: \n{}\n'.format(output_str.stderr.decode()))
                 is_exec = True
             except subprocess.CalledProcessError as ex:
-                logger.debug('Inventory script failed with exit code {}. Cmd: {} Output: {} Logs: {}'.format(
+                logger.error('Inventory script failed with exit code {}. Cmd: {} Output: {} Logs: {}'.format(
                     ex.returncode, ex.cmd, ex.output, ex.stderr))
+                logger.exception(ex)
             except Exception as e:
-                logger.debug('Error importing executing host file: %s > %s [%s/%s]' % (hosts_file, e, i, retry))
+                logger.error('Error importing executing host file: %s > %s [%s/%s]' % (hosts_file, e, i, retry))
+                logger.exception(e)
 
         if not is_exec and not is_yaml:
             logger.warn('Unable to import the hosts file (%s) from a dynamic inventory [%s/%s]' % (hosts_file, i, retry))

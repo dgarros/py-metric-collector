@@ -110,6 +110,8 @@ class Collector:
                 host_time_datapoint[0]['tags']['nomad_job_name'] = os.environ['NOMAD_JOB_NAME']
             if os.environ.get('NOMAD_ALLOC_INDEX'):
                 host_time_datapoint[0]['tags']['nomad_alloc_index'] = os.environ['NOMAD_ALLOC_INDEX']
+            if os.environ.get('NOMAD_ALLOC_ID'):
+                host_time_datapoint[0]['tags']['nomad_alloc_id'] = os.environ['NOMAD_ALLOC_ID']
 
             values.append((n for n in host_time_datapoint))
             values = itertools.chain(*values)
