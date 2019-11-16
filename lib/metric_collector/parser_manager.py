@@ -527,7 +527,12 @@ class ParserManager:
     if transform:
         func = getattr(transforms, transform)
         if func:
-            json_data = func(json_data)
+            try:
+                json_data = func(json_data)
+            except Exception as ex:
+                logger.exception('Error applying transform {}'.format(transform))
+                # return without parsing here since we couldnt apply the transform
+                return datas_to_return
     for match in parser['data']['parser']['matches']:
       if match['method'] != 'jmespath':
         logger.error('Match type %s for json is not supported', match['method'])

@@ -15,7 +15,7 @@ parser:
                   - jmespath: txPower
                     variable-name: output-power
                   - jmespath: rxPower
-                    variable-name: rx-optical-power
+                    variable-name: rx-optical-power-dbm
                   - jmespath: voltage
                     variable-name: voltage
                   - jmespath: temperature
