@@ -80,17 +80,23 @@ class Scheduler:
                 next_worker = self._get_worker(interval, refresh=refresh)
                 next_worker.add_host(host, cmds)
                 self.working.add(next_worker)
+        if refresh:
+            # start any new threads since last cycle
+            self.start()
 
     def start(self):
         ''' Start all worker threads and block until done '''
         if len(self.working) == 0:
             self.working.add(self.default_worker)
+        started = []
         for worker in self.working:
-            worker.start()
+            if not worker.isAlive():
+                worker.start()
+                started.append(worker)
         for interval, workers in self.workers.items():
             if isinstance(workers, list):
                 self.workers[interval] = utils.Cycle(workers)
-        for worker in self.working:
+        for worker in started:
             worker.join()
 
     def stop(self):

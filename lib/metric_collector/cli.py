@@ -60,11 +60,13 @@ def shard_host_list(shard_id, shard_size, hosts):
     return hosts
 
 
-def select_hosts(hosts_file, tag_list, sharding, sharding_offset, scheduler=None, refresh_interval=None, refresh=False):
+def select_hosts(hosts_file, tag_list, sharding, sharding_offset, scheduler=None, refresh_interval=None, refresh=False, allow_zero_hosts=False):
     """
     Parse a host file or pull hosts from dynamic inventory , and add it to the scheduler periodically
     """
     hosts = import_inventory(hosts_file = hosts_file)
+    if len(hosts) == 0 and not allow_zero_hosts:
+        sys.exit("Failed to get any hosts !")
 
     if sharding:
         sharding_param = sharding.split('/')
@@ -86,7 +88,8 @@ def select_hosts(hosts_file, tag_list, sharding, sharding_offset, scheduler=None
         t = threading.Timer(
             refresh_interval, select_hosts,
             args=(hosts_file, tag_list, sharding, sharding_offset),
-            kwargs={'scheduler': scheduler, 'refresh_interval': refresh_interval, 'refresh': True},
+            kwargs={'scheduler': scheduler, 'refresh_interval': refresh_interval, 'refresh': True,
+                    'allow_zero_hosts': allow_zero_hosts},
         )
         t.setDaemon(True)
         t.start()
@@ -220,6 +223,7 @@ def main():
     full_parser.add_argument("--max-worker-threads", type=int, default=1, help="Maximum number of worker threads per interval for scheduler")
     full_parser.add_argument("--use-scheduler", action='store_true', help="Use scheduler")
     full_parser.add_argument("--hosts-refresh-interval", type=int, default=3*60*60, help="Interval to periodically refresh dynamic host inventory")
+    full_parser.add_argument("--allow_zero_hosts", action='store_true', help="Allow scheduler to run even with 0 hosts")
 
     dynamic_args = vars(full_parser.parse_args())
 
@@ -342,6 +346,7 @@ def main():
             dynamic_args['hosts'], tag_list, sharding, sharding_offset,
             scheduler=device_scheduler,
             refresh_interval=float(hri),
+            allow_zero_hosts=dynamic_args.get('allow_zero_hosts', False),
         )
         device_scheduler.start()  # blocking call
         return
