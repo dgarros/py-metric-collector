@@ -15,6 +15,7 @@ ipaddress = "*"
 textfsm = "*"
 jmespath = "*"
 requests-mock = "*"
+py-metric-collector = {path = "."}
 
 [dev-packages]
 pytest = "*"

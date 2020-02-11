@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 from datetime import datetime 
 from datetime import timedelta
 
@@ -156,9 +156,9 @@ def import_inventory(hosts_file, retry=3, retry_internal=5):
         if not isinstance(hosts, dict):
             hosts = {}
 
-        if len(hosts.keys()) > 0:
+        if len(list(hosts.keys())) > 0:
             return hosts
-        elif len(hosts.keys()) == 0 and i == retry:
+        elif len(list(hosts.keys())) == 0 and i == retry:
             logger.error('Unable to import the hosts file (%s), either in Yaml or from a dynamic inventory after all try, ABORDING [%s/%s]' % (hosts_file, i, retry))
             return {}
         else:

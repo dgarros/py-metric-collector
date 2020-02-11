@@ -35,7 +35,7 @@ def format_datapoints_inlineprotocol(datapoints):
     for datapoint in datapoints:
         tags = ''
         first_tag = 1
-        for tag, value in datapoint['tags'].items():
+        for tag, value in list(datapoint['tags'].items()):
 
             if first_tag == 1:
                 first_tag = 0
@@ -47,7 +47,7 @@ def format_datapoints_inlineprotocol(datapoints):
         ## Format Measurement
         fields = ''
         first_field = 1
-        for tag, value in datapoint['fields'].items():
+        for tag, value in list(datapoint['fields'].items()):
 
             if first_field == 1:
                 first_field = 0

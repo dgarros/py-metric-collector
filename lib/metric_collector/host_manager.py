@@ -37,7 +37,7 @@ class HostManager(object):
         ### -------------------------------------------------------------    
         ### Check commands provided
         ### -------------------------------------------------------------
-        for command_grp, command_set in commands.items():
+        for command_grp, command_set in list(commands.items()):
 
             if not isinstance(command_set, dict):
                 self.log.warn('command: format for %s not supported, skipping' % command_grp)
@@ -160,7 +160,7 @@ class HostManager(object):
         ### -------------------------------------------------------------
         ### Check list of hosts provided
         ### -------------------------------------------------------------
-        for host in inventory.keys():
+        for host in list(inventory.keys()):
             if isinstance(inventory[host], dict):
 
                 ## TODO check if the dictionnary contain at least tags and address
@@ -224,7 +224,7 @@ class HostManager(object):
         groups_matched = []
 
         ## First do a pass based on host tag and identify all group_command that matches
-        for group_command, command in self.commands.items():
+        for group_command, command in list(self.commands.items()):
             if any([ht in command['skip_tags'] for ht in host_tags]):
                 self.log.debug('Skipping command {} for host {}'.format(group_command, host))
                 continue

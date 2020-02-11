@@ -64,12 +64,12 @@ class ParserManager:
         continue
 
       ## Check if parser contain a key "parser"
-      if not "parser" in parser['data'].keys():
+      if not "parser" in list(parser['data'].keys()):
         logger.error('Error loading  parser: %s, parser structure is missing', parser['name'])
         continue
 
       # Check parser type
-      if not "type" in parser["data"]["parser"].keys():
+      if not "type" in list(parser["data"]["parser"].keys()):
         logger.warn('Type is not defined for parser %s, default XML', parser['name'])
 
       elif parser["data"]["parser"]['type'] in SUPPORTED_PARSER_TYPE:
@@ -82,16 +82,16 @@ class ParserManager:
         parser['transform'] =  parser["data"]["parser"]["transform"]
 
       ## Extract the command from the parser
-      if "regex-command" in parser['data']['parser'].keys():
+      if "regex-command" in list(parser['data']['parser'].keys()):
         parser['command'] = parser['data']['parser']['regex-command']
 
-      elif 'command' in parser['data']['parser'].keys():
+      elif 'command' in list(parser['data']['parser'].keys()):
         parser['command'] = parser['data']['parser']['command']
       else:
         logger.error('Unable to find the command for parser: %s', parser['name'])
         continue
 
-      if "measurement" in parser['data']['parser'].keys():
+      if "measurement" in list(parser['data']['parser'].keys()):
         parser['measurement'] = parser['data']['parser']['measurement']
 
       self.__add_parser__( name=parser['name'], parser=parser )
@@ -105,7 +105,7 @@ class ParserManager:
     """
 
     ## Check with parser name
-    for name, parser in self.parsers.items():
+    for name, parser in list(self.parsers.items()):
       if name == input:
         return parser
 
@@ -132,7 +132,7 @@ class ParserManager:
       
       # logger.debug('Searching parser for %s', parser_type)
 
-      for name, parser in self.parsers.items():
+      for name, parser in list(self.parsers.items()):
         if parser['type'] != parser_type:
           continue
 
@@ -221,8 +221,8 @@ class ParserManager:
     parser = self.__find_parser__(input=input)
     
     if parser:
-      logger.debug('Looking for a measurement name (keys): %s', parser.keys())
-      if 'measurement' in parser.keys():
+      logger.debug('Looking for a measurement name (keys): %s', list(parser.keys()))
+      if 'measurement' in list(parser.keys()):
         return parser['measurement']
 
     measurement_name = parser['command']
@@ -350,7 +350,7 @@ class ParserManager:
                     
                     if 'enumerate' in sub_match:
                       enum_match = False
-                      for enum_item in sub_match['enumerate'].keys():
+                      for enum_item in list(sub_match['enumerate'].keys()):
                         if value_tmp == enum_item:
                           enum_match = True
                           value_tmp = sub_match['enumerate'][enum_item]
@@ -381,7 +381,7 @@ class ParserManager:
 
            
             # parse the tags
-            for key, value in match["loop"].items():
+            for key, value in list(match["loop"].items()):
               if key == 'sub-matches':
                 continue
               key_results = node.xpath(value)
@@ -565,7 +565,7 @@ class ParserManager:
     if value is None:
       return data
     if 'enumerate' in match:
-      for enum_key, enum_value in match['enumerate'].items():
+      for enum_key, enum_value in list(match['enumerate'].items()):
         if value == enum_key:
           value = enum_value
           break
@@ -608,7 +608,7 @@ class ParserManager:
           if sm['transform'] == 'str_2_int':
             value = self.str_2_int(value)
         if 'enumerate' in sm:
-          for enum_key, enum_value in sm['enumerate'].items():
+          for enum_key, enum_value in list(sm['enumerate'].items()):
             if value == enum_key:
               value = enum_value
               break
@@ -618,7 +618,7 @@ class ParserManager:
         logger.debug('Setting {} to {}'.format(key, value))
 
       # parse the sub-match tags
-      for tag_name, tag_jmespath in loop.items():
+      for tag_name, tag_jmespath in list(loop.items()):
         if tag_name == 'sub-matches':
           continue
         tag_value = jmespath.search(tag_jmespath, node)
@@ -637,25 +637,25 @@ class ParserManager:
     keys={}
     db_schema = 3
 
-    if 'keys' in kwargs.keys():
+    if 'keys' in list(kwargs.keys()):
         # This is due dict are mutable and a normal assigment does NOT copy the value, it copy the reference
         keys=copy.deepcopy(kwargs['keys'])
     if db_schema == 3:
-        for key in keys.keys():
+        for key in list(keys.keys()):
             variable = variable.replace("$"+key,"")
             variable = variable.replace("..",".")
         variable = variable.replace("$host","")
         variable = re.sub(r"^\.", "", variable)
         return variable, variable
     if db_schema == 2:
-        for key in keys.keys():
+        for key in list(keys.keys()):
             variable = variable.replace("$"+key,"")
             variable = variable.replace("..",".")
         variable = variable.replace("$host","")
         variable = re.sub(r"^\.", "", variable)
         return "jnpr.collector", variable
     else: # default db_schema (option 1) open-nti legacy
-        for key in keys.keys():
+        for key in list(keys.keys()):
             variable = variable.replace("$"+key,keys[key])
         variable = variable.replace("$host",kwargs['host'])
         # the host replacement should be move it to other place

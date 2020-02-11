@@ -75,8 +75,8 @@ class Scheduler:
         if not hostcmds:
             logger.error('Scheduler: No commands found to collect')
             return
-        for host, interval_cmds in hostcmds.items():
-            for interval, cmds in interval_cmds.items():
+        for host, interval_cmds in list(hostcmds.items()):
+            for interval, cmds in list(interval_cmds.items()):
                 next_worker = self._get_worker(interval, refresh=refresh)
                 next_worker.add_host(host, cmds)
                 self.working.add(next_worker)
@@ -93,7 +93,7 @@ class Scheduler:
             if not worker.isAlive():
                 worker.start()
                 started.append(worker)
-        for interval, workers in self.workers.items():
+        for interval, workers in list(self.workers.items()):
             if isinstance(workers, list):
                 self.workers[interval] = utils.Cycle(workers)
         for worker in started:

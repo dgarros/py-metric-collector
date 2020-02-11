@@ -33,7 +33,7 @@ class Collector:
                     target_cmds += c['commands']
                 host_cmds[host] = target_cmds
                
-        for host, target_commands in host_cmds.items():
+        for host, target_commands in list(host_cmds.items()):
             values = []
             credential = self.hosts_manager.get_credentials(host)
 

@@ -36,7 +36,7 @@ class NetconfCollector():
     self.host = address
     self.hostname = host
     if context:
-        self.context = {k: v for i in context for k, v in i.items()}
+        self.context = {k: v for i in context for k, v in list(i.items())}
     else:
         self.context = None
     self.__credential = credential

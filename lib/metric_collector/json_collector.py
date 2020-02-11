@@ -20,7 +20,7 @@ class JsonCollector(object):
         self.__is_connected = False
         self.parsers = parsers
         if context:
-            self.context = {k: v for i in context for k, v in i.items()}
+            self.context = {k: v for i in context for k, v in list(i.items())}
         else:
             self.context = None
         self.facts = {}

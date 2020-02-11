@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import sys
 import uuid
@@ -9,8 +9,6 @@ try: # for pip >= 10
 except ImportError: # for pip <= 9.0.3
     from pip.req import parse_requirements
     
-__author__ = 'Damien Garros <dgarros@gmail.com>'
-
 requirements_data = parse_requirements('requirements.txt', session=uuid.uuid1())
 requirements = [str(package.req) for package in requirements_data]
 
@@ -27,8 +25,6 @@ params = {
     ],
     'url': 'https://github.com/xxx',
     'license': 'Apache License, Version 2.0',
-    'author': 'Damien Garros',
-    'author_email': 'dgarros@gmail.com',
     'description': 'Collect timeserie information from various devices, currently support Junos and F5',
     'install_requires': requirements,
     'classifiers': [

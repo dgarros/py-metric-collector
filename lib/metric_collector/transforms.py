@@ -2,8 +2,8 @@
 
 def arista_interface_queues(data):
     new = {'ingressVoqCounters': []}
-    for k, v in data['ingressVoqCounters']['interfaces'].items():
-        for tc, data in v['trafficClasses'].items():
+    for k, v in list(data['ingressVoqCounters']['interfaces'].items()):
+        for tc, data in list(v['trafficClasses'].items()):
             item = {'interface': k}
             item['trafficClass'] = tc
             item.update(data)
@@ -13,7 +13,7 @@ def arista_interface_queues(data):
 
 def arista_interface_transceiver(data):
     new = {'interfaces': []}
-    for k, v in data['interfaces'].items():
+    for k, v in list(data['interfaces'].items()):
         item = {'interface': k}
         item.update(v)
         new['interfaces'].append(item)

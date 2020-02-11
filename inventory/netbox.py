@@ -1,6 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-# Copyright: (c) 2017, Damien Garros
 # Inspired from Ahmed AbouZaid work <http://aabouzaid.com/>
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
@@ -192,11 +191,11 @@ class NetboxAsInventory(object):
                 'count': 0
             }
             
-            for grp_name, grp_filters in filter_groups.items():
+            for grp_name, grp_filters in list(filter_groups.items()):
                 grp_api_url_params = ""
 
                 for grp_filter in grp_filters:
-                    for key,value in grp_filter.items():
+                    for key,value in list(grp_filter.items()):
 
                         if key == "limit" or key == "offset":
                             continue
@@ -310,7 +309,7 @@ class NetboxAsInventory(object):
             key_name = self.key_map[category]
             data_dict = categories_source[category]
 
-            for var_name, var_data in self.context[category].items():
+            for var_name, var_data in list(self.context[category].items()):
                 # This is because "custom_fields" has more than 1 type.
                 # Values inside "custom_fields" could be a key:value or a dict.
                 if isinstance(data_dict.get(var_data), dict):
@@ -360,7 +359,7 @@ class NetboxAsInventory(object):
             It prints the inventory in JSON format
         """
 
-        print(json.dumps(inventory_dict, sort_keys=True,indent=4,))
+        print((json.dumps(inventory_dict, sort_keys=True,indent=4,)))
 
     def netbox_get_devices_list(self, params=''):
        
