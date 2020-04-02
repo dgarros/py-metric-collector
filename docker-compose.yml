@@ -22,7 +22,6 @@ services:
     entrypoint:
       - metric-collector
       - --commands=commands.yaml
-      - --console
       - --start
       - --credentials=${CREDENTIALS:-credentials.yaml}
       - --hosts=${HOSTS:-hosts.yaml}
