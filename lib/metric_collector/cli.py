@@ -199,8 +199,7 @@ def main():
     full_parser.add_argument("--sharding-offset", default=True, help="Define an offset needs to be applied to the shard_id")
 
     full_parser.add_argument("--parserdir", default="parsers", help="Directory where to find parsers")
-    full_parser.add_argument("--connect-timeout", default=15, help="Timeout for collector device connect")
-    full_parser.add_argument("--command-timeout", default=30, help="Timeout for collector device rpc calls")
+    full_parser.add_argument("--collector-timeout", default=15, help="Timeout for collector device rpc/rest calls")
     full_parser.add_argument("--retry", default=5, help="Max retry")
 
     full_parser.add_argument("--host", default=None, help="Host DNS or IP")
@@ -328,8 +327,7 @@ def main():
             dynamic_args['output_type'], dynamic_args['output_addr'],
             max_worker_threads=max_worker_threads,
             use_threads=use_threads, num_threads_per_worker=max_collector_threads,
-            connect_timeout=dynamic_args['connect_timeout'],
-            command_timeout=dynamic_args['command_timeout']
+            collector_timeout=dynamic_args['collector_timeout']
         )
         hri = dynamic_args.get('hosts_refresh_interval', 6 * 60 * 60)
         select_hosts(
@@ -357,8 +355,7 @@ def main():
             output_type=dynamic_args['output_type'], 
             output_addr=dynamic_args['output_addr'],
             collect_facts=dynamic_args.get('no_facts', True),
-            connect_timeout=dynamic_args['connect_timeout'],
-            command_timeout=dynamic_args['command_timeout']
+            timeout=dynamic_args['collector_timeout']
     )
     target_hosts = hosts_manager.get_target_hosts(tags=tag_list)
 

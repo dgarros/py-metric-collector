@@ -64,26 +64,25 @@ class F5Collector(object):
 
         # TODO(Mayuresh) Collect any other relevant facts here
 
-    def execute_query(self, query, timeout=None):
+    def execute_query(self, query):
 
         base_url = 'https://{}/'.format(self.host)
         try:
             query = base_url + query
             logger.debug('[%s]: execute : %s', self.hostname, query)
-            timeout = timeout or self.__timeout
-            result = self.mgmt.icrs.get(query, timeout=timeout)
+            result = self.mgmt.icrs.get(query)
             return result.json()
         except Exception as ex:
             logger.error('Failed to execute query: %s on %s: %s', query, self.hostname, str(ex))
             return
 
-    def collect(self, command, timeout=None):
+    def collect(self, command):
 
         # find the command/query to execute
         logger.debug('[%s]: parsing : %s', self.hostname, command)
         parser = self.parsers.get_parser_for(command)
         try:
-            raw_data = self.execute_query(parser['data']['parser']['query'], timeout=timeout)
+            raw_data = self.execute_query(parser['data']['parser']['query'])
         except TypeError as e:
             logger.error('Parser returned no data. Message: {}'.format(e))
             raw_data = None
