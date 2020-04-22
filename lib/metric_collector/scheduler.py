@@ -17,7 +17,7 @@ class Scheduler:
         self.host_mgr = host_manager.HostManager(credentials=creds_conf, commands=cmds_conf)
         self.parser_mgr = parser_manager.ParserManager(parser_dirs=parsers_dir)
         self.collector = collector.Collector(self.host_mgr, self.parser_mgr, output_type, output_addr,
-            collector_timeout=collector_timeout)
+            timeout=collector_timeout)
         self.max_worker_threads = max_worker_threads
         self.output_type = output_type
         self.output_addr = output_addr
