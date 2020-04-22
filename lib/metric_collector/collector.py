@@ -12,12 +12,15 @@ global_measurement_prefix = 'metric_collector'
 
 class Collector:
 
-    def __init__(self, hosts_manager, parser_manager, output_type, output_addr, collect_facts=True):
+    def __init__(self, hosts_manager, parser_manager, output_type, output_addr,
+            collect_facts=True, connect_timeout=15, command_timeout=30):
         self.hosts_manager = hosts_manager
         self.parser_manager = parser_manager
         self.output_type = output_type
         self.output_addr = output_addr
         self.collect_facts = collect_facts
+        self.connect_timeout = connect_timeout
+        self.command_timeout = command_timeout
 
     def collect(self, worker_name, hosts=None, host_cmds=None, cmd_tags=None):
         if not hosts and not host_cmds:
@@ -47,11 +50,11 @@ class Collector:
             if device_type == 'juniper':
                 dev = netconf_collector.NetconfCollector(
                         host=host, address=host_address, credential=credential,
-                        parsers=self.parser_manager, context=host_context, collect_facts=self.collect_facts)
+                        parsers=self.parser_manager, context=host_context, collect_facts=self.collect_facts, timeout=self.connect_timeout)
             elif device_type == 'f5':
                 dev = f5_rest_collector.F5Collector(
                     host=host, address=host_address, credential=credential,
-                    parsers=self.parser_manager, context=host_context)
+                    parsers=self.parser_manager, context=host_context, timeout=self.connect_timeout)
             dev.connect()
 
             if dev.is_connected():
@@ -73,7 +76,7 @@ class Collector:
                 for command in target_commands:
                     try:
                         logger.info('[%s] Collecting > %s' % (host,command))
-                        data = dev.collect(command)  # returns a generator
+                        data = dev.collect(command, timeout=self.command_timeout)  # returns a generator
                         if data:
                             values.append(data)
                             cmd_successful += 1
