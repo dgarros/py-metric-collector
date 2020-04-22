@@ -189,9 +189,7 @@ def main():
     full_parser.add_argument("--tag", nargs='+', help="Collect data from hosts that matches the tag")
     full_parser.add_argument("--cmd-tag", nargs='+', help="Collect data from command that matches the tag")
     
-    full_parser.add_argument( "--test", action='store_true', help="Use emulated Junos device")
     full_parser.add_argument("-s", "--start", action='store_true', help="Start collecting (default 'no')")
-    full_parser.add_argument("-i", "--input", default=BASE_DIR, help="Directory where to find input files")
 
     full_parser.add_argument("--loglvl", default=20, help="Logs verbosity, 10-debug, 50 Critical")
 
@@ -201,11 +199,9 @@ def main():
     full_parser.add_argument("--sharding-offset", default=True, help="Define an offset needs to be applied to the shard_id")
 
     full_parser.add_argument("--parserdir", default="parsers", help="Directory where to find parsers")
-    full_parser.add_argument("--timeout", default=600, help="Default Timeout for Netconf session")
-    full_parser.add_argument("--delay", default=3, help="Delay Between Commands")
+    full_parser.add_argument("--connect-timeout", default=15, help="Timeout for collector device connect")
+    full_parser.add_argument("--command-timeout", default=30, help="Timeout for collector device rpc calls")
     full_parser.add_argument("--retry", default=5, help="Max retry")
-    full_parser.add_argument("--usehostname", default=True, help="Use hostname from device instead of IP")
-    full_parser.add_argument("--dbschema", default=2, help="Format of the output data")
 
     full_parser.add_argument("--host", default=None, help="Host DNS or IP")
     full_parser.add_argument("--hosts", default="hosts.yaml", help="Hosts file in yaml")
@@ -223,7 +219,7 @@ def main():
     full_parser.add_argument("--max-worker-threads", type=int, default=1, help="Maximum number of worker threads per interval for scheduler")
     full_parser.add_argument("--use-scheduler", action='store_true', help="Use scheduler")
     full_parser.add_argument("--hosts-refresh-interval", type=int, default=3*60*60, help="Interval to periodically refresh dynamic host inventory")
-    full_parser.add_argument("--allow_zero_hosts", action='store_true', help="Allow scheduler to run even with 0 hosts")
+    full_parser.add_argument("--allow-zero-hosts", action='store_true', help="Allow scheduler to run even with 0 hosts")
 
     dynamic_args = vars(full_parser.parse_args())
 
@@ -232,19 +228,11 @@ def main():
         full_parser.print_help()
         sys.exit(1)
 
-    ## Change BASE_DIR_INPUT if we are in "test" mode
-    if dynamic_args['test']:
-        BASE_DIR_INPUT = dynamic_args['input']
-
     ### ------------------------------------------------------------------------------
     # Loading YAML Default Variables
     ### ------------------------------------------------------------------------------
-    db_schema = dynamic_args['dbschema']
     max_connection_retries = dynamic_args['retry']
-    delay_between_commands = dynamic_args['delay']
     logging_level = int(dynamic_args['loglvl'])
-    default_junos_rpc_timeout = dynamic_args['timeout']
-    use_hostname = dynamic_args['usehostname']
 
     ### ------------------------------------------------------------------------------
     ### Validate Arguments
@@ -339,7 +327,9 @@ def main():
             credentials, general_commands,  dynamic_args['parserdir'],
             dynamic_args['output_type'], dynamic_args['output_addr'],
             max_worker_threads=max_worker_threads,
-            use_threads=use_threads, num_threads_per_worker=max_collector_threads
+            use_threads=use_threads, num_threads_per_worker=max_collector_threads,
+            connect_timeout=dynamic_args['connect_timeout'],
+            command_timeout=dynamic_args['command_timeout']
         )
         hri = dynamic_args.get('hosts_refresh_interval', 6 * 60 * 60)
         select_hosts(
@@ -366,7 +356,10 @@ def main():
             parser_manager=parsers_manager, 
             output_type=dynamic_args['output_type'], 
             output_addr=dynamic_args['output_addr'],
-            collect_facts=dynamic_args.get('no_facts', True))
+            collect_facts=dynamic_args.get('no_facts', True),
+            connect_timeout=dynamic_args['connect_timeout'],
+            command_timeout=dynamic_args['command_timeout']
+    )
     target_hosts = hosts_manager.get_target_hosts(tags=tag_list)
 
     if use_threads:
