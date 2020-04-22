@@ -143,12 +143,10 @@ class NetconfCollector():
 
     return True
 
-  def execute_command(self,command=None, timeout=None):
+  def execute_command(self,command=None):
 
     try:
       logger.debug('[%s]: execute : %s', self.hostname, command)
-      if timeout:
-        self.pyez.timeout = timeout
       # the data returned is already in etree format
       command_result = self.pyez.rpc.cli(command, format="xml")
     except RpcError as err:
@@ -158,11 +156,11 @@ class NetconfCollector():
 
     return command_result
 
-  def collect(self, command=None, timeout=None):
+  def collect(self, command=None):
 
     # find the command to execute from the parser directly
     parser = self.parsers.get_parser_for(command)
-    data = self.execute_command(parser['data']['parser']['command'], timeout=timeout)
+    data = self.execute_command(parser['data']['parser']['command'])
     
     if data is None:
         return None
