@@ -185,35 +185,41 @@ class NetboxAsInventory(object):
 
         if not filter_groups:
             return self.netbox_get_devices_list()
-
         else:
-            global_hosts_list_json = {
-                'results': [],
-                'count': 0
-            }
+            include_filters = {}
+            exclude_filters = {}
             
-            for grp_name, grp_filters in filter_groups.items():
-                grp_api_url_params = ""
+            ## Separate include and exclude filters
+            for key in filter_groups.keys():
+                if "exclude_" in key:
+                    exclude_filters[key] = filter_groups[key]
+                else:
+                    include_filters[key] = filter_groups[key]
 
-                for grp_filter in grp_filters:
-                    for key,value in grp_filter.items():
+            include_devices = self.get_devices_from_filters(filters=include_filters)  # global_hosts_list_json
 
-                        if key == "limit" or key == "offset":
-                            continue
+            excluded_device_ids = []
+            
+            ## If some exclude filters are present, 
+            ## Query the list of devices and build a list of device IDS to exclude
+            ## and go over the list of devices to remove all devices that needs to be excluded
+            if len(exclude_filters.keys()):
+                excluded_devices = self.get_devices_from_filters(filters=exclude_filters)  # global_hosts_list_json
 
-                        if isinstance(value, list):
-                            for v in value:
-                                grp_api_url_params += "%s=%s&" % (key, v)
-                        else:
-                            grp_api_url_params += "%s=%s&" % (key, value)
+                for device in excluded_devices['results']:
+                    excluded_device_ids.append(device["id"])
 
-                grp_hosts_list_json = self.netbox_get_devices_list(grp_api_url_params)
+                devices = [dev for dev in include_devices["results"] if dev["id"] not in excluded_device_ids]
+                
+                logging.info('Devices count after exclusion : {} devices'.format(len(devices)))
 
-                global_hosts_list_json['results'] += grp_hosts_list_json['results']
-                global_hosts_list_json['count'] += grp_hosts_list_json['count']
-
-            logging.info('Got {} global hosts from netbox'.format(global_hosts_list_json['count']))
-            return global_hosts_list_json
+                return { 
+                    "count": len(devices),
+                    "results": devices
+                }
+                
+            
+            return include_devices
 
 
     def add_host_to_inventory(self, host_data):
@@ -361,6 +367,41 @@ class NetboxAsInventory(object):
         """
 
         print(json.dumps(inventory_dict, sort_keys=True,indent=4,))
+
+    def get_devices_from_filters(self, filters={}):
+        """
+        Query netbox based on one or multiples filters and return a unified list of devices
+        """
+
+        global_hosts_list_json = {
+            'results': [],
+            'count': 0
+        }
+        
+        for grp_name, grp_filters in filters.items():
+            grp_api_url_params = ""
+
+            for grp_filter in grp_filters:
+                for key,value in grp_filter.items():
+
+                    if key == "limit" or key == "offset":
+                        continue
+
+                    if isinstance(value, list):
+                        for v in value:
+                            grp_api_url_params += "%s=%s&" % (key, v)
+                    else:
+                        grp_api_url_params += "%s=%s&" % (key, value)
+
+            grp_hosts_list_json = self.netbox_get_devices_list(grp_api_url_params)
+
+            global_hosts_list_json['results'] += grp_hosts_list_json['results']
+            global_hosts_list_json['count'] += grp_hosts_list_json['count']
+
+        logging.info('Got {} global hosts from netbox'.format(global_hosts_list_json['count']))
+
+        return global_hosts_list_json
+
 
     def netbox_get_devices_list(self, params=''):
        
